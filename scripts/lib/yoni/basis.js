@@ -2,13 +2,12 @@ import * as gt from "mojang-gametest";
 import * as gui from "mojang-minecrart-ui";
 import * as mc from "mojang-minecraft";
 
-export default { GT, GUI, MC };
 
-export default const world = mc.world;
-export default const events = mc.world.events;
-export default const scoreboard = mc.world.scoreboard;
+const world = mc.world;
+const events = mc.world.events;
+const scoreboard = mc.world.scoreboard;
 
-export default function dim(dimid = "overworld"){
+function dim(dimid = "overworld"){
   switch (dimid) {
     case -1:
     case "nether":
@@ -22,7 +21,13 @@ export default function dim(dimid = "overworld"){
   }
 }
 
-export default function runCmd(command = "", commandRunner){
+/**
+ * @deprecated - use Command.execute() or Command.run()
+ * @param {String} - command
+ * @param {RunnableObject} - 
+ * @return {JSON}
+ */
+function runCmd(command = "", commandRunner){
   if (typeof commandRunner == "undefined"){
     try {
       return dim(0).runCommand(command);
@@ -37,3 +42,16 @@ export default function runCmd(command = "", commandRunner){
     };
   }
 }
+
+export {
+  gt as GT,
+  gui as GUI,
+  mc as MC,
+  
+  world,
+  events,
+  scoreboard,
+  
+  dim,
+  runCmd
+};
