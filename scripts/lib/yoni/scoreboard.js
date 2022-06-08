@@ -1,41 +1,268 @@
 import default from "scripts/lib/yoni/basis.js";
 
+const scoreboard = world.scoreboard;
 
+class Command {
+  command = "scoreboard";
+  arguments = [];
+  constructor(object){
+    if (object == "objectives")
+      this.arguments.push("objectives")
+    else if (object == "players")
+      this.arguments.push("players")
+    else
+      throw new Error();
+  }
+  pushArguments(...args){
+    this.push(...args);
+  }
+  push(...args){
+    args.forEach((arg) => {
+      arg = String(arg);
+      this.arguments.push(arg);
+    });
+  }
+  runCommand(){
+    this.run();
+  }
+  printLine(){
+    let commandLine = command;
+    this.arguments.forEach((arg) => {
+      arg = arg.replace(/([\"\\])/, "\\$1");
+      commandLine += "\u0020" + arg;
+    });
+    return commandLine
+  }
+  run(){
+    dim(0).runCommand(this.printLine());
+  }
+}
 
 export function addObjective(objective, displayName){
   objective = String(objective);
   displayName = String(displayName);
-  if (string2Byte(objective).length < 16)
+  if (string2Byte(objective).length > 16)
     throw new Error()
-  if (string2Byte(displayName).length < 32)
+  if (string2Byte(displayName).length > 32)
     throw new Error()
   
-  dim(0).runCommand
+  command = new Command("objectives");
+  command.push("add", objective, "dummy");
+  if (displayName != ""){
+    command.push(displayName);
+  }
+  
+  command.run();
   
 }
 
 function removeObjective(objective){
+  //let status = "succeed";
+  
+  objective = String(objective);
+  if (string2Byte(objective).length > 16)
+    return  "nonexistent"
+  if (string2Byte(objective).length < 1)
+    return "nonexistent"
+  
+  command = new Command("objectives");
+  command.push("remove", objective);
+  
+  command.run();
+  
 }
 
-function getObjective(){
+function hasObjective(objective){
+  objective = String(objective);
+  if (string2Byte(objective).length > 16){
+    return false;
+  }
+  try {
+    scoreboard.getObjective(objective);
+  } catch {
+    return false;
+  }
+  return true;
 }
 
-function setScore(objective, object){
+function getObjective(objective){
+  objective = String(objective);
+  if (string2Byte(objective).length > 16){
+    return null;
+  }
+  try {
+    return scoreboard.getObjective(objective);
+  } catch {
+    return null;
+  }
+}
+
+function isObjective(object){
+  try {
+    if (getObjective(object.id) === object){
+      return true;
+    }
+  } catch {
+    return false;
+  }
+}
+function isIdentity(object){
+  let participants = scoreboard.getParticipants();
+  participants.forEach((part) => {
+    if (part === object){
+      return true;
+    }
+  });
+  return false;
+}
+
+/**
+ * @param {Number} or {Entity}
+ * @return {ScoreboardIdentity}
+ */
+function objectToIdentity(object){
+  if (isIdentity(object){
+    return object;
+  }
+  if (Entity.isEntity(object)){
+    if (isIdentity(object.scoreboard)){
+      return object.scoreboard;
+    }
+  } else if (!isNaN(Number(object))){
+    let participants = scoreboard.getParticipants();
+    participants.forEach((part) => {
+      if (part.id == object){
+        return part;
+      }
+    });
+  }
+  return null;
+}
+
+/**
+ * @param {String} or {ScoreboardObjective}
+ * @return {ScoreboardObjective}
+ */
+function objectToObjective(object){
+  if (isObjective(object)){
+    return object;
+  }
+  if (hasObjective(object)){
+    return getObjective(object);
+  }
+  return null;
+}
+import { ScoreboardIdentityType } from "mojang-minecraft";
+
+function setScore(objective, object, score){
+  objective = objectToObjective(objective);
+  object = objectToIdentity(object);
+  switch(object.type){
+    case ScoreboardIdentityType.player:
+    case ScoreboardIdentityType.entity:
+      let entity = object.getEntity();
+      let command = new Command("players");
+      command.push("set", "@s", objective.id, score);
+      entity.runCommand(command.printLine());
+      break;
+    case ScoreboardIdentityType.fakeplayer:
+      for (let pl of world.getPlayers()){
+        if (pl.nameTag == object.displayName){
+          throw new Error();
+        }
+      }
+      let command = new Command("players");
+      command.push("set", object.displayName, objective.id, score);
+      command.run();
+      break;
+    default:
+      throw new Error("Unknown identify type: " + object.type);
+  }
 }
 
 function getScore(objective, object){
+  objective = objectToObjective(objective);
+  object = objectToIdentity(object);
+  if (objective == null){
+    return null;
+  }
+  if (object == null){
+    return null;
+  }
+  return objective.getScore(object);
 }
 
-function addScore(objective, object){
+function addScore(objective, object, score){
+  let currentScore = getScore(objective, object);
+  let appendScore = Number(score);
+  let finalScore = currentScore
+  if (!isNaN(appendScore)){
+    finalScore += appendScore;
+  }
+  if (currentScore == finalScore){
+    return true;
+  }
+  setScore(objective, object, finalScore);
 }
 
-function removeScore(objective, object){
+function removeScore(objective, object, score){
+  let appendScore = score * -1;
+  addScore(objective, object, appendScore);
 }
 
 function resetScore(objective, object){
+  objective = objectToObjective(objective);
+  object = objectToIdentity(object);
+  switch(object.type){
+    case ScoreboardIdentityType.player:
+    case ScoreboardIdentityType.entity:
+      let entity = object.getEntity();
+      let command = new Command("players");
+      command.push("reset", "@s", objective.id);
+      entity.runCommand(command.printLine());
+      break;
+    case ScoreboardIdentityType.fakeplayer:
+      for (let pl of world.getPlayers()){
+        if (pl.nameTag == object.displayName){
+          throw new Error();
+        }
+      }
+      let command = new Command("players");
+      command.push("reset", object.displayName, objective.id);
+      command.run();
+      break;
+    default:
+      throw new Error("Unknown identify type: " + object.type);
+  }
+}
+
+function resetScores(object){
+  object = objectToIdentity(object);
+  switch(object.type){
+    case ScoreboardIdentityType.player:
+    case ScoreboardIdentityType.entity:
+      let entity = object.getEntity();
+      let command = new Command("players");
+      command.push("reset", "@s");
+      entity.runCommand(command.printLine());
+      break;
+    case ScoreboardIdentityType.fakeplayer:
+      for (let pl of world.getPlayers()){
+        if (pl.nameTag == object.displayName){
+          throw new Error();
+        }
+      }
+      let command = new Command("players");
+      command.push("reset", object.displayName);
+      command.run();
+      break;
+    default:
+      throw new Error("Unknown identify type: " + object.type);
+  }
 }
 
 function operationScore(objective, object){
+  throw new Error("Function not implemented");
 }
 
 export default class Scoreboard {
