@@ -1,13 +1,16 @@
-import * as gt from "mojang-gametest";
-import * as gui from "mojang-minecrart-ui";
-import * as mc from "mojang-minecraft";
+import * as Gametest from "mojang-gametest";
+import * as MinecraftGui from "mojang-minecrart-ui";
+import * as Minecraft from "mojang-minecraft";
 
+export { Gametest }
+export { MinecraftGui }
+export { Minecraft }
 
-const world = mc.world;
-const events = mc.world.events;
-const scoreboard = mc.world.scoreboard;
+export const world = Minecraft.world;
+export const events = world.events;
+export const scoreboard = world.scoreboard;
 
-function dim(dimid = "overworld"){
+export function dim(dimid = "overworld"){
   switch (dimid) {
     case -1:
     case "nether":
@@ -22,12 +25,13 @@ function dim(dimid = "overworld"){
 }
 
 /**
- * @deprecated - use Command.execute() or Command.run()
+ * 
+ * @deprecated - use Command.run() instead
  * @param {String} - command
  * @param {RunnableObject} - 
  * @return {JSON}
  */
-function runCmd(command = "", commandRunner){
+export function runCmd(command = "", commandRunner){
   if (typeof commandRunner == "undefined"){
     try {
       return dim(0).runCommand(command);
@@ -43,15 +47,32 @@ function runCmd(command = "", commandRunner){
   }
 }
 
-export {
-  gt as GT,
-  gui as GUI,
-  mc as MC,
-  
-  world,
-  events,
-  scoreboard,
-  
-  dim,
-  runCmd
-};
+/**
+ * a simple function to execute command
+ * @deprecated - use Command.execute() instead
+ * @param {Runner} - a command runner
+ * @params {String[]} - 
+ * @return {JSON}
+ */
+export function execCmd(runner, command, ...args){
+  if (typeof runner == "undefined")
+    return { StatusCode: StatusCode.fail };
+  if (typeof runner.runCommand != "function")
+    return { StatusCode: StatusCode.error };
+  args.forEach((arg) => {
+    arg = String(arg);
+    if (arg.replace(/\"/g, "") != arg)
+      arg = arg.replace(/\"/g, "\\\"");
+    if (arg.replace(/\s/g, "") != arg)
+      arg = "\""+arg+"\"";
+    command += "\u0020"+arg;
+  });
+  try {
+    return runner.runCommand(command);
+  } catch(err) {
+    if (err instanceof ReferenceError)
+      return { StatusCode: StatusCode.fail };
+    else
+      return err;
+  }
+}

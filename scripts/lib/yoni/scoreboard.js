@@ -1,7 +1,5 @@
-import Entity from "entity.js";
-import { dim, runCmd } from "scripts/lib/yoni/basis.js";
-
-const scoreboard = world.scoreboard;
+import { Entity } from "scripts/lib/yoni/entity.js";
+import { scoreboard, dim, execCmd } from "scripts/lib/yoni/basis.js";
 
 class Command {
   command = "scoreboard";
@@ -37,6 +35,88 @@ class Command {
   run(){
     dim(0).runCommand(this.printLine());
   }
+}
+export class Scoreboard {
+  //objective operation
+  static addObjective(objective, displayName){
+    objective = String(objective);
+    let hasDisplayName = false;
+    if (typeof displayName != "undefined" && displayName != null)
+      displayName = String(displayName);
+      hasDisplayName = true;
+    if (string2Byte(objective).length > 16)
+      throw new Error()
+    if (string2Byte(displayName).length > 32)
+      throw new Error()
+    
+    let command = ["scoreboard", "objectives", "add", objective, "dummy"];
+    if (hasDisplayName){
+      command.push(displayName);
+    
+    execCmd(dim(0), ...command);
+  
+  }
+  static listObjectives(){}
+  static removeObjective(objective){}
+  static renameObjective(objective, newName){}
+  static resetObjective(objective){}
+  static setDisplay(type, objective, sequence){}
+  static setDisplayName(objective, newName){}
+
+  //score operation
+  static addScore(objective, object, score){}
+  static getScore(objective, object){}
+  static getScores(object){}
+  static removeScore(objective, object, score){}
+  static resetScore(object){}
+  static setScore(objective, object, score){}
+  //expand
+  static listScores(object){}
+  
+  //expand Participants operation
+  static getParticipants(objective){}
+  static addParticipant(objective, object){}
+  static removeParticipant(objective, object){}
+}
+export class ScoreboardObjective {
+  //constructor
+  constructor(objective){}
+  
+  //objective operation
+  removeObjective(){}
+  renameObjective(newName){}
+  resetObjective(){}
+  setDisplayName(newName){}
+  
+  //score operation
+  addScore(object, score){}
+  getScore(object){}
+  removeScore(object, score){}
+  resetScore(object){}
+  setScore(object, score){}
+  
+  //expand
+  getScores(...filters){}
+  
+  //expand Participants operation
+  getParticipants(){}
+  addParticipant(object){}
+  removeParticipant(object){}
+}
+
+export class ScoreboardParticipant{
+  constructor(object){}
+  
+  resetScore(objective){}
+  resetScores(){}
+  
+  addScore(objective){}
+  removeScore(objective){}
+  setScore(objective){}
+  getScore(objective){}
+  getScores(){}
+  operationScore(operator, object, objective){}
+  
 }
 
 export function addObjective(objective, displayName){

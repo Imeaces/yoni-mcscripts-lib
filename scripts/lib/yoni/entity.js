@@ -1,14 +1,23 @@
-import { dim } from "scripts/lib/yoni/basis.js";
-import Command from "scripts/lib/yoni/command.js";
+import { Minecraft, dim } from "scripts/lib/yoni/basis.js";
+import { Command } from "scripts/lib/yoni/command.js";
 
 //need more info
 
 export default class Entity {
   #entity;
+  get entity(){
+    return this.#entity;
+  }
+  set entity(){
+    throw new Error();
+  }
+  
   constructor(entity){
-    if (!isEntity(entity))
-      throw new Error();
-    this.#entity = entity;
+    if (isYoniEntity(entity)) //如果已经封装为YoniEntity，则直接返回原实体
+      return entity;
+    if (!isMinecraftEntity(entity)) //如果不是MCEntity则报错
+      throw new TypeError();
+    this.#entity = entity; //如果是MCEntity则保存
   }
   isEntity(){
     return isEntity(this.#entity);
@@ -22,7 +31,7 @@ export default class Entity {
   hasAnyFamily(...families){
     return hasAnyFamily(this.#entity, ...families);
   }
-  
+
   static isEntity(object){
     return isEntity(object);
   }
@@ -46,24 +55,45 @@ export default class Entity {
   }
 }
 
-function isEntity(object){
-  //function not implemented
-  return true;
+function isMinecraftEntity(object){
+  if (object instanceof Minecraft.Entity)
+    return true;
+  return false
 }
 
-function isAliveEntity(entity){
-  if (typeof object == "object"){
-    getLoadedEntities().forEach((entity)=>{
-      if (object === entity)
-        return true;
-    });
-  }
+function isEntity(object){
+  if (isYoniEntity(object))
+    return true;
+  if (isMinecraftEntity(object))
+    return true;
   return false;
 }
 
+function isYoniEntity(object){
+  if (object instanceof Entity)
+    return true;
+}
+
+function isAliveEntity(entity){
+  if (!isEntity(object))
+    return false;
+  if (typeof object != "object")
+    return false;
+  getLoadedEntities().forEach((entity)=>{
+    if (object === entity)
+      return true;
+  });
+  return false;
+}
+
+isSameEntity(ent1, ent2){
+  
+}
 
 
 function isAlive(entity){
+  if (!isEntity(entity))
+    return false;
   try {
     return entity.getComponent("minecraft:health").currnet > 0;
   } catch {
