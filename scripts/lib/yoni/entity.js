@@ -3,35 +3,48 @@ import { Command } from "scripts/lib/yoni/command.js";
 
 //need more info
 
-export default class Entity {
+export class YoniEntity {
   #entity;
-  get entity(){
+  get entity() {
     return this.#entity;
   }
-  set entity(){
+  set entity() {
     throw new Error();
   }
-  
+  constructor(vanillaEntity) {
+    if (!isMinecraftEntity(vanillaEntity))
+      throw new TypeError("Not a vanilla entity")
+    this.#entity = vanillaEntity;
+    for (let val in vanillaEntity) {
+      if (typeof this[val] == "undefined" && typeof vanillaEntity[val] == "function")
+        this[val] = function(...args){ return this.#entity[val](...args)}
+    }
+  }
+
+  isEntity() {
+    return isEntity(this.#entity);
+  }
+  isAliveEntity() {
+    return isAliveEntity(this.#entity);
+  }
+  hasFamily(family) {
+    return hasFamily(this.#entity, familiy);
+  }
+  hasAnyFamily(...families) {
+    return hasAnyFamily(this.#entity, ...families);
+  }
+
+
+}
+
+export default class Entity {
   constructor(entity){
     if (isYoniEntity(entity)) //如果已经封装为YoniEntity，则直接返回原实体
       return entity;
     if (!isMinecraftEntity(entity)) //如果不是MCEntity则报错
       throw new TypeError();
-    this.#entity = entity; //如果是MCEntity则保存
+    return new YoniEntity(entity); //如果是MCEntity则保存
   }
-  isEntity(){
-    return isEntity(this.#entity);
-  }
-  isAliveEntity(){
-    return isAliveEntity(this.#entity);
-  }
-  hasFamily(family){
-    return hasFamily(this.#entity, familiy);
-  }
-  hasAnyFamily(...families){
-    return hasAnyFamily(this.#entity, ...families);
-  }
-
   static isEntity(object){
     return isEntity(object);
   }
@@ -70,7 +83,7 @@ function isEntity(object){
 }
 
 function isYoniEntity(object){
-  if (object instanceof Entity)
+  if (object instanceof YoniEntity)
     return true;
 }
 
