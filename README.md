@@ -1,2 +1,2 @@
 # yoni-mcscripts-lib
-提供更加简单的gametest使用方式
+参照bukkit api实现的mc gt js库

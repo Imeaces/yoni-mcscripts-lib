@@ -1,4 +1,4 @@
-export default class Logger{
+export default class Logger {
   #name;
   maxLength = 65536;
   get name(){

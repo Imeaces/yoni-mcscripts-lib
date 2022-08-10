@@ -55,11 +55,6 @@ export default class Entity {
   }
 }
 
-function isMinecraftEntity(object){
-  if (object instanceof Minecraft.Entity)
-    return true;
-  return false
-}
 
 function isEntity(object){
   if (isYoniEntity(object))
@@ -67,6 +62,12 @@ function isEntity(object){
   if (isMinecraftEntity(object))
     return true;
   return false;
+}
+
+function isMinecraftEntity(object){
+  if (object instanceof Minecraft.Entity)
+    return true;
+  return false
 }
 
 function isYoniEntity(object){
@@ -86,16 +87,44 @@ function isAliveEntity(entity){
   return false;
 }
 
-isSameEntity(ent1, ent2){
-  
+function isSameEntity(ent1, ent2){
+  try {
+    let ent1 = getMinecraftEntity(ent1);
+    let ent2 = getMinecraftEntity(ent2);
+  } catch (err){
+    return false;
+  }
+  if (ent1 === ent2)
+    return true;
+  return false;
 }
 
 
-function isAlive(entity){
-  if (!isEntity(entity))
-    return false;
+function getMinecraftEntity(object){
+  if (isMinecraftEntity(object))
+    return object;
+  else if (isYoniEntity(object))
+    return object.entity;
+  else
+    throw new TypeError("Not a entity");
+}
+
+// get vanilla health component
+// internal function for YoniEntity
+function getHealthComponent(entity){
   try {
-    return entity.getComponent("minecraft:health").currnet > 0;
+    return entity.getComponent("minecraft:health");
+  } catch {
+    return null;
+  }
+}
+
+
+
+function isAlive(entity){
+  let vanillaEntity = getMinecraftEntity(entity);
+  try {
+    return getCurrentHealth(vanillaEntity) > 0;
   } catch {
     return false;
   }
@@ -105,7 +134,29 @@ function hasFamily(entity, family){
   return hasAnyFamily(entity, family);
 }
 
+function getCurrentHealth(entity){
+  let vanillaEntity = getMinecraftEntity(entity);
+  try {
+    let component = getHealthComponent(vanillaEntity);
+    return getHealthComponent(vanillaEntity).current;
+  } catch {
+    return 0;
+  }
+}
+
+function getMaxHealth(entity){
+  let vanillaEntity = getMinecraftEntity(entity);
+  let component = getHealthComponent(vanillaEntity);
+  
+  let currentHealth = component.current;
+  component.setToMax();
+  let maxHealth = component.current;
+  component.setToValue(currentHealth);
+  return maxHealth;
+}
+
 function hasAnyFamily(entity, ...families){
+  entity = getMinecraftEntity(entity);
   families.forEach((conditionFamily)=> {
     conditionFamily = String(conditionFamily);
     let command = "execute if entity @s[family="+conditionFamily+"]";
@@ -151,7 +202,7 @@ function getLoadedEntities(){
   let dimid = [0,-1,1];
   dimid.forEach((id) => {
     dim(id).getEntities().forEach((entity) => {
-      loadedEntities.push(entity);
+      loadedEntities.push(new Entity(entity));
     });
   });
   return loadedEntities;

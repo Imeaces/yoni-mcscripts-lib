@@ -2,7 +2,7 @@
  * @auther Silvigarabis
  */
 import * as mc from "mojang-minecraft";
-import * as text from "../lib/text.js";
+import * as text from "scripts/yoni/util/text.js";
 
 const world = mc.world;
 const events = mc.world.events;
