@@ -6,9 +6,9 @@ export { Gametest }
 export { MinecraftGui }
 export { Minecraft }
 
-export const VanillaWorld = Minecraft.world;
-export const VanillaEvents = VanillaWorld.events;
-export const VanillaScoreboard = VanillaWorld.scoreboard;
+export const vanillaWorld = Minecraft.world;
+export const vanillaEvents = vanillaWorld.events;
+export const vanillaScoreboard = vanillaWorld.scoreboard;
 
 export class StatusCode {
     static fail = -1;
@@ -20,13 +20,13 @@ export function dim(dimid = "overworld"){
   switch (dimid) {
     case -1:
     case "nether":
-      return VanillaWorld.getDimension("nether");
+      return vanillaWorld.getDimension("nether");
     case 1:
     case "the end":
     case "the_end":
-      return VanillaWorld.getDimension("the end");
+      return vanillaWorld.getDimension("the end");
     default:
-      return VanillaWorld.getDimension("overworld");
+      return vanillaWorld.getDimension("overworld");
   }
 }
 
@@ -61,9 +61,16 @@ export function runCmd(command = "", commandRunner){
  * @return {JSON}
  */
 export function execCmd(runner, command, ...args){
+/*
   runner.runCommand("say execCmd..");
   runner.runCommand("say "+command);
   runner.runCommand("say §r"+args);
+  try {
+    throw new Error();
+  } catch (e) {
+    runCmd("say §r"+e.stack);
+  }
+*/
   if (typeof runner == "undefined")
     return { StatusCode: StatusCode.fail };
   if (typeof runner.runCommand != "function")

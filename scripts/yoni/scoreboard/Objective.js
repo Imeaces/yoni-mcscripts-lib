@@ -8,7 +8,7 @@ import {
     Player as VanillaPlayer,
     ScoreboardIdentity as VanillaScoreboardIdentity
 } from "mojang-minecraft";
-import { execCmd as execCommand, dim } from "scripts/yoni/basis.js";
+import { execCmd as execCommand, dim, vanillaScoreboard } from "scripts/yoni/basis.js";
 
 export default class Objective {
     #isUnregistered = false;
@@ -32,11 +32,18 @@ export default class Objective {
     }
     
     get isUnregistered(){
+        let result = false;
         if (this.#isUnregistered){
-            return true;
+            result = true;
         } else {
-            return false;
+            try {
+                vanillaScoreboard.getObjective(this.#id);
+            } catch {
+                result = true;
+                this.unregister();
+            }
         }
+        return result;
     }
     
     #scores = new Map();
@@ -49,7 +56,7 @@ export default class Objective {
     }
     
     unregister(){
-        if (this.isUnregistered) throw new Error("Objective has been removed!");
+        if (this.#isUnregistered) throw new Error("Objective has been removed!");
         
         this.#isUnregistered = true;
         
@@ -94,6 +101,7 @@ export default class Objective {
         let scoreInfo = this.getScoreInfo(entry);
         let newScore = Math.round((max - min) * Math.random() + min);
         scoreInfo.score = newScore;
+        return newScore;
     }
     removeScore(entry, score){
         if (this.isUnregistered) throw new Error("Objective has been removed!");
@@ -106,7 +114,7 @@ export default class Objective {
         scoreInfo.score = newScore;
     }
     resetScore(entry){
-        if (this.#isUnregistered) throw new Error("Objective has been removed!");
+        if (this.isUnregistered) throw new Error("Objective has been removed!");
 
         this.getScoreInfo(entry).reset();
     }
@@ -167,10 +175,10 @@ export default class Objective {
                 type = EntryType.EMTITY;
             }
 
-            entry = new Entry(null, type, null, entity);
+            entry = Entry.getEntry(null, type, null, entity);
         }
         if (entry instanceof VanillaScoreboardIdentity)
-            entry = new Entry(entry);
+            entry = Entry.getEntry(entry);
         if (!(entry instanceof Entry))
             throw new TypeError("Not an Entry type or cannot cover to an Entry");
 

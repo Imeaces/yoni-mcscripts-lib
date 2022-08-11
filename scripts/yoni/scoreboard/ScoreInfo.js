@@ -2,7 +2,7 @@ import Utils from "scripts/yoni/scoreboard/Utils.js";
 import Entry from "scripts/yoni/scoreboard/Entry.js";
 import Objective from "scripts/yoni/scoreboard/Objective.js";
 import EntryType from "scripts/yoni/scoreboard/EntryType.js";
-import { StatusCode, execCmd, dim, VanillaScoreboard } from "scripts/yoni/basis.js";
+import { StatusCode, execCmd, dim, vanillaScoreboard } from "scripts/yoni/basis.js";
 import { getLoadedEntities } from "scripts/yoni/util/yoni-lib.js";
 
 //基础功能已实现
@@ -58,16 +58,17 @@ export default class ScoreInfo {
             
         }
         
-        this.#score = score;
-        
     }
     
     get score(){
-        let score; 
-        try {
-            score = this.#objective.vanillaObjective.getScore(this.#entry);
-        } catch { score = null; }
-        this.#score = score;
+        let score;
+        if (this.#entry.vanillaScbId == null){
+            score = null;
+        } else {
+            try {
+                score = this.#objective.vanillaObjective.getScore(this.#entry.vanillaScbId);
+            } catch { score = null; }
+        }
         return score;
     }
     

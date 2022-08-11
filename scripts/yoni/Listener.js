@@ -1,3 +1,3 @@
-export function Listerer(event, callback, ...args){
+export function Listener(event, callback, ...args){
     event.subscribe(callback, ...args);
 }
