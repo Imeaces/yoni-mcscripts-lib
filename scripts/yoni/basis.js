@@ -6,9 +6,9 @@ export { Gametest }
 export { MinecraftGui }
 export { Minecraft }
 
-export const vanillaWorld = Minecraft.world;
-export const vanillaEvents = vanillaWorld.events;
-export const vanillaScoreboard = vanillaWorld.scoreboard;
+export const VanillaWorld = Minecraft.world;
+export const VanillaEvents = VanillaWorld.events;
+export const VanillaScoreboard = VanillaWorld.scoreboard;
 
 export class StatusCode {
     static fail = -1;
@@ -16,17 +16,24 @@ export class StatusCode {
     static success = 0;
 }
 
-export function dim(dimid = "overworld"){
+export function dim(dimid = Minecraft.MinecraftDimensionTypes.overworld){
   switch (dimid) {
     case -1:
     case "nether":
-      return vanillaWorld.getDimension("nether");
+      return VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.nether);
     case 1:
     case "the end":
     case "the_end":
-      return vanillaWorld.getDimension("the end");
+      return VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.theEnd);
+    case 0:
+    case "overworld":
+       return VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.overworld);
     default:
-      return vanillaWorld.getDimension("overworld");
+      try {
+          return VanillaWorld.getDimension(dimid);
+      } catch {
+          return dim(0);
+      }
   }
 }
 
