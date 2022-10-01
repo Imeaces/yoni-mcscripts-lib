@@ -4,22 +4,22 @@
     "name": "yoni-mcscripts-lib",
     "description": "Yoni Script Module",
     "uuid": "0b7ef624-e6b8-11ec-b378-df8eb4284b8b",
-    "version": [0, 1, 0],
-    "min_engine_version": [1, 19, 0]
+    "version": [0, 4, 0],
+    "min_engine_version": [1, 19, 40]
   },
   "modules": [
     {
       "description": "data:yoni",
       "type": "data",
       "uuid": "0b7ef926-e6b8-11ec-b37e-ab2dfd3caa48",
-      "version": [0, 1, 0]
+      "version": [0, 4, 0]
     },
     {
       "description": "scripts:yoni",
       "type": "script",
       "language": "javascript",
       "uuid": "0b7efb24-e6b8-11ec-b382-5358dafc5ed1",
-      "version": [0, 1, 0],
+      "version": [0, 4, 0],
       "entry": "scripts/main.js"
     }
   ],

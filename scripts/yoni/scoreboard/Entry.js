@@ -5,15 +5,14 @@ let idRecords = new Map();
 let entityRecords = new Map();
 let nameRecords = new Map();
 let scbidRecords = new Map();
-let symbolRecords = new Map();
 
-export class EntryType {
+class EntryType {
     static PLAYER = Minecraft.ScoreboardIdentityType.player;
     static ENTITY = Minecraft.ScoreboardIdentityType.entity;
     static FAKE_PLAYER = Minecraft.ScoreboardIdentityType.fakePlayer;
 }
 
-export class EntryOption {
+class EntryOption {
     name;
     id;
     scbid;
@@ -21,7 +20,7 @@ export class EntryOption {
     type;
 }
 
-export default class Entry {
+class Entry {
     static #fakePlayerEntity = Symbol("fakePlayerEntity");
     static get fakePlayerEntity(){
         return this.#fakePlayerEntity;
@@ -39,171 +38,142 @@ export default class Entry {
         throw new Error("Sorry, couldn't guess the entry");
     }
     
-    static getEntries(){
-        return symbolRecords.values();
-    }
-    
     static getEntry(option){
-        let { entity, id, name, scbid, type } = option;
-        entity = (entity instanceof YoniEntity) ? YoniEntity.vanillaEntity : entity;
         
-        let symbol;
+        let { entity, id, name, scbid, type } = option;
+        entity = (entity instanceof YoniEntity) ? entity.vanillaEntity : entity;
+        let entry;
         
         //优先级: entity, scbid, id, name
-        let e = entityRecords.get(entity);
-        let i = idRecords.get(id);
-        let n = nameRecords.get(name);
-        let s = scbidRecords.get(scbid);
+        if (entityRecords.has(entity))
+            entry = entityRecords.get(entity);
+        else if (scbidRecords.has(scbid))
+            entry = scbidRecords.get(scbid);
+        else if (idRecords.has(id))
+            entry = idRecords.get(id);
+        else if (nameRecords.has(name))
+            entry = nameRecords.get(name);
+        else
+            entry = new Entry(option);
         
-        for (let _ of [e, s, i, n]){
-            if (_ == null)
-                continue;
-            symbol = _;
-        }
-        
-        if (symbol === undefined){
-            symbol = Symbol("entry");
-            let newEntry = new Entry(option);
-            symbolRecords.set(symbol, newEntry);
-        }
-        
-        let entry = symbolRecords.get(symbol);
-        
-        if (entry.getEntity() != null)
-            entityRecords.set(entry.getEntity(), symbol);
-        if (entry.id != null)
-            idRecords.set(entry.id, symbol);
-        if (entry.vanillaScbid != null)
-            scbidRecords.set(entry.vanillaScbid, symbol);
-        if (entry.displayName != null && type === EntryType.FAKE_PLAYER)
-            nameRecords.set(entry.displayName, symbol);
-            
         if (type != null && entry.type !== type)
             throw new Error("entry type do not matches");
+            
+        if (entry.getEntity() !== null)
+            entityRecords.set(entry.getEntity(), entry);
+        if (entry.id !== undefined)
+            idRecords.set(entry.id, entry);
+        if (entry.vanillaScbid !== undefined)
+            scbidRecords.set(entry.vanillaScbid, entry);
+        if (type === EntryType.FAKE_PLAYER && entry.displayName !== undefined)
+            nameRecords.set(entry.displayName, entry);
+        
         return entry;
     }
     
     #type;
     #id;
-    #displayName;
+    #name;
     #vanillaScbid;
+    #entity;
     
     get type(){
         return this.#type;
     }
+    
     get id(){
-        if (this.#id == null && this.vanillaScbid != null){
-            this.#id = this.vanillaScbid.id;
-        } else if (this.#id !== this.vanillaScbid.id){
-            this.#id = null;
-            this.#vanillaScbid = null;
-        }
+        if (this.vanillaScbid?.id !== this.#id)
+            this.#id = this.vanillaScbid?.id;
         return this.#id;
     }
+    
     get displayName(){
-        if (this.vanillaScbid != null){
-            this.#displayName = this.vanillaScbid.displayName;
-        } else if (this.type == EntryType.PLAYER){
-            this.#displayName = this.getEntity().name;
-        } else if (this.type == EntryType.ENTITY){
-            this.#displayName = this.id;
-        }
-        return this.#displayName;
+        if (this.#type == EntryType.PLAYER)
+            return this.#entity.name;
+        else if (this.#type  == EntryType.ENTITY)
+            return this.id;
+        else if (this.#type === EntryType.FAKE_PLAYER)
+            return this.#name;
     }
     
     get vanillaScbid(){
-        if (this.#entity?.scoreboard != null && this.#entity.scoreboard !== this.#vanillaScbid){
-            this.#vanillaScbid = this.#entity?.scoreboard;
-        }
+        if (this.#type === EntryType.PLAYER || this.#type === EntryType.ENTITY && this.#entity.scoreboard !== this.#vanillaScbid)
+            this.#vanillaScbid = this.#entity.scoreboard;
         return this.#vanillaScbid;
     }
     
-    #entity;
     getEntity(){
-        if (this.vanillaScbid != null && this.#type !== EntryType.FAKE_PLAYER){
-            try {
-                this.#entity = this.vanillaScbid.getEntity();
-            } catch {}
-        }
+        if (this.#type === EntryType.FAKE_PLAYER)
+            this.#entity = null;
         return this.#entity;
     }
     
-    constructor(option){
-        
-        let { entity, id, name, scbid, type } = option;
-        entity = (entity instanceof YoniEntity) ? YoniEntity.vanillaEntity : entity;
-        
-        let condF;
-        if (name == null) condF = function (e){ return e.id === id; };
-        else if (id == null && type === EntryType.FAKE_PLAYER) condF = function (e){ return e.type === EntryType.FAKE_PLAYER && e.displayName === name; };
-        else condF = function (e){ return e.displayName === name && e.id === id; };
-        
-        /*
-        entity scbid
-        scbid entity, id
-        type entity, scbid 
-        id scbid
-        name entity, scbid, id
-        */
-        if (entity == null){
-            if (scbid != null){
-                entity = function (){
-                    try {
-                        return scbid.getEntity();
-                    } catch {}
-                }();
-            }
-        }
-
-        if (scbid == null){
-           if (entity?.scoreboard != null){
-               scbid = entity.scoreboard;
-           } else if (id != null || type === EntryType.FAKE_PLAYER && name != null){
-               scbid = function (){
-                   for (let _ of VanillaScoreboard.getParticipants()){
-                       if (condF(_)){
-                           return _;
-                       }
-                   }
-               }();
-           }
-        }
-        
-        if (id == null){
-            if (scbid != null){
-                id = scbid.id;
-            }
-        }
-        
-        if (type == null){
-            if (scbid != null){
-                type = scbid.type;
-            } else if (entity != null){
-                if (entity instanceof Minecraft.Entity){
-                    type = EntryType.ENTITY;
-                } else if (entity instanceof Minecraft.Player){
-                    type = EntryType.PLAYER;
+    update(){
+        if (this.#type === EntryType.FAKE_PLAYER){
+            this.#vanillaScbid = undefined;
+            for (let s of VanillaScoreboard.getParticipants()){
+                if (s.displayName === this.#name && s.type === this.#type){
+                    this.#vanillaScbid = s;
+                    break;
                 }
-            } else {
-                type = EntryType.FAKE_PLAYER;
+            }
+        } else {
+            let i = this.vanillaScbid;
+        }
+        return this;
+    }
+    
+    constructor(option){
+        let { entity, id, name, scbid, type } = option;
+        entity = (entity instanceof YoniEntity) ? entity.vanillaEntity : entity;
+        
+        if (entity !== undefined){
+            if (entity instanceof Minecraft.Player)
+                type = EntryType.PLAYER;
+            else if (entity instanceof Minecraft.Entity)
+                type = EntryType.ENTITY;
+            else throw new TypeError("Unknown entity type");
+            scbid = entity.scoreboard;
+            id = scbid.id;
+        } else {
+            let condF = null;
+            if (type === EntryType.FAKE_PLAYER && name !== "" && name !== scbid?.displayName){
+                condF = (_)=>{
+                    return _.displayName === name && type === _.type;
+                };
+            } else if (id !== undefined && scbid === undefined){
+                condF = (_)=>{
+                    return _.id === id;
+                };
+            }
+            
+            if (condF !== null){
+                scbid = undefined;
+                for (let s of VanillaScoreboard.getParticipants()){
+                    if (condF(s)){
+                        scbid = s;
+                        break;
+                    }
+                }
+                if (scbid !== undefined){
+                    type = scbid.type;
+                    name = scbid.displayName;
+                    id = scbid.id;
+                    entity = scbid.getEntity();
+                } else if (id !== undefined){
+                    throw new Error(`Unable to determine the scbid ${id}`);
+                }
             }
         }
         
-        if (name == null){
-            if (scbid != null){
-                name = scbid.displayName;
-            } else if (type === EntryType.PLAYER && entity != null){
-                name = entity.name;
-            }
-        }
-        
-        this.#displayName = name;
         this.#id = id;
-        this.#vanillaScbid = scbid;
         this.#entity = entity;
+        this.#name = name;
         this.#type = type;
+        this.#vanillaScbid = scbid;
         
     }
 }
 
-export { Entry } 
+export { Entry, EntryType, EntryOption };
+export default Entry;
