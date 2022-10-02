@@ -1,5 +1,6 @@
 import { StatusCode, execCmd, dim, VanillaScoreboard, Minecraft } from "yoni/basis.js";
 import Objective from "yoni/scoreboard/Objective.js";
+import Entry from "yoni/scoreboard/Entry.js";
 
 /**
  * enum of alive display slot
@@ -133,7 +134,7 @@ export default class SimpleScoreboard {
         return this.getObjective(VanillaScoreboard.getObjectiveAtDisplaySlot(slot).id);
     }
     
-    static setDisplaySlot(slot, objective, sequence){
+    static setDisplaySlot(slot, objective, sequence="descending"){
         if (!Array.from(DisplaySlotType).includes(slot))
             throw new TypeError("Not a DisplaySlot type");
         if (!(objective instanceof Objective))
@@ -169,7 +170,7 @@ export default class SimpleScoreboard {
     static getEntries(){
         return Array.from(VanillaScoreboard.getParticipants())
             .map((_)=>{
-                return Entry.getEntry({scbid: _, type: scbid.type});
+                return Entry.getEntry({scbid: _, type: _.type});
             });
     }
     
