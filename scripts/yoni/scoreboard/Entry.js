@@ -1,5 +1,5 @@
-import { VanillaScoreboard, Minecraft } from "scripts/yoni/basis.js";
-import { YoniEntity } from "scripts/yoni/entity.js";
+import { VanillaScoreboard, Minecraft } from "yoni/basis.js";
+import { YoniEntity } from "yoni/entity.js";
 
 let idRecords = new Map();
 let entityRecords = new Map();
@@ -134,7 +134,7 @@ class Entry {
                 type = EntryType.ENTITY;
             else throw new TypeError("Unknown entity type");
             scbid = entity.scoreboard;
-            id = scbid.id;
+            id = scbid?.id;
         } else {
             let condF = null;
             if (type === EntryType.FAKE_PLAYER && name !== "" && name !== scbid?.displayName){

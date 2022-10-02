@@ -1,5 +1,5 @@
-import { StatusCode, execCmd, dim, VanillaScoreboard, Minecraft } from "scripts/yoni/basis.js";
-import Objective from "scripts/yoni/scoreboard/Objective.js";
+import { StatusCode, execCmd, dim, VanillaScoreboard, Minecraft } from "yoni/basis.js";
+import Objective from "yoni/scoreboard/Objective.js";
 
 /**
  * enum of alive display slot
