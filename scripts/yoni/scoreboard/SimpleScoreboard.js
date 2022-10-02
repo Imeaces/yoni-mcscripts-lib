@@ -204,34 +204,16 @@ export default class SimpleScoreboard {
             entry = Entry.guessEntry(entry);
         
         if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
-            let ent;
-            if (entry.type == EntryType.PLAYER){
-                ent = entry.getEntity();
-            } else {
-                let entryEnt = entry.getEntity();
-                for (let e of YoniEntitiy.getAliveEntities()){
-                    if (e === entryEnt){
-                        ent = e;
-                        break;
-                    }
-                }
-            }
+            let ent = entry.getEntity();
             if (ent === undefined){
                 throw new InternalError("Could not find the entity");
-            }
-            if (execCmd(ent, "scoreboard", "players", "reset", "@s").statusCode != StatusCode.success){
+            } else if (execCmd(ent, "scoreboard", "players", "reset", "@s").statusCode != StatusCode.success){
                 throw new InternalError("Could not set score, maybe entity or player disappeared?");
             }
-        } else {
-        
-            for (let pl of Minecraft.getPlayers()){
-                if (pl.name = entry.displayName){
-                    throw new NameConflictError(entry.displayName);
-                }
-            }
-
+        } else if ([...VanillaWorld.getPlayers()].length === 0){
             execCmd(dim(0), "scoreboard", "players", "reset", entry.displayName);
-            
+        } else {
+            throw new NameConflictError(entry.displayName);
         }
     }
 }
