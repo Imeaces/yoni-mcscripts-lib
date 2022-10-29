@@ -1,76 +1,176 @@
 import { VanillaEvents }  from "yoni/basis.js";
 import { EventListener } from "yoni/event.js";
-import { printError } from "yoni/util/console.js";
+import YoniEntity from "yoni/entity.js";
+import { Logger } from "yoni/util/Logger.js";
+
+const logger = new Logger("ChatCommand");
+
+const defaultCmdMap = new Map();
+const nonPrefixCmdMap = new Map();
+const prefixMap = new Map();
+
+let defaultPrefix = "!";
 
 export default class ChatCommand {
-    static #prefixCmds = new Map();
-    getPrefixes(){
-        return Array.from(this.#prefixCmds.keys());
+    static get defaultPrefix(){
+        return defaultPrefix;
     }
-    static executeCommand(sender, prefix, rawCommand){
+    static set defaultPrefix(i){
+        if (typeof i === "string" && i.length === 1)
+            defaultPrefix = i;
+    }
+    
+    /*static executeCommand(sender, rawCommand){
         const parameters = this.getParameters(rawCommand);
         const label = parameters[0];
-        const command = prefix + rawCommand;
-        this.#invokeCommand(sender, prefix, command, label, parameters.splice(1));
+        if (label.startsWith(defaultPrefix)) label = label.slice(defaultPrefix.length);
+        this.#invokeCommand(sender, rawCommand, label, parameters.splice(1));
+            }
+
         
-    }
+    }*/
+    
     static receiveBeforeChatEvent(event){
-        const message = event.message;
+        
         let isCmd = false;
-        let prefix = "";
-        for (let p of this.#prefixCmds.keys()){
-            if (message.startsWith(p)){
-                isCmd = true;
-                prefix = p;
-                if (p !== "")
-                    break;
+        let executor = null;
+        
+        let sender = event.sender;
+        let message = event.message;
+        let rawCommand = message;
+        
+        let prefix;
+        
+        let parameters = this.getParameters(message);
+        let label = parameters[0];
+        
+        for (let p of prefixMap.keys()){
+            if (!message.startsWith(p))
+                continue;
+            
+            let cmdMap = prefixMap.get(p);
+            let newLabel = label.slice(p.length);
+            if (!cmdMap.has(newLabel))
+                continue;
+                
+            isCmd = true;
+            label = label.slice(p.length);
+            rawCommand = rawCommand.slice(p.length);
+            executor = cmdMap.get(newLabel);
+            break;
+        }
+        
+        if (!isCmd && nonPrefixCmdMap.has(label)){
+            isCmd = true;
+            executor = nonPrefixCmdMap.get(label);
+        }
+        
+        if (!isCmd && message.startsWith(defaultPrefix)){
+            isCmd = true;
+            label = label.slice(defaultPrefix.length);
+            rawCommand = rawCommand.slice(defaultPrefix.length);
+            
+            if (defaultCmdMap.has(label)){
+                executor = defaultCmdMap.get(label);
             }
         }
+        
         if (isCmd){
-            if (prefix !== "") event.cancel = true;
-            this.executeCommand(event.sender, prefix, message.substring(prefix.length));
-        }
-    }
-    
-    static registerPrefixCommand(prefix, command, commandExecutor){
-        if (this.#prefixCmds.get(prefix) === undefined){
-            if (prefix === "")
-                console.warn("registering non-prefix command, the message that like command without prefix won't be cancel");
-            this.#prefixCmds.set(prefix, new Map());
-        }
-        this.#prefixCmds.get(prefix).set(command, commandExecutor);
-    }
-    
-    static registerCommand(...args){
-        this.registerPrefixCommand('!', ...args);
-    }
-    
-    static unregisterPrefixCommand(prefix, command, commandExecutor){
-        if (commandExecutor === null || commandExecutor !== undefined && this.#prefixCmds.get(prefix).get(command) === commandExecutor)
-            this.#prefixCmds.get(prefix).delete(command);
-            if (this.#prefixCmds.get(prefix).size == 0){
-                this.#prefixCmds.delete(prefix);
+            event.cancel = true;
+            if (executor !== null){
+                this.#invokeCommand({
+                    sender: event.sender,
+                    rawCommand: rawCommand,
+                    args: parameters.slice(1),
+                    label: label,
+                    executor: executor 
+                });
+            } else {
+                logger.debug("无法找到命令 {}", label);
+                YoniEntity.from(sender).sendMessage("[ChatCommand]: 无法找到命令" + label);
             }
+        }
     }
     
-    static unregisterCommand(...args){
-        this.unregisterPrefixCommand('!', ...args);
+    static registerPrefixCommand(...args){
+        this.registerCustomPrefixCommand(...args);
     }
     
-    static #invokeCommand(sender, prefix, command, label, args){
-        let commandExecutor = this.#prefixCmds.get(prefix).get(label);
+    static registerCommand(command, executor){
+        if (typeof command !== "string" || command.length === 0)
+            throw new TypeError("command not valid");
+        
+        let cmdMap = defaultCmdMap;
+        
+        if (typeof executor.onCommand !== "function" && typeof executor !== "function")
+            throw new TypeError("cannot execute it");
+        
+        cmdMap.set(command, executor);
+        logger.trace("注册命令 command: {}", command);
+    }
+    
+    static unregisterCommand(command){
+        defaultCmdMap.delete(command);
+        logger.trace("移除命令 command: {}", command);
+    }
+    
+    static registerNonPrefixCommand(command, executor){
+        if (typeof command !== "string" || command.length === 0)
+            throw new TypeError("command not valid");
+        
+        let cmdMap = nonPrefixCmdMap;
+        
+        if (typeof executor.onCommand !== "function" && typeof executor !== "function")
+            throw new TypeError("cannot execute it");
+        
+        cmdMap.set(command, executor);
+        logger.trace("注册无前缀命令 command: {}", command);
+    }
+    static unregisterNonPrefixCommand(command){
+        nonPrefixCmdMap.delete(command);
+        logger.trace("移除无前缀命令 command: {}", command);
+    }
+    
+    static registerCustomPrefixCommand(prefix, command, executor){
+        if (typeof prefix !== "string" || prefix.length === 0)
+            throw new TypeError("prefix not valid");
+        if (typeof command !== "string" || command.length === 0)
+            throw new TypeError("command not valid");
+        
+        let cmdMap = null;
+        if (!prefixMap.has(prefix))
+            prefixMap.set(prefix, new Map());
+        
+        cmdMap = prefixMap.get(prefix);
+        
+        if (typeof executor.onCommand !== "function" && typeof executor !== "function")
+            throw new TypeError("cannot execute it");
+        
+        cmdMap.set(command, executor);
+        logger.trace("注册命令 prefix: {}, command: {}", prefix, command);
+    }
+    static unregisterCustomPrefixCommand(prefix, command){
+        let cmdMap = prefixMap.get(prefix);
+        if (cmdMap === undefined) return;
+        cmdMap.delete(command);
+        if (cmdMap.size === 0)
+            prefixMap.delete(prefix);
+        logger.trace("移除命令 prefix: {}, command: {}", prefix, command);
+    }
+    
+    static #invokeCommand(options){
+        let { sender, rawCommand, label, args, executor } = options;
+        sender = YoniEntity.from(sender);
         try {
-            if (commandExecutor?.onCommand instanceof Function){
-                commandExecutor.onCommand(sender, command, label, args);
-                return;
-            } else if (commandExecutor instanceof Function){
-                commandExecutor(sender, command, label, args);
-                return;
-            } else if (prefix !== ""){
-                console.error("[ChatCommand]: 无法找到命令" + label);
+            logger.debug("正在执行命令{}", label);
+            if (typeof executor.onCommand === "function"){
+                executor.onCommand(sender, rawCommand, label, args);
+            } else {
+                executor(sender, rawCommand, label, args);
             }
         } catch(err) {
-            printError(`[ChatCommand]: 运行命令${label}时发生错误`, err);
+            logger.error("运行命令{}时发生错误 {}", label, err);
+            sender.sendMessage(`[ChatCommand]: 运行命令${label}时发生错误，请查看控制台或寻求管理员的帮助`);
         }
     }
     
@@ -156,10 +256,8 @@ export default class ChatCommand {
     }
 }
 
-
-export { ChatCommand }
-
-EventListener.register("beforeChat", (event) => {
+export { ChatCommand };
+EventListener.register(VanillaEvents.beforeChat, (event) => {
     if (event.cancel) return;
     ChatCommand.receiveBeforeChatEvent(event);
 });

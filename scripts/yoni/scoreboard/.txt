@@ -1,8 +1,0 @@
-将Scoreboard的各个模块整个到文件里，方便导入
-将Entry2彻底替代Entry
-不再使用ScoreInfo来管理分数，且不再作为单独的文件
-修复上几个提交改废的各种函数
-SimpleScoreboard中删除一个不安全的函数
-SimpleScoreboard.removeObjective()在什么情况下都会移除旧的记分项引用
-完成了操作显示记分项的函数
-引入更加详细的错误类型
