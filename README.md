@@ -1,5 +1,4 @@
 # yoni-mcscripts-lib
 
-|轮子|路径|
-|---|---|
-|scoreboard|<scripts/yoni/scoreboard/>|
+提供自认为方便的Scripts API调用
+文档缓慢更新………或者根本没有
