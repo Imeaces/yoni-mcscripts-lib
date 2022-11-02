@@ -90,8 +90,6 @@ class Objective {
     
     constructor(...args){
         
-        let vanillaObjective, scoreboard, name, displayName, criteria, objectiveOptions;
-        
         if (args.length === 1){
             let { scoreboard, vanillaObjective, name, displayName, criteria, objectiveOptions } = args[0];
             this.#vanillaObjective = vanillaObjective;
