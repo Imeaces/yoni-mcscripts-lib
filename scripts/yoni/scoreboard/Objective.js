@@ -122,7 +122,7 @@ class Objective {
         if (!Number.isInteger(min) || !Number.isInteger(max))
             throw new ScoreRangeError();
         if (!await this.#postPlayersCommand("random", entry, min, max)){
-            throw new InternalError("Could not add score, maybe entity or player disappeared?");
+            throw new InternalError("Could not random score, maybe entity or player disappeared?");
         }
         return this.getScore(entry);
     }
@@ -177,10 +177,10 @@ class Objective {
             if (ent === undefined){
                 throw new InternalError("Could not find the entity");
             }
-            return !await Command.fetchExecuteParams(ent, ...params).statusCode;
+            return !(await Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, ...params)).statusCode;
         } else if ([...VanillaWorld.getPlayers({name: entry.displayName})].length === 0){
             let params = ["scoreboard", "players", option, entry.displayName, this.#id, ...args];
-            return !Command.fetchParams(...params).statusCode;
+            return !(await Command.addParams(Command.PRIORITY_HIGHEST, ...params)).statusCode;
         } else {
             throw new NameConflictError(entry.displayName);
         }

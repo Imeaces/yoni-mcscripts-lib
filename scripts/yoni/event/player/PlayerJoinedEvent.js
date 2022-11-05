@@ -38,7 +38,7 @@ let ticking = ()=>{
     });
 }
 
-const signal = EventSignal.builder("yonimc:playerJoined")
+const signal = EventSignal.builder("yoni:playerJoined")
     .eventClass(PlayerJoinedEvent)
     .build()
     .whenFirstSubscribe(()=>{

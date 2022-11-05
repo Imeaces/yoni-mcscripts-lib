@@ -11,7 +11,7 @@ export class PlayerDeadEvent extends Event {
 
 let eventId;
 
-const signal = EventSignal.builder("yonimc:playerDead")
+const signal = EventSignal.builder("yoni:playerDead")
     .eventClass(PlayerDeadEvent)
     .build()
     .whenFirstSubscribe(()=>{

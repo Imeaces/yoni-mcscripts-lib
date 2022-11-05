@@ -44,6 +44,7 @@ globalThis.runTask = runTask;
 globalThis.Logger = Logger;
 globalThis.world = World;
 globalThis.Entity = Entity;
+globalThis.YoniEntity = Entity;
 globalThis.Player = Player;
 globalThis.SimulatedEntity = SimulatedPlayer;
 globalThis.EventTypes = EventTypes;
@@ -55,6 +56,7 @@ globalThis.ScoreboardObjective = Objective;
 globalThis.YoniScheduler = YoniScheduler;
 globalThis.Schedule = Schedule;
 globalThis.ChatCommand = ChatCommand;
+globalThis.Minecraft = Minecraft;
 
 globalThis.Vanilla = {
     Minecraft,

@@ -4,6 +4,6 @@
 
 |导入模块|导出名|
 |---|---|
-|`@minecraft/server|Minecraft`|
+|`@minecraft/server`|`Minecraft`|
 |`@minecraft/server-ui`|`MinecraftGui`|
 |`@minecraft/server-gametest`|`Gametest`|

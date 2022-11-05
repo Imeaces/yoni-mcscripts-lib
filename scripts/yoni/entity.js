@@ -1,6 +1,7 @@
-import { Minecraft, dim, Gametest, VanillaWorld } from "yoni/basis.js";
+import { Minecraft, dim, Gametest, VanillaWorld, StatusCode } from "yoni/basis.js";
 import { Command } from "yoni/command.js";
 import Entry from "yoni/scoreboard/Entry.js";
+import { dealWithCmd } from "yoni/lib/utils.js";
 
 const { EntityTypes } = Minecraft;
 
@@ -328,9 +329,8 @@ class Player extends Entity {
     }
     
     sendRawMessage(rawtext){
-        let command = "tellraw @s " + JSON.stringify(rawtext);
-        return Command.addExecute(Command.PRIORITY_HIGH, this, command)
-            .then(result => result.statusCode === 0 );
+        let command = "tellraw @s " + JSON.stringify(rawtext, dealWithCmd);
+        return Command.addExecute(Command.PRIORITY_HIGH, this, command);
     }
 }
 

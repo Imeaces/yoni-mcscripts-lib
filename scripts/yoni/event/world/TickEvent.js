@@ -37,7 +37,7 @@ const triggerEvent = ()=>{
     signal.triggerEvent(currentTick, deltaTime);
 };
 
-const signal = EventSignal.builder("yonimc:tick")
+const signal = EventSignal.builder("yoni:tick")
     .eventClass(TickEvent)
     .build()
     .whenFirstSubscribe(()=>{

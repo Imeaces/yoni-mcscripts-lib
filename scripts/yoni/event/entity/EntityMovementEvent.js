@@ -181,7 +181,7 @@ const triggerEvent = async (entity, oldLoc, changedLoc)=>{
     });
 };
 
-let signal = EventSignal.builder("yonimc:entityMovement")
+let signal = EventSignal.builder("yoni:entityMovement")
     .eventClass(EntityMovementEvent)
     .filterResolver((values, filters)=>{
         values = values[0];

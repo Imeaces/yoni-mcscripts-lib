@@ -4,7 +4,7 @@
     "name": "yoni-mcscripts-lib",
     "description": "Yoni Script Module",
     "uuid": "0b7ef624-e6b8-11ec-b378-df8eb4284b8b",
-    "version": [0, 6, 0],
+    "version": [0, 6, 1],
     "min_engine_version": [1, 19, 50]
   },
   "modules": [
@@ -12,35 +12,29 @@
       "description": "data:yoni",
       "type": "data",
       "uuid": "0b7ef926-e6b8-11ec-b37e-ab2dfd3caa48",
-      "version": [0, 6, 0]
+      "version": [0, 6, 1]
     },
     {
       "description": "scripts:yoni",
       "type": "script",
       "language": "javascript",
       "uuid": "0b7efb24-e6b8-11ec-b382-5358dafc5ed1",
-      "version": [0, 6, 0],
+      "version": [0, 6, 1],
       "entry": "scripts/yoni/index.js"
     }
   ],
   "dependencies": [
     /* Gametest需要的依赖项 begin */
     {
-      //mojang-minecraft
       "module_name": "@minecraft/server",
-      //"uuid": "b26a4d4c-afdf-4690-88f8-931846312678",
       "version": "1.1.0-beta"
     },
     {
-      //mojang-gametest
       "module_name": "@minecraft/server-gametest",
-      //"uuid": "6f4b6893-1bb6-42fd-b458-7fa3d0c89616",
       "version": "1.0.0-beta"
     },
     {
-      // mojang-minecraft-ui
       "module_name": "@minecraft/server-ui",
-      //"uuid": "2bd50a27-ab5f-4f40-a596-3641627c635e",
       "version": "1.0.0-beta"
     }
     /* Gametest需要的依赖项 end */

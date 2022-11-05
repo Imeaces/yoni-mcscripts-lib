@@ -1,6 +1,7 @@
 import { VanillaWorld } from "yoni/basis.js";
 import { getErrorMsg } from "./console.js";
 import { Command } from "yoni/command.js";
+import { dealWithCmd } from "yoni/lib/utils.js";
 
 import {
     outputContentLog,
@@ -10,13 +11,13 @@ import {
 } from "yoni/config.js";
 
 async function send(receiver, message){
-    let rawtext = JSON.stringify({rawtext:[{translate: String(message)}]})
+    let rawtext = JSON.stringify({rawtext:[{translate: String(message)}]}, dealWithCmd)
     Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
 }
 
 let isNoticeLoggerUsage = false;
 
-let specificTag = "yonimc:console";
+let specificTag = "yoni:console";
 
 let outputToConsole = (()=>{
     const console = globalThis.console;
@@ -148,33 +149,39 @@ export class Logger {
             msg = "[{}]: " + msg;
             printLog(time, lv, msg, this.name, ...rps);
         };
-        return new Proxy(Object.assign(levels), {
-            get: (levels, prop)=>{
-                //if (prop === "log") return (...args)=>{this.log(...args);};
+        const levelOutputs = {};
+        const getOutput = (prop)=>{
+            
+            let lv = getLevelCode(prop);
                 
+            if (lv > logLevel) return ()=>{};
+            
+            return (...args)=>{
+                log(lv, ...args);
+            };
+        };
+        Object.keys(levels).forEach((key)=>{
+            levelOutputs[key] = getOutput(key);
+        });
+        return new Proxy(levelOutputs, {
+            get: (levelOutputs, prop)=>{
                 if (typeof prop === "symbol"){
                     if (prop === Symbol.iterator){
-                        let keys = Object.keys(levels);
                         return function*(){
-                            for (let idx = 0; idx < keys.length; idx++){
-                                yield keys[idx];
+                            for (let key of Object.keys(levelOutputs)){
+                                yield levelOutputs[key];
                             }
                         };
                     }
                     return;
                 }
                 
-                if (Object.prototype.hasOwnProperty(prop)){
-                    return levels[prop];
+                if (Object.prototype.hasOwnProperty.call(levelOutputs, prop)){
+                    return levelOutputs[prop];
                 }
                 
-                let lv = getLevelCode(prop);
+                return getOutput(prop);
                 
-                if (lv > logLevel) return ()=>{};
-                
-                return (...args)=>{
-                    log(lv, ...args);
-                };
             }
         });
     }

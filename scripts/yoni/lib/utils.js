@@ -11,3 +11,10 @@ export const getKeys = (object)=>{
     }
     return keys;
 }
+export function dealWithCmd(key, value){
+    if (typeof value === "string"){
+        value = value.replaceAll(/[“”]/g, "\"");
+        value = value.replaceAll(/[‘’]/g, "'");
+    }
+    return value;
+}
