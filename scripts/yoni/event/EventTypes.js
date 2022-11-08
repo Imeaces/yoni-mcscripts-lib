@@ -3,6 +3,11 @@ import { debug } from "yoni/config.js";
 import { Logger } from "yoni/util/Logger.js";
 import { EventListener } from "./EventListener.js";
 
+import { YoniScheduler } from "yoni/schedule.js";
+const objectToDestroy = [];
+const objectWillDestroy = [];
+const revokeCallbacks = new Map();
+
 /**
  * 事件管理
  * 不建议移除事件，由于移除事件的机制为设空回调，导致移除事件并不是真正的移除，大量移除事件导致事件遗留，可能影响性能
@@ -202,18 +207,61 @@ export class EventTypes {
     registeredEventTypes.set("system", map);
 })();
 
-export class Event {
-    constructor(values){
-        if (values === undefined){
-            return;
+YoniScheduler.runCycleTickTask(()=>{
+    if (objectToDestroy.length !== 0){
+        let arr = Array.from(objectToDestroy);
+        objectToDestroy.length = 0;
+        arr.forEach(obj=>{
+            let f = revokeCallbacks.get(obj);
+            revokeCallbacks.delete(obj);
+            f();
+        });
+    }
+    if (objectWillDestroy.length !== 0){
+        objectToDestroy.push.apply(objectToDestroy, objectWillDestroy);
+        objectWillDestroy.length = 0;
+    }
+}, 0, 0, false);
+
+export const EventRemover = (e)=>{
+    let proxyOpt = Proxy.revocable(e, {
+        get: (t, k)=>{
+            let v = t[k];
+            if (typeof v === "function"){
+                return (...args)=>{ t[k](...args); };
+            } else {
+                return v;
+            }
+        },
+        set: (t, k, v)=>{
+            t[k] = v;
+            return true;
         }
-        for (let key in values){
-            Object.defineProperty(this, key, {
-                get: function (){
-                    return values[key];
-                },
-                set: function (val){
-                    values[key] = val;
+    });
+    objectWillDestroy.push(proxyOpt.proxy);
+    revokeCallbacks.set(proxyOpt.proxy, proxyOpt.revoke);
+    return proxyOpt.proxy;
+}
+/**
+ * 注意，此类创建的对象有自我销毁的功能
+ * 为了实现它，导致继承此类的子类无法拥有私有属性
+ */
+export class Event {
+    constructor(...values){
+        if (values.length !== 0){
+            values.forEach((vals)=>{
+                for (let key in vals){
+                    Object.defineProperty(this, key, {
+                        configurable: false,
+                        enumerable: false,
+                        get: function (){
+                            return vals[key];
+                            
+                        },
+                        set: function (val){
+                            vals[key] = val;
+                        }
+                    });
                 }
             });
         }

@@ -1,12 +1,12 @@
 import { YoniEntity } from "yoni/entity.js";
-import { EventListener, EventSignal, Event } from "yoni/event.js";
+import { EventListener, EventSignal } from "yoni/event.js";
+import { PlayerEvent } "./PlayerEvent.js";
 
-export class PlayerDeadEvent extends Event {
+export class PlayerDeadEvent extends PlayerEvent {
     constructor(player){
-        super({ player: YoniEntity.from(player) });
+        super(player);
         Object.freeze(this);
     }
-    tryCancel(){}
 }
 
 let eventId;

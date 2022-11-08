@@ -105,6 +105,7 @@ export class EventListener {
         } catch (e){
             this.#callbacks[idx] = null;
             logger.error("在注册id为{}的回调时发生错误 {}", idx, e);
+            throw e;
         }
     }
     

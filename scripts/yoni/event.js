@@ -1,4 +1,4 @@
-import { Event, EventTypes } from "./event/EventTypes.js";
+import { Event, EventTypes, EventRemover } from "./event/EventTypes.js";
 import { EventSignal } from "./event/EventSignal.js";
 import { EventListener } from "./event/EventListener.js";
 export default EventTypes;
@@ -6,7 +6,8 @@ export {
     Event,
     EventTypes,
     EventSignal,
-    EventListener
+    EventListener,
+    EventRemover
 };
 
 import("./event/loadEvents.js");

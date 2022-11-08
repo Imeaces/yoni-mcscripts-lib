@@ -1,4 +1,8 @@
-import { Event, EventTypes, getIdentifierInfo } from "./EventTypes.js";
+import { Event, EventTypes, getIdentifierInfo, EventRemover } from "./EventTypes.js";
+import { YoniScheduler } from "yoni/schedule.js";
+const objectToDestroy = [];
+const objectWillDestroy = [];
+const revokeCallbacks = new WeakMap();
 
 class EventSignalBuilder {
     
@@ -12,7 +16,7 @@ class EventSignalBuilder {
     #firebug = null;
     static defaultFirebug(callbacks /* Array<Object{callback: <Function>, filters: <Array> }> */, eventClass /* any */, eventValues/* Array[any] */){
         callbacks.forEach((f)=>{
-            f(new eventClass(...eventValues));
+            f(EventRemover(new eventClass(...eventValues)));
         });
     }
     
@@ -206,6 +210,8 @@ export class EventSignal {
             getCallbackCount,
             whenSubscribe,
             whenUnsubscribe,
+            onSubscribe: whenSubscribe,
+            onUnsubscribe: whenUnsubscribe,
             registerEvent,
             unregisterEvent,
             whenFirstSubscribe,

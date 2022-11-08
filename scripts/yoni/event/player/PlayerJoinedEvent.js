@@ -1,20 +1,20 @@
 import { YoniEntity } from "yoni/entity.js";
 import { EventListener, EventSignal, Event } from "yoni/event.js";
-import { VanillaWorld, runTask } from "yoni/basis.js";
+import { VanillaWorld } from "yoni/basis.js";
+import { YoniScheduler } from "yoni/schedule.js";
 
 class PlayerJoinedEvent extends Event {
-    constructor (player){
+    player;
+    constructor(player){
         super();
-        this.player = YoniEntity.from(player);
-        Object.freeze(this);
+        Object.defineProperty(this, "player", {
+            value: YoniEntity.from(player),
+            writable: false,
+            enumerable: true
+        });
     }
-    get cancel(){
-        if (new Set(VanillaWorld.getPlayers()).has(this.player.vanillaEntity)) return true;
-        return false;
-    }
-    set cancel(bool){
-        if (bool)
-            this.player.postKick("加入游戏被取消");
+    kickPlayer(){
+        this.player.postKick("加入游戏被取消");
     }
 }
 
@@ -37,6 +37,7 @@ let ticking = ()=>{
         }
     });
 }
+let scheduleId = -1;
 
 const signal = EventSignal.builder("yoni:playerJoined")
     .eventClass(PlayerJoinedEvent)
