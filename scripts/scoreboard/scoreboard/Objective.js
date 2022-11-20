@@ -262,13 +262,13 @@ class Objective {
         
         return Array.from(this.getEntries())
             .map((_)=>{
-                return this.getScoreInfo(_)
+                return this.getScoreInfo(_);
             });
     }
     
     /**
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry
-     * @param {boolean} - should we set score to 0 if score is undefined
+     * @param {boolean} autoInit - should we set score to 0 if score is undefined
      * @returns {ScoreInfo} specific score for this objective for a
      * participants.
      * @throws This function can throw errors.
