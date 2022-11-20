@@ -3,6 +3,8 @@ import { StatusCode, overworld, dim, VanillaScoreboard, Minecraft } from "../bas
 import Objective from "./Objective.js";
 import Entry from "./Entry.js";
 
+class YoniEntity {}
+
 /**
  * enum of alive display slot
  */

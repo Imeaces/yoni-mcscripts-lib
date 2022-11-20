@@ -4,6 +4,8 @@ import { Command } from "../command.js";
 import { Entry, EntryType } from "./Entry.js";
 import { NameConflictError, ScoreRangeError, ObjectiveUnregisteredError } from "./ScoreboardError.js"
 
+class YoniEntity {}
+
 /**
  * Contains objectives and participants for the scoreboard.
  */
