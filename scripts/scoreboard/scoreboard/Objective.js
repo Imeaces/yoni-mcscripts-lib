@@ -208,7 +208,7 @@ class Objective {
     
     /**
      * @remarks 为记分板项目在记分项上执行特定的操作
-     * @param {string} - 操作的名称
+     * @param {string} option - 操作的名称
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可以作为记分板项目的东西
      * @param {string[]} args - 操作所需要的参数
      * @returns {Promise<boolean>} 操作是否成功
