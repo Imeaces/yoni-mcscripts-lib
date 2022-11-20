@@ -1,9 +1,8 @@
 import { StatusCode, overworld, dim, VanillaScoreboard, Minecraft } from "../basis.js";
+import { YoniEntity } from "../entity.js";
 
 import Objective from "./Objective.js";
 import Entry from "./Entry.js";
-
-class YoniEntity {}
 
 /**
  * enum of alive display slot
@@ -21,7 +20,7 @@ export default class SimpleScoreboard {
     static #objectives = new Map();
     
     /**
-     * Adds a new objective to the scoreboard.
+     * @remarks Adds a new objective to the scoreboard.
      * @param {string} name - name of new objective
      * @param {string} criteria - criteria of new objective, current only accept "dummy"
      * @param {string} displayName - displayName of new objective, default is equals to name
@@ -50,8 +49,8 @@ export default class SimpleScoreboard {
     }
     
     /**
-     * Removes an objective from the scoreboard.
-     * @param {string|Objective} nameOrObjective - objectiveId or Objective
+     * @remarks Removes an objective from the scoreboard.
+     * @param {string|Objective|Minecraft.ScoreboardObjective} nameOrObjective - objectiveId or Objective
      */
     static removeObjective(nameOrObjective){
         let objectiveId;
@@ -103,8 +102,9 @@ export default class SimpleScoreboard {
     }
     
     /** 
+     * @remarks
      * Returns all defined objectives.
-     * @returns {Objective[]} an array contains all defined objectives.
+     * @returns {Objective[]} - an array contains all defined objectives.
      */
     static getObjectives(){
         let objectives = [];
@@ -193,7 +193,7 @@ export default class SimpleScoreboard {
     /**
      * @remarks reset scores of all participants (in asynchronously)
      * @param {Function} filter - particular filter function, the function will be call for every participants, if return true, then reset the scores of participants
-     * @return {number} --  success count
+     * @return {number} - success count
      */
     static async postResetAllScore(filter=null){
         if (filter === null){
@@ -237,14 +237,16 @@ export default class SimpleScoreboard {
         
         if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
             let ent = entry.getEntity();
-            if (ent === undefined){
+            if (ent == null){
                 throw new InternalError("Could not find the entity");
             }
-            if (await Command.fetchExecuteParams(ent, "scoreboard", "players", "reset", "@s").statusCode != StatusCode.success){
+            let rt = await Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, "scoreboard", "players", "reset", "@s");
+            if (rt.statusCode != StatusCode.success){
                 throw new InternalError("Could not set score, maybe entity or player disappeared?");
             }
-        } else if ([...VanillaWorld.getPlayers()].length === 0){
-            if (await Command.fetchParams("scoreboard", "players", "reset", entry.displayName).statusCode !== StatusCode.success){
+        } else if ([...VanillaWorld.getPlayers({name: entry.displayName})].length === 0){
+            let rt = await Command.addParams(Command.PRIORITY_HIGHEST, "scoreboard", "players", "reset", entry.displayName);
+            if (rt.statusCode !== StatusCode.success){
                 throw new InternalError(rt.statusMessage);
             }
         } else {

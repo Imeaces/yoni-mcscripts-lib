@@ -1,11 +1,9 @@
 import { VanillaScoreboard, Minecraft } from "yoni/basis.js";
-//import { YoniEntity } from "yoni/entity.js";
-
-class YoniEntity {}
+import { YoniEntity } from "../entity.js";
 
 let idRecords = new Map();
-let entityRecords = new WeakMap();
 let nameRecords = new Map();
+let entityRecords = new WeakMap();
 let scbidRecords = new WeakMap();
 
 class EntryType {
