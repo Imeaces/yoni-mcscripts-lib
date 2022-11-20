@@ -101,7 +101,7 @@ export default class SimpleScoreboard {
     }
     
     /** 
-     * Returns all defined objectives.
+     * @returns {Objective[]} all defined objectives.
      */
     static getObjectives(){
         let objectives = [];
@@ -225,7 +225,7 @@ export default class SimpleScoreboard {
     
     /**
      * reset scores of a participant
-     * @param entry
+     * @param {Entry|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
      */
     static async postResetScore(entry){
         if (!(entry instanceof Entry))

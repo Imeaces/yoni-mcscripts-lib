@@ -27,6 +27,10 @@ class EntryOption {
 
 class Entry {
     
+    /**
+     * @param {Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @returns {Entry}
+     */
     static guessEntry(any){
         if (any instanceof Minecraft.ScoreboardIdentity)
             return this.getEntry({scbid: any});

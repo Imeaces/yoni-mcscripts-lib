@@ -115,7 +115,7 @@ class Objective {
      * add score in the objective for the entry
      * @param {Entry|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
      * @param {number} score 
-     * @returns {Promise<number>} the new score of the entry
+     * @returns {number} the new score of the entry
      */
     async postAddScore(entry, score){
         if (!Number.isInteger(score))
@@ -127,11 +127,11 @@ class Objective {
     }
     
     /**
-     * 
-     * @param {Entry|Minecraft.Entity|Minecraft.Player} entry 
-     * @param {*} min 
-     * @param {*} max 
-     * @returns 
+     * set a random score for entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} min 
+     * @param {number} max 
+     * @returns {number} the new score of the entry
      */
     async postRandomScore(entry, min=-2147483648, max=2147483647){
         if (!Number.isInteger(min) || !Number.isInteger(max))
@@ -142,23 +142,37 @@ class Objective {
         return this.getScore(entry);
     }
     
+    /**
+     * remove score in the objective for the entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {number} the new score of the entry
+     */
     async postRemoveScore(entry, score){
         if (!Number.isInteger(score))
             throw new ScoreRangeError();
-        if (!await this.#postPlayersCommand("remove", entry, score)){
+        if (await this.#postPlayersCommand("remove", entry, score) === false){
             throw new InternalError("Could not remove score, maybe entity or player disappeared?");
         }
         return this.getScore(entry);
     }
     
+    /**
+     * reset score in the objective for the entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     */
     async postResetScore(entry){
-        if (!await this.#postPlayersCommand("reset", entry)){
+        if (await this.#postPlayersCommand("reset", entry) === false){
             throw new InternalError("Could not reset score, maybe entity or player disappeared?");
         }
     }
     
+    /**
+     * reset all score for entrys in the objective
+     */
     async postResetScores(){
-        let rt = await Command.fetchParams("scoreboard", "players", "reset", "*", this.#id);
+        let rt = await Command.addParams(Command.PRIORITY_HIGHEST, "scoreboard", "players", "reset", "*", this.#id);
         if (!rt.statusCode){
             throw new Error(rt.statusMessage);
         }
@@ -167,8 +181,9 @@ class Objective {
     /**
      * @remarks
      * Set a specific score for a participant.
-     * @param entry, or other thing that can be set score
-     * @param {Number} an integer number
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {number} the new score of the entry
      * @throws This function can throw errors.
      */
     async postSetScore(entry, score){
@@ -204,9 +219,9 @@ class Objective {
     
     /**
      * @remarks
-     * Returns a specific score for a participant.
-     * @param participant
-     * @return {Number} - the score of entry
+     * Returns a specific score for a participant, else return undefined
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} participant
+     * @return {number} - the score of entry
      * @throws This function can throw errors.
      */
     getScore(entry){
@@ -225,8 +240,7 @@ class Objective {
     }
     
     /**
-     * @remarks
-     * Returns all objective participant identities.
+     * @returns {Entry[]} - all objective participant identities.
      * @throws This function can throw errors.
      */
     getEntries(){
@@ -239,8 +253,7 @@ class Objective {
     }
     
     /**
-     * @remarks
-     * Returns specific scores for this objective for all
+     * @returns {ScoreInfo[]} specific scores for this objective for all
      * participants.
      * @throws This function can throw errors.
      */
@@ -253,6 +266,13 @@ class Objective {
             });
     }
     
+    /**
+     * @returns {ScoreInfo} specific score for this objective for a
+     * participants.
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry
+     * @param {boolean} - should we set score to 0 if score is undefined
+     * @throws This function can throw errors.
+     */
     getScoreInfo(entry, autoInit=false){
         this.checkUnregistered();
         
@@ -266,19 +286,52 @@ class Objective {
     }
     
     //以下为兼容函数，主要是不这样做要改的东西比较多
-    setScore(...args){
+    
+    /**
+     * @remarks
+     * Set a specific score for a participant.
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {number} the new score of the entry
+     * @throws This function can throw errors.
+     */
+    async setScore(...args){
         return this.postSetScore(...args);
     }
-    removeScore(...args){
+    /**
+     * remove score in the objective for the entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {number} the new score of the entry
+     */
+    async removeScore(...args){
         return this.postRemoveScore(...args);
     }
-    randomScore(...args){
+    /**
+     * set a random score for entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} min 
+     * @param {number} max 
+     * @returns {number} the new score of the entry
+     */
+    async randomScore(...args){
         return this.postRandomScore(...args);
     }
-    resetScore(...args){
+    /**
+     * reset score in the objective for the entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     */
+    async resetScore(...args){
         return this.postResetScore(...args);
     }
-    addScore(...args){
+    /**
+     * add score in the objective for the entry
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {number} the new score of the entry
+     */
+    async addScore(...args){
         return this.postAddScore(...args);
     }
 }
@@ -287,6 +340,10 @@ class ScoreInfo {
     #entry;
     #objective;
     
+    /**
+     * @param {Objective}
+     * @param {Entry} entry 
+     */
     constructor(obj, entry){
         if (!(obj instanceof Objective))
             throw new TypeError("Not an Objective type");
@@ -300,6 +357,9 @@ class ScoreInfo {
         this.#objective.setScore(this.#entry, score);
     }
     
+    /**
+     * @returns {number} score
+     */
     get score(){
         return this.#objective.getScore(this.#entry);
     }
