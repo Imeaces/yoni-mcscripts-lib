@@ -297,8 +297,8 @@ class Objective {
      * @returns {number} the new score of the entry
      * @throws This function can throw errors.
      */
-    async setScore(...args){
-        return this.postSetScore(...args);
+    async setScore(entry, score){
+        return this.postSetScore(entry, score);
     }
     /**
      * remove score in the objective for the entry
@@ -306,8 +306,8 @@ class Objective {
      * @param {number} score 
      * @returns {number} the new score of the entry
      */
-    async removeScore(...args){
-        return this.postRemoveScore(...args);
+    async removeScore(entry, score){
+        return this.postRemoveScore(entry, score);
     }
     /**
      * set a random score for entry
@@ -316,16 +316,16 @@ class Objective {
      * @param {number} max 
      * @returns {number} the new score of the entry
      */
-    async randomScore(...args){
-        return this.postRandomScore(...args);
+    async randomScore(entry, min, max){
+        return this.postRandomScore(entry, min, max);
     }
     /**
      * reset score in the objective for the entry
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
      * @param {number} score 
      */
-    async resetScore(...args){
-        return this.postResetScore(...args);
+    async resetScore(entry){
+        return this.postResetScore(entry);
     }
     /**
      * add score in the objective for the entry
@@ -333,8 +333,8 @@ class Objective {
      * @param {number} score 
      * @returns {number} the new score of the entry
      */
-    async addScore(...args){
-        return this.postAddScore(...args);
+    async addScore(entry, score){
+        return this.postAddScore(entry, score);
     }
 }
 
