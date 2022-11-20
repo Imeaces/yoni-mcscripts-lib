@@ -20,9 +20,9 @@ export default class SimpleScoreboard {
     
     /**
      * Adds a new objective to the scoreboard.
-     * @param {string} -- name of new objective
-     * @param {string} -- criteria of new objective, current only accept "dummy"
-     * @param {string} -- displayName of new objective, default is equals to name
+     * @param {string} name - name of new objective
+     * @param {string} criteria - criteria of new objective, current only accept "dummy"
+     * @param {string} displayName - displayName of new objective, default is equals to name
      * @throws This function can throw errors.
      */
     static addObjective(name, criteria="dummy", displayName=name){
