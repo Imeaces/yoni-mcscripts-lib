@@ -3,10 +3,6 @@ import { StatusCode, overworld, dim, VanillaScoreboard, Minecraft } from "../bas
 import Objective from "./Objective.js";
 import Entry from "./Entry.js";
 
-let log;
-import("yoni/util/Logger.js").then((m)=>{
-    log = m.log;
-});
 /**
  * enum of alive display slot
  */
@@ -23,10 +19,10 @@ export default class SimpleScoreboard {
     static #objectives = new Map();
     
     /**
-     * @remarks
      * Adds a new objective to the scoreboard.
-     * @param objectiveId
-     * @param displayName
+     * @param {string} -- name of new objective
+     * @param {string} -- criteria of new objective, current only accept "dummy"
+     * @param {string} -- displayName of new objective, default is equals to name
      * @throws This function can throw errors.
      */
     static addObjective(name, criteria="dummy", displayName=name){
@@ -52,9 +48,8 @@ export default class SimpleScoreboard {
     }
     
     /**
-     * @remarks
      * Removes an objective from the scoreboard.
-     * @param objectiveId or Objective
+     * @param {string|Objective} -- objectiveId or Objective
      */
     static removeObjective(nameOrObjective){
         let objectiveId;
@@ -80,9 +75,9 @@ export default class SimpleScoreboard {
     /**
      * @remarks
      * Returns a specific objective (by id).
-     * @param objectiveId
-     * @param (Boolean) if true, it will try to create a dummy objective when objective didn't exist
-     * @return return Objective if existed, else return null
+     * @param {string} -- objectiveId
+     * @param {boolean} -- if true, it will try to create a dummy objective when objective didn't exist
+     * @return {Objective} return Objective if existed, else return null
      */
     static getObjective(name, autoCreateDummy=false){
         let result = null;
@@ -105,8 +100,7 @@ export default class SimpleScoreboard {
         return result;
     }
     
-    /**
-     * @remarks
+    /** 
      * Returns all defined objectives.
      */
     static getObjectives(){
@@ -121,7 +115,8 @@ export default class SimpleScoreboard {
      * @remarks
      * Returns an objective that occupies the specified display
      * slot.
-     * @param displaySlotId
+     * @param {string} displaySlotId
+     * @return {Objective}
      * @throws This function can throw errors.
      */
     static getDisplayAtSlot(...args){
@@ -132,7 +127,7 @@ export default class SimpleScoreboard {
         if (sortOrder in rt){
             result.sortOrder = rt.sortOrder;
         }
-        return result;
+        return this.getObjective(result.id);
     }
     
     static #getIdOfObjective(any){
@@ -181,6 +176,9 @@ export default class SimpleScoreboard {
             });
     }
     
+    /**
+     * remove all objectives from scoreboard
+     */
     static removeAllObjectives(){
         Array.from(VanillaScoreboard.getObjectives())
             .forEach(obj=>{
@@ -189,9 +187,9 @@ export default class SimpleScoreboard {
     }
     
     /**
-     * reset scores of all participants
-     * @param particular filter function, the function will be call for every participants, if return true, then reset the scores of participants
-     * @return Promise<Number> success count
+     * @remarks reset scores of all participants (in asynchronously)
+     * @param {Function} filter particular filter function, the function will be call for every participants, if return true, then reset the scores of participants
+     * @return {Promise<Number>} --  success count
      */
     static async postResetAllScore(filter){
         if (filter === undefined){

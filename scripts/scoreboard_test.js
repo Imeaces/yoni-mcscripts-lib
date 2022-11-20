@@ -1,6 +1,6 @@
 import { say as print } from "./scoreboard/util/utils.js";
 import { printError } from "./scoreboard/util/console.js";
-
+import { VanillaWorld } from "./scoreboard/basis.js";
 import { Entry, EntryType, Scoreboard } from "./scoreboard/scoreboard.js";
 
 /*

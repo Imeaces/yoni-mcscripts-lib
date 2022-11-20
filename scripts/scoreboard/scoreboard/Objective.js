@@ -41,13 +41,16 @@ class Objective {
         return this.#displayName;
     }
     
+    /** 
+     * @returns {boolean} whether the objective is readonly, notice that readonly doesn't implemented yet.
+     */
     isReadOnly(){
         this.checkUnregistered();
         return !!this.#objectiveOptions?.readonly;
     }
     
-    /**
-     * Returns whether the objective has been removed.
+    /**  
+     * @returns {boolean}  Returns whether the objective has been removed.
      */
     isUnregistered(){
         if (!this.#unregistered){
@@ -69,9 +72,8 @@ class Objective {
     }
     
     /**
-     * Returns the origin objective class of this scoreboard
+     * @returns {Minecraft.ScoreboardObjective} the origin objective class of this scoreboard
      * objective.
-     * @return {Minecraft.ScoreboardObjective}
      */
     get vanillaObjective(){
         return this.#vanillaObjective;
@@ -109,6 +111,12 @@ class Objective {
         }
     }
     
+    /**
+     * add score in the objective for the entry
+     * @param {Entry|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {number} score 
+     * @returns {Promise<number>} the new score of the entry
+     */
     async postAddScore(entry, score){
         if (!Number.isInteger(score))
             throw new ScoreRangeError();
@@ -118,6 +126,13 @@ class Objective {
         return this.getScore(entry);
     }
     
+    /**
+     * 
+     * @param {Entry|Minecraft.Entity|Minecraft.Player} entry 
+     * @param {*} min 
+     * @param {*} max 
+     * @returns 
+     */
     async postRandomScore(entry, min=-2147483648, max=2147483647){
         if (!Number.isInteger(min) || !Number.isInteger(max))
             throw new ScoreRangeError();
