@@ -6,27 +6,38 @@ let nameRecords = new Map();
 let entityRecords = new WeakMap();
 let scbidRecords = new WeakMap();
 
+/**
+ * Represents an entry type of scoreboard
+ * @readonly
+ * @enum {EntryType}
+ */
 class EntryType {
+    /** @type {EntryType} */
     static PLAYER = Minecraft.ScoreboardIdentityType.player;
+    /** @type {EntryType} */
     static ENTITY = Minecraft.ScoreboardIdentityType.entity;
+    /** @type {EntryType} */
     static FAKE_PLAYER = Minecraft.ScoreboardIdentityType.fakePlayer;
 }
 
 /**
- * interface
+ * @interface EntryOption
  */
 class EntryOption {
-    name;
-    id;
-    scbid;
-    entity;
-    type;
+    name = null;
+    id = null;
+    scbid = null;
+    entity = null;
+    type = null;
 }
 
+/**
+ * Contains an identity of the scoreboard item.
+ */
 class Entry {
     
     /**
-     * @param {Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} any
      * @returns {Entry}
      */
     static guessEntry(any){
@@ -41,6 +52,11 @@ class Entry {
         throw new Error("Sorry, couldn't guess the entry");
     }
     
+    /**
+     * 
+     * @param {EntryOption} option 
+     * @returns {Entry}
+     */
     static getEntry(option){
         
         let { entity, id, name, scbid, type } = option;
@@ -83,16 +99,28 @@ class Entry {
     #vanillaScbid;
     #entity;
     
+    /**
+     * Type of the scoreboard identity.
+     * @returns {EntryType}
+     */
     get type(){
         return this.#type;
     }
     
+    /**
+     * Identifier of the scoreboard identity.
+     * @returns {number}
+     */
     get id(){
         if (this.vanillaScbid?.id !== this.#id)
             this.#id = this.vanillaScbid?.id;
         return this.#id;
     }
     
+    /**
+     * Returns the player-visible name of this identity.
+     * @returns {string}
+     */
     get displayName(){
         if (this.vanillaScbid !== undefined && this.#vanillaScbid.displayName !== undefined)
             return this.vanillaScbid.displayName;
@@ -105,6 +133,9 @@ class Entry {
         
     }
     
+    /**
+     * @returns {Minecraft.ScoreboardIdentity}
+     */
     get vanillaScbid(){
         if (this.#type === EntryType.PLAYER || this.#type === EntryType.ENTITY && this.#entity.scoreboard !== this.#vanillaScbid)
             this.#vanillaScbid = this.#entity.scoreboard;
@@ -113,12 +144,17 @@ class Entry {
         return this.#vanillaScbid;
     }
     
+    /**
+     * If the scoreboard identity is an entity or player, returns 
+     * the entity that this scoreboard item corresponds to.
+     * @returns {Minecraft.Entity}
+     */
     getEntity(){
         if (this.#type === EntryType.FAKE_PLAYER)
             this.#entity = null;
         return this.#entity;
     }
-    
+    /** @returns {Entry} Returns self, after update the vanillaScbid record */
     update(){
         if (this.#type === EntryType.FAKE_PLAYER){
             this.#vanillaScbid = undefined;
@@ -135,6 +171,9 @@ class Entry {
         return this;
     }
     
+    /**
+     * @hideconstructor
+     */
     constructor(option){
         let { entity, id, name, scbid, type } = option;
         entity = (entity instanceof YoniEntity) ? entity.vanillaEntity : entity;

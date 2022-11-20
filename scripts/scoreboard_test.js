@@ -20,7 +20,7 @@ let oneScoreInfo = obj.getScoreInfo(onePlayer);
 
 obj.setScore(onePlayer, 2344);
 print("set 2334: "+obj.getScore(onePlayer));
-
+obj.getScoreInfos()
 oneScoreInfo.score = 2001;
 print(obj.getScore(onePlayer));
 print("scoreInfo.score = 2001: "+oneScoreInfo.score);

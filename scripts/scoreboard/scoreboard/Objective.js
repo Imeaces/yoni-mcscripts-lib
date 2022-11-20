@@ -5,6 +5,11 @@ import { Command } from "../command.js";
 import { Entry, EntryType } from "./Entry.js";
 import { NameConflictError, ScoreRangeError, ObjectiveUnregisteredError } from "./ScoreboardError.js"
 
+/**
+ * check whether numbers is in range from -2^31 to 2^31-1
+ * @param  {...number} scores 
+ * @throws Throws when one of number not in range
+ */
 function checkScoreIsInRange(...scores){
     for (let s of scores){
         if (Number.isInteger(s) === false
@@ -27,8 +32,13 @@ class Objective {
     #unregistered = false;
     #vanillaObjective;
     
+    get scoreboard(){
+        return this.#scoreboard;
+    }
+
     /**
      * 记分项的标识符。
+     * @returns {string}
      * @throws This property can throw when used.
      */
     get id(){
@@ -45,6 +55,7 @@ class Objective {
     
     /**
      * 返回此记分项的玩家可见名称。
+     * @returns {string}
      * @throws This property can throw when used.
      */
     get displayName(){
@@ -91,7 +102,7 @@ class Objective {
     
     /**
      * 原始记分项对象
-     * @returns {Minecraft.ScoreboardObjective|any} 原始记分项对象
+     * @returns {Minecraft.ScoreboardObjective} 原始记分项对象
      */
     get vanillaObjective(){
         return this.#vanillaObjective;
@@ -151,7 +162,7 @@ class Objective {
      */
     async postRandomScore(entry, min=-2147483648, max=2147483647){
         checkScoreIsInRange(min, max);
-        if (await this.#postPlayersCommand("random", entry, min, max) !== true){
+        if (!await this.#postPlayersCommand("random", entry, min, max)){
             throw new InternalError("Could not random score, maybe entity or player disappeared?");
         }
         return this.getScore(entry);
@@ -210,7 +221,7 @@ class Objective {
      * @remarks 为记分板项目在记分项上执行特定的操作
      * @param {string} option - 操作的名称
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可以作为记分板项目的东西
-     * @param {string[]} args - 操作所需要的参数
+     * @param {...any} args - 操作所需要的参数
      * @returns {Promise<boolean>} 操作是否成功
      * @throws This function can throw errors.
      */
@@ -261,7 +272,7 @@ class Objective {
     
     /**
      * @remarks 获取在记分项上的记分板项目
-     * @returns {Entry[]} - 一个包含了在记分项上的记分板项目的数组
+     * @returns {Entry[]} 一个包含了在记分项上的记分板项目的数组
      * @throws This function can throw errors.
      */
     getEntries(){
@@ -371,12 +382,15 @@ class ScoreInfo {
         this.#entry = entry;
     }
     
+    /**
+     * @param {number} score
+     */
     set score(score){
         this.#objective.setScore(this.#entry, score);
     }
     
     /**
-     * @returns {number}
+     * @type {number}
      */
     get score(){
         return this.#objective.getScore(this.#entry);
@@ -386,7 +400,7 @@ class ScoreInfo {
      * 重置此对象对应的记分板项目在对应的记分项上的分数
      */
     async reset(){
-        this.#objective.resetScore(this.#entry);
+        awaitthis.#objective.resetScore(this.#entry);
     }
     
     getEntry(){
