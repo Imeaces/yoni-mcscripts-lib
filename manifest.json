@@ -20,7 +20,7 @@
       "language": "javascript",
       "uuid": "0b7efb24-e6b8-11ec-b382-5358dafc5ed1",
       "version": [0, 6, 1],
-      "entry": "scripts/yoni/index.js"
+      "entry": "scripts/test.js"
     }
   ],
   "dependencies": [
