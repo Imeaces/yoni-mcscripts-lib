@@ -50,7 +50,7 @@ class Objective {
     }
     
     /**  
-     * @returns {boolean}  Returns whether the objective has been removed.
+     * @returns {boolean} Returns whether the objective has been removed.
      */
     isUnregistered(){
         if (!this.#unregistered){

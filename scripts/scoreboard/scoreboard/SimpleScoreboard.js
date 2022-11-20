@@ -49,7 +49,7 @@ export default class SimpleScoreboard {
     
     /**
      * Removes an objective from the scoreboard.
-     * @param {string|Objective} -- objectiveId or Objective
+     * @param {string|Objective} nameOrObjective - objectiveId or Objective
      */
     static removeObjective(nameOrObjective){
         let objectiveId;
@@ -75,8 +75,8 @@ export default class SimpleScoreboard {
     /**
      * @remarks
      * Returns a specific objective (by id).
-     * @param {string} -- objectiveId
-     * @param {boolean} -- if true, it will try to create a dummy objective when objective didn't exist
+     * @param {string} name - objectiveId
+     * @param {boolean} autoCreateDummy - if true, it will try to create a dummy objective when objective didn't exist
      * @return {Objective} return Objective if existed, else return null
      */
     static getObjective(name, autoCreateDummy=false){
@@ -101,7 +101,8 @@ export default class SimpleScoreboard {
     }
     
     /** 
-     * @returns {Objective[]} all defined objectives.
+     * Returns all defined objectives.
+     * @returns {Objective[]} an array contains all defined objectives.
      */
     static getObjectives(){
         let objectives = [];
@@ -168,6 +169,7 @@ export default class SimpleScoreboard {
     /**
      * @remarks
      * Returns all defined scoreboard identities.
+     * @returns {Entry[]}
      */
     static getEntries(){
         return Array.from(VanillaScoreboard.getParticipants())
@@ -188,11 +190,11 @@ export default class SimpleScoreboard {
     
     /**
      * @remarks reset scores of all participants (in asynchronously)
-     * @param {Function} filter particular filter function, the function will be call for every participants, if return true, then reset the scores of participants
-     * @return {Promise<Number>} --  success count
+     * @param {Function} filter - particular filter function, the function will be call for every participants, if return true, then reset the scores of participants
+     * @return {number} --  success count
      */
-    static async postResetAllScore(filter){
-        if (filter === undefined){
+    static async postResetAllScore(filter=null){
+        if (filter === null){
             let rt = await Command.fetch("scoreboard players reset *");
             if (rt.statusCode){
                 throw new Error(rt.statusMessage);
@@ -225,7 +227,7 @@ export default class SimpleScoreboard {
     
     /**
      * reset scores of a participant
-     * @param {Entry|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry 
      */
     static async postResetScore(entry){
         if (!(entry instanceof Entry))
