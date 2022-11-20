@@ -221,7 +221,7 @@ class Objective {
      * @remarks
      * Returns a specific score for a participant, else return undefined
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} participant
-     * @return {number} - the score of entry
+     * @returns {number} - the score of entry
      * @throws This function can throw errors.
      */
     getScore(entry){
@@ -267,10 +267,10 @@ class Objective {
     }
     
     /**
-     * @returns {ScoreInfo} specific score for this objective for a
-     * participants.
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry
      * @param {boolean} - should we set score to 0 if score is undefined
+     * @returns {ScoreInfo} specific score for this objective for a
+     * participants.
      * @throws This function can throw errors.
      */
     getScoreInfo(entry, autoInit=false){
