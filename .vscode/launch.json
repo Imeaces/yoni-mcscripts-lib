@@ -1,0 +1,13 @@
+{
+  "configurations": [
+  {
+    "type": "minecraft-js",
+    "request": "attach",
+    "name": "yoni-mcscripts-lib debugger",
+    "mode": "listen",
+    "localRoot": "${workspaceFolder}/scripts/",
+    "host": "localhost",
+    "port": 19144
+  }
+  ]
+}

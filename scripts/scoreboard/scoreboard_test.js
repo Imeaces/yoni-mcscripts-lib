@@ -3,8 +3,8 @@ import { printError } from "./util/console.js";
 import { VanillaWorld } from "./basis.js";
 import { Entry, EntryType, Scoreboard } from "./scoreboard.js";
 
-function print(msg){
-    say(msg);
+async function print(msg){
+    await say(msg);
     console.warn(msg);
 }
 

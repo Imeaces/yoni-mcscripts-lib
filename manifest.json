@@ -5,7 +5,7 @@
     "description": "Yoni Script Module",
     "uuid": "0b7ef624-e6b8-11ec-b378-df8eb4284b8b",
     "version": [0, 6, 1],
-    "min_engine_version": [1, 19, 50]
+    "min_engine_version": [1, 19, 40]
   },
   "modules": [
     {
@@ -27,7 +27,7 @@
     /* Gametest需要的依赖项 begin */
     {
       "module_name": "@minecraft/server",
-      "version": "1.1.0-beta"
+      "version": "1.0.0-beta"
     },
     {
       "module_name": "@minecraft/server-gametest",
