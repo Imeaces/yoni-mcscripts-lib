@@ -92,6 +92,7 @@ async function print(msg){
     while (val.done === false) {
         if (++count > 15) {
             await print("太多了点，就不继续了");
+            break;
         }
         await print(Entry.guessEntry(val.value).displayName);
         await obj.setScore(val.value, 2976);
