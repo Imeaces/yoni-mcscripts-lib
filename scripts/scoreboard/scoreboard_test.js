@@ -69,13 +69,13 @@ async function print(msg){
 
     await print("最后列出所有人的分数给你看看");
     let objects = Scoreboard.getObjectives();
-    Scoreboard.getEntries().forEach((e) => {
+    for (let e of Scoreboard.getEntries()) {
         await print(e.displayName + "的分数");
-        objects.forEach((obj) => {
+        for (let obj of objects){
             await print(`${obj.displayName}(${obj.id}): ${obj.getScore(e)}`);
-        });
+        }
         await print("");
-    });
+    }
 
 
     await print("我觉得，最后给所有可以设置分数的家伙设置一个分数会更有趣");
