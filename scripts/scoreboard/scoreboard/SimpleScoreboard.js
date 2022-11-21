@@ -1,9 +1,11 @@
 import { StatusCode, VanillaScoreboard, Minecraft } from "../basis.js";
-import { YoniEntity } from "../entity.js";
 import { Command } from "../command.js";
 
 import Objective from "./Objective.js";
 import Entry from "./Entry.js";
+
+//实际运行并不需要，只是为了自动补全生效而导入的
+import { YoniEntity } from "../entity.js";
 
 /**
  * enum of alive display slot
@@ -26,8 +28,8 @@ export default class SimpleScoreboard {
     /**
      * @remarks Adds a new objective to the scoreboard.
      * @param {string} name - name of new objective
-     * @param {string} criteria - criteria of new objective, current only accept "dummy"
-     * @param {string} displayName - displayName of new
+     * @param {string} criteria="dummy" - criteria of new objective, current only accept "dummy"
+     * @param {string} displayName=name - displayName of new
      * objective, default is equals to name
      * @returns {Objective} new objective
      * @throws This function can throw errors.
@@ -83,8 +85,8 @@ export default class SimpleScoreboard {
      * @remarks
      * Returns a specific objective (by id).
      * @param {string} name - objectiveId
-     * @param {boolean} autoCreateDummy - if true, it will try to create a dummy objective when objective didn't exist
-     * @returns {Objective} return Objective if existed, else return null
+     * @param {boolean} autoCreateDummy=false - if true, it will try to create a dummy objective when objective didn't exist
+     * @returns {?Objective} return Objective if existed, else return null
      */
     static getObjective(name, autoCreateDummy=false){
         let result = null;

@@ -1,1 +1,1 @@
-import "./scoreboard_test.js";
+import "./scoreboard/scoreboard_test.js";

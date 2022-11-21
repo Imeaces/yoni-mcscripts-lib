@@ -1,8 +1,9 @@
 import { StatusCode, overworld, runTask, Minecraft } from "./basis.js";
 import { debug } from "./config.js";
 import { getKeys } from "./lib/utils.js";
+
+//实际运行并不需要，只是为了自动补全生效而导入的
 import { YoniEntity } from "./entity.js";
-import { CommandResult } from "@minecraft/server";
 
 let log = ()=>{};
 
@@ -139,7 +140,7 @@ export class CommandQueue {
     resolve;
     /**
      * 
-     * @param {Promise<CommandResult>} commandPromise 
+     * @param {Promise<Minecraft.CommandResult>} commandPromise 
      */
     async resolveResult(commandPromise){
         
@@ -211,7 +212,7 @@ export default class Command {
     /**
      * execute a command with params
      * @param  {...string} params - Command params
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static fetchParams(...params){
         return Command.addExecute(Command.PRIORITY_NORMAL, overworld, getCommand(...params));
@@ -220,7 +221,7 @@ export default class Command {
      * execute a command with params by specific sender
      * @param {CommandSender} sender - Command's sender
      * @param {...string} params - command params
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static fetchExecuteParams(sender, ...params){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, getCommand(...params));
@@ -228,7 +229,7 @@ export default class Command {
     /**
      * execute a command by specific sender
      * @param {CommandSender} sender - Command's sender
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static fetchExecute(sender, command){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, command);
@@ -238,7 +239,7 @@ export default class Command {
      * add a command to specific priority to execute
      * @param {CommandPriority} priority 
      * @param {string} command 
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static add(priority, command){
         return Command.addExecute(priority, overworld, command);
@@ -247,7 +248,7 @@ export default class Command {
      * add a command with params to specific priority to execute
      * @param {CommandPriority} priority 
      * @param {...string} params
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static addParams(priority, ...params){
         return Command.addExecute(priority, overworld, getCommand(...params));
@@ -257,7 +258,7 @@ export default class Command {
      * @param {CommandPriority} priority 
      * @param {CommandSender} sender
      * @param {...string} params
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static addExecuteParams(priority, sender, ...params){
         return Command.addExecute(priority, sender, getCommand(...params));
@@ -269,7 +270,7 @@ export default class Command {
      * @param {CommandPriority} priority 
      * @param {CommandSender} sender 
      * @param {string} command 
-     * @returns {Promise<CommandResult>}
+     * @returns {Promise<Minecraft.CommandResult>}
      */
     static addExecute(priority, sender, command){
         let resolve, reject;
@@ -298,7 +299,7 @@ export default class Command {
      * execute a set of commands by sender
      * @param {CommandSender} sender 
      * @param {string[]} commands - command
-     * @returns {Promise<CommandResult[]]>}
+     * @returns {Promise<Minecraft.CommandResult[]]>}
      */
     static async postExecute(sender, commands){
         commands = Array.from(commands);

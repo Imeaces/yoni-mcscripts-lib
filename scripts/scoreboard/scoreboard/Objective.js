@@ -1,9 +1,11 @@
 import { Minecraft, VanillaWorld, StatusCode, VanillaScoreboard } from "../basis.js";
-import { YoniEntity } from "../entity.js";
 
 import { Command } from "../command.js";
 import { Entry, EntryType } from "./Entry.js";
 import { NameConflictError, ScoreRangeError, ObjectiveUnregisteredError } from "./ScoreboardError.js"
+
+//实际运行并不需要，只是为了自动补全生效而导入的
+import { YoniEntity } from "../entity.js";
 
 /**
  * check whether numbers is in range from -2^31 to 2^31-1
