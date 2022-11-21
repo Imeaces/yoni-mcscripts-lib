@@ -185,10 +185,16 @@ export default class SimpleScoreboard {
         let obj = this.getObjective(this.#getIdOfObjective(settings.objective));
         let settingArg;
         try {
-            settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
-                obj.vanillaObjective,
-                settings.sortOrder
-            );
+            if ("sortOrder" in settings){
+                settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
+                    obj.vanillaObjective,
+                    settings.sortOrder
+                );
+            } else {
+                settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
+                    obj.vanillaObjective
+                );
+            }
         } catch {
             settingArg = {
                 objective: obj.vanillaObjective
