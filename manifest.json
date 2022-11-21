@@ -1,11 +1,11 @@
 {
   "format_version": 2,
   "header": {
-    "name": "scoreboard",
-    "description": "scoreboard",
+    "name": "scoreboard base",
+    "description": "yoni-mcscripts-lib",
     "uuid": "9fa0851a-69cc-11ed-9c80-ebb0d0984087",
-    "version": [0, 7, 0],
-    "min_engine_version": [1, 19, 40]
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 19, 50]
   },
   "modules": [
     {
