@@ -8,29 +8,30 @@ import Entry from "./Entry.js";
 import { YoniEntity } from "../entity.js";
 
 /**
- * @enum
+ * @typedef {string} DisplaySlotType
+ */
+/**
  * @readonly
+ * @enum {DisplaySlotType}
  * enum of alive display slot
  */
-export const DisplaySlotType = {
-    /** @type {DisplaySlotType} */
+export const DisplaySlotTypes = {
     list: "list",
-    /** @type {DisplaySlotType} */
     sidebar: "sidebar",
-    /** @type {DisplaySlotType} */
     belowname: "belowname"
 }
 
 /**
- * @enum
+ * @typedef {string} ObjectiveSortOrder
+ */
+/**
  * @readonly
+ * @enum {ObjectiveSortOrder}
  * Used for specifying a sort order for 
  * how to display an objective and its list of participants.
  */
-export const ObjectiveSortOrder = {
-    /** @type {ObjectiveSortOrder} */
+export const ObjectiveSortOrderEnum = {
     "ascending": "ascending",
-    /** @type {ObjectiveSortOrder} */
     "descending": "descending"
 }
 
@@ -38,8 +39,8 @@ export const ObjectiveSortOrder = {
  * @interface
  * 与显示位置有关的类型
  * @typedef {Object} DisplayOptions
- * @property {ObjectiveSortOrder} sortOrder - 如果可能，在此位置上排序使用的方式
- * @peoperty {Objective} objective - 此位置上显示的记分项
+ * @property {ObjectiveSortOrder|undefined} sortOrder - 如果可能，在此位置上排序使用的方式
+ * @property {Objective|Minecraft.ScoreboardObjective} objective - 此位置上显示的记分项
  */
 
 /**
@@ -54,8 +55,8 @@ export default class SimpleScoreboard {
     /**
      * @remarks Adds a new objective to the scoreboard.
      * @param {string} name - name of new objective
-     * @param {string} criteria="dummy" - criteria of new objective, current only accept "dummy"
-     * @param {string} displayName=name - displayName of new
+     * @param {string} criteria - criteria of new objective, current only accept "dummy"
+     * @param {string} displayName - displayName of new
      * objective, default is equals to name
      * @returns {Objective} new objective
      * @throws This function can throw errors.
@@ -203,7 +204,7 @@ export default class SimpleScoreboard {
                 settingArg.sortOrder = settings.sortOrder
             }
         }
-        let rt = VanillaScoreboard.setObjectiveAtDisplaySlot(
+        VanillaScoreboard.setObjectiveAtDisplaySlot(
             slot,
             settingArg
         );
