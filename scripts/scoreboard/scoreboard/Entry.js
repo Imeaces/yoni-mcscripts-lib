@@ -81,7 +81,7 @@ class Entry {
         if (type != null && entry.type !== type)
             throw new Error("entry type do not matches");
             
-        if (entry.getEntity() !== null)
+        if (entry.getEntity() != null)
             entityRecords.set(entry.getEntity(), entry);
         if (entry.id !== undefined)
             idRecords.set(entry.id, entry);
@@ -137,7 +137,8 @@ class Entry {
      * @returns {Minecraft.ScoreboardIdentity}
      */
     get vanillaScbid(){
-        if (this.#type === EntryType.PLAYER || this.#type === EntryType.ENTITY && this.#entity.scoreboard !== this.#vanillaScbid)
+        if ((this.#type === EntryType.PLAYER || this.#type === EntryType.ENTITY)
+        && this.#entity.scoreboard !== this.#vanillaScbid)
             this.#vanillaScbid = this.#entity.scoreboard;
         if (this.#vanillaScbid !== undefined && scbidRecords.get(this.#vanillaScbid) !== this)
             scbidRecords.set(this.#vanillaScbid, this);
@@ -206,14 +207,14 @@ class Entry {
                         break;
                     }
                 }
-                if (scbid !== undefined){
-                    type = scbid.type;
-                    name = scbid.displayName;
-                    id = scbid.id;
-                    entity = scbid.getEntity();
-                } else if (id !== undefined){
-                    throw new Error(`Unable to determine the scbid ${id}`);
-                }
+            }
+            if (scbid !== undefined){
+                type = scbid.type;
+                name = scbid.displayName;
+                id = scbid.id;
+                entity = scbid.getEntity();
+            } else if (id !== undefined){
+                throw new Error(`Unable to determine the scbid ${id}`);
             }
         }
         

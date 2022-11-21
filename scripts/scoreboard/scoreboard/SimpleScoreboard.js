@@ -8,13 +8,39 @@ import Entry from "./Entry.js";
 import { YoniEntity } from "../entity.js";
 
 /**
+ * @enum
+ * @readonly
  * enum of alive display slot
  */
 export const DisplaySlotType = {
+    /** @type {DisplaySlotType} */
     list: "list",
+    /** @type {DisplaySlotType} */
     sidebar: "sidebar",
+    /** @type {DisplaySlotType} */
     belowname: "belowname"
 }
+
+/**
+ * @enum
+ * @readonly
+ * Used for specifying a sort order for 
+ * how to display an objective and its list of participants.
+ */
+export const ObjectiveSortOrder = {
+    /** @type {ObjectiveSortOrder} */
+    "ascending": "ascending",
+    /** @type {ObjectiveSortOrder} */
+    "descending": "descending"
+}
+
+/**
+ * @interface
+ * 与显示位置有关的类型
+ * @typedef {Object} DisplayOptions
+ * @property {ObjectiveSortOrder} sortOrder - 如果可能，在此位置上排序使用的方式
+ * @peoperty {Objective} objective - 此位置上显示的记分项
+ */
 
 /**
  * Contains objectives and participants for the scoreboard.
@@ -37,7 +63,7 @@ export default class SimpleScoreboard {
     static addObjective(name, criteria="dummy", displayName=name){
         if (!name || typeof name !== "string")
             throw new TypeError("Objective name not valid!");
-        if (this.getObjective(name) !== undefined)
+        if (this.getObjective(name) !== null)
             throw new Error("Objective "+name+" existed!");
         if (criteria !== "dummy")
             throw new Error("Unsupported criteria: " + criteria);
@@ -73,10 +99,6 @@ export default class SimpleScoreboard {
             throw new Error("unknown error while removing objective");
         }
         if (this.#objectives.has(objectiveId)){
-            let inMapObjective = this.getObjective(objectiveId);
-            if (!inMapObjective.isUnregister()){
-                inMapObjective.unregister();
-            }
             this.#objectives.delete(objectiveId);
         }
     }
@@ -123,23 +145,24 @@ export default class SimpleScoreboard {
     }
     
     /**
-     * @ignore
      * @remarks
      * Returns an objective that occupies the specified display
      * slot.
-     * @param {string} displaySlotId
-     * @return {Objective}
+     * @param {DisplaySlotType} slot
+     * @returns {DisplayOptions}
      * @throws This function can throw errors.
      */
-    static getDisplayAtSlot(...args){
-        let rt = VanillaScoreboard.getObjectiveAtDisplaySlot(...args);
+    static getDisplayAtSlot(slot){
+        let rt = VanillaScoreboard.getObjectiveAtDisplaySlot(slot);
         let result = {
-            objective: this.getObjective(rt.objective.id),
+            objective: rt.objective ?
+                this.getObjective(rt.objective.id) :
+                null
         };
-        if (sortOrder in rt){
+        if ("sortOrder" in rt){
             result.sortOrder = rt.sortOrder;
         }
-        return this.getObjective(result.id);
+        return result;
     }
     
     static #getIdOfObjective(any){
@@ -148,39 +171,52 @@ export default class SimpleScoreboard {
          } else if (any && typeof any === "string"){
              return any;
          } else {
-             throw new Error();
+             throw new TypeError();
          }
     }
     /**
-     * @ignore
-     * 
-     * @param {*} slot 
-     * @param {*} settings 
-     * @returns 
+     * @remarks
+     * 在指定位置上显示记分项
+     * @param {DisplaySlotType} slot - 位置的id
+     * @param {DisplayOptions} settings - 对于显示方式的设置
+     * @returns {Objective} 指定显示位置的记分项对应的对象
      */
     static setDisplayAtSlot(slot, settings){
-        let objId = this.#getIdOfObjective(settings.objective);
+        let obj = this.getObjective(this.#getIdOfObjective(settings.objective));
+        let settingArg;
+        try {
+            settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
+                obj.vanillaObjective,
+                settings.sortOrder
+            );
+        } catch {
+            settingArg = {
+                objective: obj.vanillaObjective
+            };
+            if ("sortOrder" in settings){
+                settingArg.sortOrder = settings.sortOrder
+            }
+        }
         let rt = VanillaScoreboard.setObjectiveAtDisplaySlot(
             slot,
-            new Minecraft.ScoreboardObjectiveDisplayOptions(
-                objId,
-                settings.sortOrder
-            )
+            settingArg
         );
-        return this.getObjective(rt.id);
+        return obj;
     }
     
     /**
-     * @ignore
      * @remarks
      * Clears the objective that occupies a display slot.
-     * @param displaySlotId
+     * @param {DisplaySlotType} slot - 位置的id
+     * @returns {?Objective}
      * @throws TypeError when slot not a DisplaySlot.
      */
     static clearDisplaySlot(slot){
         let rt = VanillaScoreboard.clearObjectiveAtDisplaySlot(slot);
         if (rt?.id !== undefined){
             return this.getObjective(rt.id);
+        } else {
+            return null;
         }
     }
     

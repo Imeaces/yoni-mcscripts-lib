@@ -156,15 +156,25 @@ class Objective {
     }
     
     /**
-     * @remarks 为记分板项目在记分项上设置一个随机的分数
+     * @remarks 为记分板项目在记分项上设置一个随机的分数。
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可以作为记分板项目的东西
-     * @param {number} min - 随机分数的最小值
-     * @param {number} max - 随机分数的最大值
+     * @param {number} min=-2147483647 - 随机分数的最小值
+     * @param {number} max=2147483647 - 随机分数的最大值
+     * @param {boolean} useBuiltIn=false - 是否在js代码层面进行随机
+     * 由于实现原理以及Minecraft自身的特性，一次随机只能有2^64-1种可能，
+     * 如果将最小值设置为-2147483648，并将最大值设置为2147483647
+     * 随机的结果一定会是 -2147483648
+     * 如果想要避免这种情况，请将此项设置为true
      * @returns {Promise<number>} 记分板项目的新分数
      */
-    async postRandomScore(entry, min=-2147483648, max=2147483647){
+    async postRandomScore(entry, min=-2147483648, max=2147483647, useBuiltIn=false){
         checkScoreIsInRange(min, max);
-        if (!await this.#postPlayersCommand("random", entry, min, max)){
+        if (useBuiltIn){
+            let vals = max - min + 1;
+            let randomScore = vals * Math.random();
+            let result = Math.round(randomScore + min);
+            return this.postSetScore(entry, result);
+        } else if (!await this.#postPlayersCommand("random", entry, min, max)){
             throw new InternalError("Could not random score, maybe entity or player disappeared?");
         }
         return this.getScore(entry);
@@ -235,6 +245,7 @@ class Objective {
         
         if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
             let params = ["scoreboard", "players", option, "@s", this.#id, ...args];
+            console.error(params);
             let ent = entry.getEntity();
             if (ent === undefined){
                 throw new InternalError("Could not find the entity");
@@ -340,14 +351,19 @@ class Objective {
         return this.postRemoveScore(entry, score);
     }
     /**
-     * @remarks 为记分板项目在记分项上设置一个随机的分数
+     * @remarks 为记分板项目在记分项上设置一个随机的分数。
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可以作为记分板项目的东西
-     * @param {number} min - 随机分数的最小值
-     * @param {number} max - 随机分数的最大值
+     * @param {number} min=-2147483647 - 随机分数的最小值
+     * @param {number} max=2147483647 - 随机分数的最大值
+     * @param {boolean} useBuiltIn=false - 是否在js代码层面进行随机
+     * 由于实现原理以及Minecraft自身的特性，一次随机只能有2^64-1种可能，
+     * 如果将最小值设置为-2147483648，并将最大值设置为2147483647
+     * 随机的结果一定会是 -2147483648
+     * 如果想要避免这种情况，请将此项设置为true
      * @returns {Promise<number>} 记分板项目的新分数
      */
-    async randomScore(entry, min=-2147483648, max=2147483647){
-        return this.postRandomScore(entry, min, max);
+    async randomScore(entry, min=-2147483647, max=2147483647, useBuiltIn=false){
+        return this.postRandomScore(entry, min, max, useBuiltIn);
     }
     /**
      * @remarks 在记分项重置指定记分板项目的分数

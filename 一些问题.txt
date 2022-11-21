@@ -1,0 +1,2 @@
+VanillaScoreboard.setObjectiveAtDisplaySlot
+返回的不是记分项，是undefined 
