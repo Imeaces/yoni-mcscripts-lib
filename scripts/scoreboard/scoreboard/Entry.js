@@ -9,7 +9,7 @@ let scbidRecords = new WeakMap();
 /**
  * Represents an entry type of scoreboard
  * @readonly
- * @enum {EntryType}
+ * @enum
  */
 class EntryType {
     /** @type {EntryType} */
@@ -21,15 +21,14 @@ class EntryType {
 }
 
 /**
- * @interface EntryOption
+ * @interface
+ * @typedef {Object} EntryOption
+ * @property {string} [name]
+ * @property {number} [id]
+ * @property {Minecraft.ScoreboardIdentity} [scbid]
+ * @property {YoniEntity|Minecraft.Entity|Minecraft.Player} [entity]
+ * @property {EntryType} [type]
  */
-class EntryOption {
-    name = null;
-    id = null;
-    scbid = null;
-    entity = null;
-    type = null;
-}
 
 /**
  * Contains an identity of the scoreboard item.
@@ -227,5 +226,5 @@ class Entry {
     }
 }
 
-export { Entry, EntryType, EntryOption };
+export { Entry, EntryType };
 export default Entry;
