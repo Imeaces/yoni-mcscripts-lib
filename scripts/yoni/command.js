@@ -1,35 +1,53 @@
-import { StatusCode, overworld, runTask } from "yoni/basis.js";
-import { debug } from "yoni/config.js";
-import { getErrorMsg } from "yoni/util/console.js";
-import { getKeys } from "yoni/lib/utils.js";
-
+import { StatusCode, overworld, runTask, Minecraft } from "./basis.js";
+import { debug } from "./config.js";
+import { getKeys } from "./lib/utils.js";
 
 let log = ()=>{};
 
-const testIfHasSpecificChar = /(["'\\])/g;
-const testIfHasSpaceChar = /(\s)/g;
-export function getCommand(cmd, ...args){
+/**
+ * generates a command by a set of params, and try to make sure that every arg is standalone
+ * @param {string} cmd 
+ * @param  {string[]|...string} args 
+ * @returns {string} command
+ */
+function getCommand(cmd, ...args){
     if (args?.length === 1 && Array.isArray(args[0])){
         args = args[0];
     }
     if (args.length !== 0){
+        //遍历每个参数，对满足某一条件的参数进行处理
         args.forEach((arg) => {
+            let shouldQuote = false; //标记是否应当在两侧添加引号
             arg = String(arg);
-            if (testIfHasSpecificChar.test(arg)){
-                arg = arg.replaceAll(testIfHasSpecificChar, "\\$1");
+            if (arg.length === 0){ //空参数
+                shouldQuote = true;
+            } else if (getCommand.startsWithNumberRegex.test(arg)){ //以数字开头的参数
+                shouldQuote = true;
+            } else if (getCommand.spaceCharRegex.test(arg)){ //含有空格，需要引号括起
+                shouldQuote = true;
             }
-            if (testIfHasSpaceChar.test(arg)){
+            if (getCommand.specificCharRegex.test(arg)){ //将特殊符号转义
+                arg = arg.replaceAll(getCommand.specificCharGlobalRegex, "\\$1");
+                console.log("yyy");
+            }
+            if (shouldQuote){ //如果需要引号，则添加引号
                 arg = `"${arg}"`;
             }
-            cmd += ` ${arg}`;
+            cmd += ` ${arg}`; //将参数字符串拼接到命令
         });
     }
     return cmd;
 }
+//因为不globle没法replaceAll
+getCommand.specificCharGlobalRegex = /(["'\\])/g;
+getCommand.specificCharRegex = /(["'\\])/;
+getCommand.spaceCharRegex = /(\s)/;
+getCommand.startsWithNumberRegex = /^[0-9]/;
 
 let commandQueues = [[], [], [], [], []];
 
 //空间换时间（滑稽）
+/** @returns {boolean} */
 function hasNextQueue(){
     if (commandQueues[4].length
     || commandQueues[3].length
@@ -40,6 +58,7 @@ function hasNextQueue(){
     }
     return false;
 }
+/** @returns {number} */
 function countNextQueues(){
     return commandQueues[4].length
     + commandQueues[3].length
@@ -47,6 +66,7 @@ function countNextQueues(){
     + commandQueues[1].length
     + commandQueues[0].length;
 }
+/** @returns {CommandQueue} */
 function fetchNextQueue(){
     if (commandQueues[4].length){
         return commandQueues[4][0];
@@ -64,6 +84,7 @@ function fetchNextQueue(){
         return commandQueues[0][0];
     }
 }
+/** remove next queue */
 function removeNextQueue(){
     if (commandQueues[4].length){
         commandQueues[4].shift();
@@ -78,16 +99,16 @@ function removeNextQueue(){
     }
 }
 
+/** @type {CommandQueue} */
 let lastFailedCommand = null;
-let executeQueueCount = 0;
-async function executeCommandQueues(){
-    executeQueueCount = 0;
+
+function executeCommandQueues(){
     runTask(executeCommandQueues);
-    while (hasNextQueue() && executeQueueCount++ < 10000){
+    let executeQueueCount = 0;
+    while (hasNextQueue()){
         //从队列plus中取得一个排队中的命令
         let commandQueue = fetchNextQueue();
         //然后将命令送入minecraft 的命令队列
-        let commandPromise;
         try {
             let p = commandQueue.sender.runCommandAsync(commandQueue.command);
             commandQueue.resolveResult(p);
@@ -102,40 +123,79 @@ async function executeCommandQueues(){
             }
             break;
         }
+        executeQueueCount += 1;
         //送入之后将队列中的命令移除
         removeNextQueue();
     }
 }
 
+/**
+ * @interface
+ * @typedef {CommandResult}
+ * @property {number} statusCode
+ * @property {number} [successCount]
+ */
+ 
+/**
+ * something that can runCommandAsync
+ * @interface
+ * @typedef {CommandSender}
+ * @peoperty {Function} runCommandAsync - a method that execute command on the object
+ */
+ 
+/**
+ * contains command queue infos
+ */
 export class CommandQueue {
+    /**
+     * @type {CommandSender}
+     */
     sender;
+    /**
+     * @type {string}
+     */
     command;
+    /**
+     * @type {Function}
+     */
     resolve;
+    reject;
+    /**
+     * @param {Promise<CommandResult>} commandPromise 
+     */
     async resolveResult(commandPromise){
         
         //然后是获取命令结果(但是现在已经没有结果了)
-        let commandResult;
+        //所以只好生成一个
+        let commandResult = { statusCode: StatusCode.success };
+        let rt = null;
         try {
-            //statusCode啥的都没了，只能自己修复一下了
-            //有点想骂人，真就啥都不想给开发者用呗
-            let rt = await commandPromise;
-            let obj = { statusCode: StatusCode.success };
-            let objKeys = getKeys(obj);
-            getKeys(rt).forEach(key=>{
-                if (objKeys.includes(key)){
-                    return;
-                }
-                obj[key] = rt[key];
-            });
-            commandResult = obj;
+            rt = await commandPromise;
         } catch (commmandExecuteErrorMessage){
-            commandResult = {
-                statusCode: StatusCode.error,
-                statusMessage: String(commmandExecuteErrorMessage)
-            };
+            commandResult.statusCode = StatusCode.error;
+            commandResult.statusMessage = String(commmandExecuteErrorMessage);
+        }
+        try {
+            if (rt != null){
+                for (let key in rt){
+                    if (key in commandResult){
+                        continue;
+                    }
+                    commandResult[key] = rt[key];
+                }
+            }
+        } catch(e){ //在commandResult出现问题的时候大概会触发这段代码
+            log("在复制属性的时候出现错误: {}", e);
         }
         this.resolve(commandResult);
     }
+    /**
+     * 
+     * @param {CommandSender} sender 
+     * @param {string} command 
+     * @param {Function} resolve 
+     * @param {Function} reject 
+     */
     constructor(sender, command, resolve, reject){
         if (typeof sender?.runCommandAsync !== "function"){
             throw new TypeError("sender cannot runCommandAsync()");
@@ -147,38 +207,101 @@ export class CommandQueue {
     }
 }
 
+/**
+ * Indicates the execution priority of this command
+ * @typedef {number} CommandPriority
+ */
 export default class Command {
     
+    /** @type {CommandPriority} */
     static PRIORITY_HIGHEST = 5;
+    /** @type {CommandPriority} */
     static PRIORITY_HIGH = 4;
+    /** @type {CommandPriority} */
     static PRIORITY_NORMAL = 3;
+    /** @type {CommandPriority} */
     static PRIORITY_LOW = 2;
+    /** @type {CommandPriority} */
     static PRIORITY_LOWEST = 1;
     
+    /**
+     * 返回队列中未执行的命令的数量
+     * @returns {number}
+     */
+    static countQueues(){
+        return countNextQueues();
+    }
+    
+    /**
+     * execute a command
+     * @param {string} command
+     */
     static fetch(command){
         return Command.addExecute(Command.PRIORITY_NORMAL, overworld, command);
     }
+    /**
+     * execute a command with params
+     * @param {...string} params - Command params
+     * @returns {Promise<CommandResult>}
+     */
     static fetchParams(...params){
         return Command.addExecute(Command.PRIORITY_NORMAL, overworld, getCommand(...params));
     }
+    /**
+     * execute a command with params by specific sender
+     * @param {CommandSender} sender - Command's sender
+     * @param {...string} params - command params
+     * @returns {Promise<CommandResult>}
+     */
     static fetchExecuteParams(sender, ...params){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, getCommand(...params));
     }
+    /**
+     * execute a command by specific sender
+     * @param {CommandSender} sender - Command's sender
+     * @returns {Promise<CommandResult>}
+     */
     static fetchExecute(sender, command){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, command);
     }
     
+    /**
+     * add a command to specific priority to execute
+     * @param {CommandPriority} priority 
+     * @param {string} command 
+     * @returns {Promise<CommandResult>}
+     */
     static add(priority, command){
         return Command.addExecute(priority, overworld, command);
     }
+    /**
+     * add a command with params to specific priority to execute
+     * @param {CommandPriority} priority 
+     * @param {...string} params
+     * @returns {Promise<CommandResult>}
+     */
     static addParams(priority, ...params){
         return Command.addExecute(priority, overworld, getCommand(...params));
     }
+    /**
+     * add a command with params to specific priority to execute by sender
+     * @param {CommandPriority} priority 
+     * @param {CommandSender} sender
+     * @param {...string} params
+     * @returns {Promise<CommandResult>}
+     */
     static addExecuteParams(priority, sender, ...params){
         return Command.addExecute(priority, sender, getCommand(...params));
     }
     //某些命令需要以尽可能快的速度执行，故添加此函数，可设置命令权重
     //然后我就把所有命令都用这个来执行了
+    /**
+     * 
+     * @param {CommandPriority} priority 
+     * @param {CommandSender} sender 
+     * @param {string} command 
+     * @returns {Promise<CommandResult>}
+     */
     static addExecute(priority, sender, command){
         let resolve, reject;
         let promise = new Promise((re, rj)=>{
@@ -193,9 +316,21 @@ export default class Command {
         }
     }
     
+    /**
+     * get command by params
+     * @param {string} command 
+     * @param  {...string} args - command params
+     * @returns {string} command
+     */
     static getCommand(command, ...args){
         return getCommand(command, ...args);
     }
+    /**
+     * execute a set of commands by sender
+     * @param {CommandSender} sender 
+     * @param {string[]} commands - command
+     * @returns {Promise<CommandResult[]]>}
+     */
     static async postExecute(sender, commands){
         commands = Array.from(commands);
         let promises = commands.map((cmd)=>Command.fetchExecute(sender, cmd));
@@ -212,7 +347,7 @@ export { Command };
 runTask(executeCommandQueues);
 
 if (debug){
-    import("yoni/util/Logger.js")
+    import("./util/Logger.js")
     .then(m=>{
         let logger = new m.Logger("Command");
         log = logger.debug;
@@ -220,7 +355,7 @@ if (debug){
     
     import("./command/ChatCommand.js")
     .then(m=>{
-        m.ChatCommand.registerCustomPrefixCommand("$", "cmdm", (sender, _, __, args)=>{
+        m.ChatCommand.registerCustomPrefixCommand("$", "cmdm", (_sender, _, __, args)=>{
             if (args[0] === "clearandprint"){
                 let str = ""; //JSON.stringify(commandQueues[3]);
                 for (let s of commandQueues[2]){

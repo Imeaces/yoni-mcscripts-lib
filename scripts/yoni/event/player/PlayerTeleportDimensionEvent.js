@@ -1,4 +1,4 @@
-import { EventSignal } from "yoni/event.js";
+import { EventSignal, EventTriggerBuilder } from "yoni/event.js";
 import { YoniScheduler } from "yoni/schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { World } from "yoni/world.js";
@@ -12,6 +12,7 @@ class PlayerTeleportDimensionEvent extends PlayerEvent {
         this.newDimension = newDimension;
     }
 }
+class PlayerTeleportDimensionEventSignal extends EventSignal {}
 
 let taskId = null;
 const PlayerDimRecords = new WeakMap();
@@ -38,9 +39,12 @@ function stop(){
     YoniScheduler.removeSchedule(taskId);
 }
 
-const signal = EventSignal.builder("yoni:playerTeleportDimension")
+const signal = new EventTriggerBuilder()
+    .id("yoni:playerTeleportDimension")
+    .eventSignalClass(PlayerTeleportDimensionEventSignal)
     .eventClass(PlayerTeleportDimensionEvent)
-    .build()
     .whenFirstSubscribe(start)
     .whenLastUnsubscribe(stop)
+    .build()
     .registerEvent();
+    

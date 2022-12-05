@@ -1,6 +1,6 @@
 import { YoniEntity } from "yoni/entity.js";
-import { EventListener, EventSignal } from "yoni/event.js";
-import { PlayerEvent } "./PlayerEvent.js";
+import { EventListener, EventSignal, EventTriggerBuilder } from "yoni/event.js";
+import { PlayerEvent } from "./PlayerEvent.js";
 
 export class PlayerDeadEvent extends PlayerEvent {
     constructor(player){
@@ -8,23 +8,33 @@ export class PlayerDeadEvent extends PlayerEvent {
         Object.freeze(this);
     }
 }
+export class PlayerDeadEventSignal extends EventSignal {}
 
-let eventId;
+let eventId0 = null;
+let eventId1 = null;
 
-const signal = EventSignal.builder("yoni:playerDead")
+const trigger = new EventTriggerBuilder()
+    .id("yoni:playerDead")
+    .eventSignalClass(PlayerDeadEventSignal)
     .eventClass(PlayerDeadEvent)
-    .build()
     .whenFirstSubscribe(()=>{
-        eventId = EventListener.register("minecraft:entityHurt", (event)=>{
+        eventId0 = EventListener.register("minecraft:entityHurt", (event)=>{
             if (event.hurtEntity.typeId !== "minecraft:player"){
                 return;
             }
             if (YoniEntity.getCurrentHealth(event.hurtEntity) === 0){
-                signal.triggerEvent(event.hurtEntity);
+                trigger.triggerEvent(event.hurtEntity);
             }
         }, {type:"minecraft:player"});
+        eventId1 = EventListener.register("yoni:playerJoined", (event)=>{
+            if (event.player.getCurrentHealth() === 0){
+                trigger.triggerEvent(event.player);
+            }
+        });
     })
     .whenLastUnsubscribe(()=>{
-        EventListener.unregister(eventId);
+        EventListener.unregister(eventId0);
+        EventListener.unregister(eventId1);
     })
-    .registerEvent()
+    .build()
+    .registerEvent();

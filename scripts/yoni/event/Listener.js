@@ -1,14 +1,16 @@
-import { EventTypes, DelayedListener, getIdentifierInfo } from "./EventTypes.js";
 import { debug } from "yoni/config.js";
 import { Logger } from "yoni/util/Logger.js";
+
+import { EventTypes, EventRegisterListener, getIdentifierInfo } from "./Types.js";
+
 const logger = new Logger("Event");
 /**
- * 事件管理
+ * 事件监听管理
  * 不建议移除事件，由于移除事件的机制为设空回调，导致移除事件并不是真正的移除，大量移除事件导致事件遗留，可能影响性能
  * 可能会在以后优化
  */
 
-export class EventListener {
+class Listener {
     static #callbacks = [];
     static #index = 0;
     
@@ -64,7 +66,7 @@ export class EventListener {
     static #delayRegister(idx, eventType, callback, ...eventFilters){
         let idInfo = getIdentifierInfo(eventType);
         let eventName = idInfo.id;
-        DelayedListener.add(idInfo.id, async ()=>{
+        EventRegisterListener.add(idInfo.id, async ()=>{
             eventType = EventTypes.get(eventType);
             this.#doDelayRegister({
                 eventName, idx,
@@ -147,3 +149,9 @@ export class EventListener {
         }
     }
 }
+
+export default Listener;
+export {
+    Listener,
+    Listener as EventListener
+};

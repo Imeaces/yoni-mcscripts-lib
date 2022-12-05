@@ -1,12 +1,6 @@
 import { VanillaEvents as MinecraftEvents, SystemEvents } from "yoni/basis.js";
 import { debug } from "yoni/config.js";
 import { Logger } from "yoni/util/Logger.js";
-import { EventListener } from "./EventListener.js";
-
-import { YoniScheduler } from "yoni/schedule.js";
-const objectToDestroy = [];
-const objectWillDestroy = [];
-const revokeCallbacks = new Map();
 
 /**
  * 事件管理
@@ -43,7 +37,7 @@ const registeredEventTypes = new Map();
 
 //用于记录 已延迟的 事件的监听 的注册 的地图
 const waitingEventRegisterMap = new Map();
-export class DelayedListener {
+class EventRegisterListener {
     static add(eventTypeIdentifier, callback){
         let idInfo = getIdentifierInfo(eventTypeIdentifier);
         if (!waitingEventRegisterMap.has(idInfo.id)){
@@ -53,14 +47,18 @@ export class DelayedListener {
         list.push(callback);
     }
     static async register(eventType){
-        if (EventTypes.has(eventType) && waitingEventRegisterMap.has(eventType)){
+        if (Types.has(eventType) && waitingEventRegisterMap.has(eventType)){
             let list = waitingEventRegisterMap.get(eventType);
             waitingEventRegisterMap.delete(eventType);
             list.forEach((callback)=>{
-                callback();
+                try {
+                    callback();
+                } catch(e) {
+                    logger.error(e);
+                }
             });
         } else {
-            throw new Error("unknown eventType"+eventType);
+            logger.error("unknown eventType"+eventType);
         }
     }
 }
@@ -84,7 +82,7 @@ function getNamespaceEventTypesMap(namespace){
     return registeredEventTypes.get(namespace);
 }
 
-export class EventTypes {
+class Types {
     static register(identifier, eventType){
         let idInfo = getIdentifierInfo(identifier);
         if (idInfo.namespace === null){
@@ -108,7 +106,7 @@ export class EventTypes {
             throw new Error("在eventType上必须有一个subscribe属性才可以注册事件");
         }
         if (waitingEventRegisterMap.has(idInfo.id)){
-            DelayedListener.register(idInfo.id);
+            EventRegisterListener.register(idInfo.id);
         }
     }
     static registerNamespace(namespace, namespaceEventTypes){
@@ -207,63 +205,8 @@ export class EventTypes {
     registeredEventTypes.set("system", map);
 })();
 
-YoniScheduler.runCycleTickTask(()=>{
-    if (objectToDestroy.length !== 0){
-        let arr = Array.from(objectToDestroy);
-        objectToDestroy.length = 0;
-        arr.forEach(obj=>{
-            let f = revokeCallbacks.get(obj);
-            revokeCallbacks.delete(obj);
-            f();
-        });
-    }
-    if (objectWillDestroy.length !== 0){
-        objectToDestroy.push.apply(objectToDestroy, objectWillDestroy);
-        objectWillDestroy.length = 0;
-    }
-}, 0, 0, false);
-
-export const EventRemover = (e)=>{
-    let proxyOpt = Proxy.revocable(e, {
-        get: (t, k)=>{
-            let v = t[k];
-            if (typeof v === "function"){
-                return (...args)=>{ t[k](...args); };
-            } else {
-                return v;
-            }
-        },
-        set: (t, k, v)=>{
-            t[k] = v;
-            return true;
-        }
-    });
-    objectWillDestroy.push(proxyOpt.proxy);
-    revokeCallbacks.set(proxyOpt.proxy, proxyOpt.revoke);
-    return proxyOpt.proxy;
-}
-/**
- * 注意，此类创建的对象有自我销毁的功能
- * 为了实现它，导致继承此类的子类无法拥有私有属性
- */
-export class Event {
-    constructor(...values){
-        if (values.length !== 0){
-            values.forEach((vals)=>{
-                for (let key in vals){
-                    Object.defineProperty(this, key, {
-                        configurable: false,
-                        enumerable: false,
-                        get: function (){
-                            return vals[key];
-                            
-                        },
-                        set: function (val){
-                            vals[key] = val;
-                        }
-                    });
-                }
-            });
-        }
-    }
-}
+export default Types;
+export { Types };
+export { Types as EventTypes };
+export { EventRegisterListener };
+import("./_loadEvents");
