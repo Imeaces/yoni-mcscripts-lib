@@ -1,0 +1,44 @@
+{
+  "compilerOptions": {
+    "noImplicitAny": true,
+    "checkJs": false,
+    "allowUnreachableCode": true,
+    
+    "allowJs": true,
+    "strict": true,
+    
+    "module": "es2022",
+    "moduleResolution": "node",
+    "target": "es2022",
+    
+    "outDir": "dist/yoni",
+    "removeComments": false,
+    
+    "preserveConstEnums": true,
+    
+    "rootDirs": [
+        "scripts"
+    ],
+    "baseUrl": "scripts/yoni",
+    "sourceMap": true,
+    "paths": {
+      "yoni-mcscripts-lib": [
+          "scripts/yoni/"
+      ]
+    },
+    
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "declarationDir": "@types/yoni-mcscripts-lib"
+    
+  },
+  "include": [
+    "scripts/**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "@types",
+    "**/*.spec.ts"
+  ]
+}

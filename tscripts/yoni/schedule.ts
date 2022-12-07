@@ -2,6 +2,7 @@ import { SystemEvents } from "./basis.js";
 import { Logger } from "./util/Logger.js";
 import { runTask } from "./basis.js";
 import { debug } from "./config.js";
+import { CallHierarchyItem } from "typescript";
 
 const logger = new Logger("Schedule");
 
@@ -10,15 +11,23 @@ const isLastSuccessRecords = new WeakMap();
 const lastSuccessTimeRecords = new WeakMap();
 const lastFailTimeRecords = new WeakMap();
 const lastExecuteTimeRecords = new WeakMap();
-const scheduleCallbacks = new WeakMap();
+
+/** @type {WeakMap<Schedule, Function>} */
+const scheduleCallbacks: WeakMap<Schedule, Function> = new WeakMap();
+
+export enum ScheduleTypes { 
+    timeCycleSchedule = "Schedule.timerCycleSchedule",
+    timeDelaySchedule = "Schedule.timerDelaySchedule",
+    tickCycleSchedule = "Schedule.tickCycleSchedule",
+    tickDelaySchedule = "Schedule.tickDelaySchedule"
+}
 
 export class Schedule {
-    static timeCycleSchedule = Symbol("Schedule.timerCycleSchedule");
-    static timeDelaySchedule = Symbol("Schedule.timerDelaySchedule");
-    static tickCycleSchedule = Symbol("Schedule.tickCycleSchedule")
-    static tickDelaySchedule = Symbol("Schedule.tickDelaySchedule")
-    
-    id;
+    id : number;
+    async: boolean;
+    period: any;
+    delay: any;
+    type: ScheduleTypes;
     
     get isQueue(){
         return taskMap.has(this.id);
@@ -48,12 +57,13 @@ export class Schedule {
             rt = lastExecuteTimeRecords.get(this);
         return rt;
     }
-    constructor(props, callback){
+    constructor(props: { async: boolean; delay: number; type: ScheduleTypes; period?: number; }, callback: Function){
         let { async, period, delay, type } = props;
         this.async = (!!async)?true:false;
         
-        if ((type === Schedule.tickCycleSchedule
-        || type === Schedule.timeCycleSchedule)
+        if ((type === ScheduleTypes.tickCycleSchedule
+        || type === ScheduleTypes.timeCycleSchedule)
+        && period !== undefined 
         && !isFinite(period))
             throw new TypeError(`period ${period} not finite`);
         
@@ -69,18 +79,20 @@ export class Schedule {
         scheduleCallbacks.set(this, callback);
         Object.freeze(this);
     }
-    run(...args){
+    run(...args: any[]){
         let callback = scheduleCallbacks.get(this);
-        callback(...args);
+        if (callback !== undefined)
+           callback(...args);
     }
-    async runAsync(...args){
+    async runAsync(...args: any[]){
         let callback = scheduleCallbacks.get(this);
-        await callback(...args);
+        if (callback !== undefined)
+            await callback(...args);
     }
 }
 
-let executingSchedule = null;
-function executeSchedule(schedule, time){
+let executingSchedule: Schedule | null = null;
+function executeSchedule(schedule: Schedule, time: number){
     executingSchedule = schedule;
     lastExecuteTimeRecords.set(schedule, time);
     if (schedule.async){
@@ -118,19 +130,25 @@ function executeSchedule(schedule, time){
 const scheduleTickDelayLessRecords = new WeakMap();
 const scheduleAddTimeRecords = new WeakMap();
 
-const schedulesTypedRecords = {};
-const taskMap = new Map();
+class schedulesTypedRecords {
+    static [ScheduleTypes.tickCycleSchedule]: Array<number> = [];
+    static [ScheduleTypes.tickDelaySchedule]: Array<number> = [];
+    static [ScheduleTypes.timeCycleSchedule]: Array<number> = [];
+    static [ScheduleTypes.timeDelaySchedule]: Array<number> = [];
+};
+const taskMap: Map<number, Schedule> = new Map();
 
-function doTickDelaySchedule(event){
+function doTickDelaySchedule(){
     runTask(doTickDelaySchedule);
     //首先，处理只执行一次的tick任务
-    let tickDelaySchedules = schedulesTypedRecords[Schedule.tickDelaySchedule];
+    let tickDelaySchedules = schedulesTypedRecords[ScheduleTypes.tickDelaySchedule];
     if (tickDelaySchedules !== undefined){
         tickDelaySchedules = Array.from(tickDelaySchedules);
         for (let idx = tickDelaySchedules.length - 1; idx >= 0; idx--){
             let time = Date.now();
             let id = tickDelaySchedules[idx];
             let schedule = taskMap.get(id);
+            if (schedule === undefined) break; //使ts不会报错，正常应该不会用到
             let delayLess = (scheduleTickDelayLessRecords.has(schedule)) ? scheduleTickDelayLessRecords.get(schedule) : schedule.delay;
             if (delayLess > 0){
                 scheduleTickDelayLessRecords.set(schedule, delayLess-1);
@@ -143,16 +161,17 @@ function doTickDelaySchedule(event){
         }
     }
 }
-function doTimeDelaySchedule(event){
+function doTimeDelaySchedule(){
     runTask(doTimeDelaySchedule);
     //接着，处理只执行一次的时间延时任务
-    let timeDelaySchedules = schedulesTypedRecords[Schedule.timeDelaySchedule];
+    let timeDelaySchedules = schedulesTypedRecords[ScheduleTypes.timeDelaySchedule];
     if (timeDelaySchedules !== undefined){
         timeDelaySchedules = Array.from(timeDelaySchedules);
         for (let idx = timeDelaySchedules.length - 1; idx >= 0; idx--){
             let time = Date.now();
             let id = timeDelaySchedules[idx];
             let schedule = taskMap.get(id);
+            if (schedule === undefined) break; //使ts不会报错，正常应该不会用到
             let passedTime = time - scheduleAddTimeRecords.get(schedule);
             let delay = schedule.delay;
             if (delay > passedTime){
@@ -166,16 +185,17 @@ function doTimeDelaySchedule(event){
         }
     }
 }
-function doTickCycleSchedule(event){
+function doTickCycleSchedule(){
     runTask(doTickCycleSchedule);
     //然后，处理循环执行的tick任务
-    let tickCycleSchedules = schedulesTypedRecords[Schedule.tickCycleSchedule];
+    let tickCycleSchedules = schedulesTypedRecords[ScheduleTypes.tickCycleSchedule];
     if (tickCycleSchedules !== undefined){
         tickCycleSchedules = Array.from(tickCycleSchedules);
         for (let idx = tickCycleSchedules.length - 1; idx >= 0; idx--){
             let time = Date.now();
             let id = tickCycleSchedules[idx];
             let schedule = taskMap.get(id);
+            if (schedule === undefined) break; //使ts不会报错，正常应该不会用到
             let delayLess = (scheduleTickDelayLessRecords.has(schedule)) ? scheduleTickDelayLessRecords.get(schedule) : schedule.delay;
             if (delayLess > 0){
                 scheduleTickDelayLessRecords.set(schedule, delayLess-1);
@@ -187,16 +207,17 @@ function doTickCycleSchedule(event){
         }
     }
 }
-function doTimeCycleSchedule(event){
+function doTimeCycleSchedule(){
     runTask(doTimeCycleSchedule);
     //最后，处理循环的时间延时任务
-    let timeCycleSchedules = schedulesTypedRecords[Schedule.timeCycleSchedule];
+    let timeCycleSchedules = schedulesTypedRecords[ScheduleTypes.timeCycleSchedule];
     if (timeCycleSchedules !== undefined){
         timeCycleSchedules = Array.from(timeCycleSchedules);
         for (let idx = timeCycleSchedules.length - 1; idx >= 0; idx--){
             let time = Date.now();
             let id = timeCycleSchedules[idx];
             let schedule = taskMap.get(id);
+            if (schedule === undefined) break; //使ts不会报错，正常应该不会用到
             let passedTime = time - scheduleAddTimeRecords.get(schedule);
             let delay = schedule.delay;
             if (delay > passedTime){
@@ -217,14 +238,18 @@ function doTimeCycleSchedule(event){
  * 你可以使用它创建任务
  */
 export default class YoniScheduler {
-    static addSchedule(schedule){
+    static addSchedule(schedule: Schedule){
         if (!(schedule instanceof Schedule))
             throw new TypeError("Not a Schedule Type");
         
         if (!(schedule.type in schedulesTypedRecords))
             schedulesTypedRecords[schedule.type] = [];
         
-        schedulesTypedRecords[schedule.type].push(schedule.id);
+        let records = schedulesTypedRecords[schedule.type]
+        if (records === undefined)
+            throw new Error("unknown schedule type");
+            
+        records.push(schedule.id);
         taskMap.set(schedule.id, schedule);
         
         scheduleAddTimeRecords.set(schedule, Date.now());
@@ -232,10 +257,7 @@ export default class YoniScheduler {
         return schedule.id;
     }
     
-    /**
-     * @param {Number|Schedule} taskId
-     */
-    static removeSchedlue(idOrSchedule){
+    static removeSchedlue(idOrSchedule: number | Schedule){
         let id;
         if (idOrSchedule instanceof Schedule)
             id = idOrSchedule.id;
@@ -244,6 +266,7 @@ export default class YoniScheduler {
         
         if (taskMap.has(id)){
             let schedule = taskMap.get(id);
+            if (schedule === undefined) throw new Error();
             let list = schedulesTypedRecords[schedule.type];
             let i = list.indexOf(id);
             list.splice(i, 1);
@@ -261,11 +284,11 @@ export default class YoniScheduler {
      * @param {Boolean} 是否异步执行
      * @returns {Number} taskId
      */
-    static runTask(callback, async = false){
+    static runTask(callback: Function, async = false){
         let schedule = new Schedule({
             async,
             delay: 0,
-            type: Schedule.tickDelaySchedule
+            type: ScheduleTypes.tickDelaySchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -278,10 +301,10 @@ export default class YoniScheduler {
      * @param {Boolean} 是否异步执行
      * @returns {Number} taskId
      */
-    static runDelayTimerTask(callback, delay=0, async = false){
+    static runDelayTimerTask(callback: Function, delay=0, async = false): number{
         let schedule = new Schedule({
             async, delay,
-            type: Schedule.timeDelaySchedule
+            type: ScheduleTypes.timeDelaySchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -294,11 +317,11 @@ export default class YoniScheduler {
      * @param {Boolean} 是否异步执行
      * @returns {Number} taskId
      */
-    static runDelayTickTask(callback, delay=0, async = false){
+    static runDelayTickTask(callback: Function, delay=0, async = false): number{
         let schedule = new Schedule({
             async,
             delay,
-            type: Schedule.tickDelaySchedule
+            type: ScheduleTypes.tickDelaySchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -312,12 +335,12 @@ export default class YoniScheduler {
      * @param {Boolean} 是否异步执行
      * @returns {Number} taskId
      */
-    static runCycleTimerTask(callback, delay, period=1, async = falsw){
+    static runCycleTimerTask(callback: Function, delay: any, period=1, async = false){
         let schedule = new Schedule({
             async,
             delay,
             period,
-            type: Schedule.timeCycleSchedule
+            type: ScheduleTypes.timeCycleSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -331,12 +354,12 @@ export default class YoniScheduler {
      * @param {Boolean} 是否异步执行
      * @returns {Number} taskId
      */
-    static runCycleTickTask(callback, delay=0, period, async = false){
+    static runCycleTickTask(callback: Function, delay=0, period: any, async = false){
         let schedule = new Schedule({
             async,
             delay,
             period,
-            type: Schedule.tickCycleSchedule
+            type: ScheduleTypes.tickCycleSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -362,11 +385,11 @@ runTask(doTickCycleSchedule);
 runTask(doTimeCycleSchedule);
 
 class TaskInfo { //还没弄
-    isLastSuccess; //上次执行时是否成功
+    isLastSuccess: any; //上次执行时是否成功
     
-    schedule; //由什么计划任务而执行的任务
+    schedule: any; //由什么计划任务而执行的任务
     
-    setResult(rt){} //设置本次执行的结果，只要调用，不管发生什么，结果都为设定值
+    setResult(rt: any){} //设置本次执行的结果，只要调用，不管发生什么，结果都为设定值
     getLastResult(){} //获得上次执行的结果
     setFailed(){} //只要调用这个方法，不管接下来发生了什么，仍然认为执行失败
     setSuccess(){} //只要调用这个方法，不管接下来发生了什么，仍然认为执行成功

@@ -250,7 +250,7 @@ class Objective {
      * @returns {Promise<boolean>} 操作是否成功
      * @throws This function can throw errors.
      */
-    async #postPlayersCommand(option, entry, ...args){
+    #postPlayersCommand(option, entry, ...args){
         this.checkUnregistered();
         
         if (!(entry instanceof Entry))
@@ -262,12 +262,12 @@ class Objective {
             if (ent === undefined){
                 throw new InternalError("Could not find the entity");
             }
-            let rt = await Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, ...params);
-            return rt.statusCode === StatusCode.success;
+            return Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, ...params)
+                .then((rt) => rt === StatusCode.success);
         } else if ([...VanillaWorld.getPlayers({name: entry.displayName})].length === 0){
             let params = ["scoreboard", "players", option, entry.displayName, this.#id, ...args];
-            let rt = await Command.addParams(Command.PRIORITY_HIGHEST, ...params);
-            return rt.statusCode === StatusCode.success;
+            return Command.addParams(Command.PRIORITY_HIGHEST, ...params)
+                .then((rt) => rt === StatusCode.success);
         } else {
             throw new NameConflictError(entry.displayName);
         }

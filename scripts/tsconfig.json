@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "yoni-mcscripts-lib": [ "./yoni" ]
+    }
+  },
+  "include": [
+    "**/*.js"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "@types",
+    "**/*.spec.ts"
+  ]
+}
