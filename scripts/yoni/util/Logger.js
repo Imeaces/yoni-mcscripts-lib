@@ -142,15 +142,19 @@ export class Logger {
     }
     
     name;
-    constructor(name){
+    constructor(name=""){
         this.name = name;
         const log = (lv, msg="", ...rps)=>{
             let time = getTimeString();
             if (msg !== "" && rps.length === 0){
                 msg = transferHolder("{}", msg);
             }
-            msg = "[{}]: " + msg;
-            printLog(time, lv, msg, this.name, ...rps);
+            if (name.trim() !== ""){
+                msg = "[{}]: " + msg;
+                printLog(time, lv, msg, this.name, ...rps);
+            } else {
+                printLog(time, lv, msg, ...rps);
+            }
         };
         const levelOutputs = {};
         const getOutput = (prop)=>{
@@ -203,7 +207,7 @@ if (overrideDefaultConsole){
 }
 
 if (debug)
-import("yoni/command/ChatCommand.js")
+import("yoni/util/ChatCommand.js")
 .then(m=>{
     m.ChatCommand.registerPrefixCommand("$", "log", (sender, rawCommand, label, args)=>{
         if (!debug) return;

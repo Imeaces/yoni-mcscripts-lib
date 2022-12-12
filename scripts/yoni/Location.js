@@ -191,7 +191,7 @@ class Location {
     }
     
     getBlock(){
-        return this.dimension.getBlock({x: this.x, y: this.y, z: this.z});
+        return this.dimension.getBlock(this.getVanillaBlockLocation());
     }
     getBlockX(){
         throw new Error("not implemented yet");
@@ -206,6 +206,22 @@ class Location {
         let { x, y, z, dimension } = this;
         return new Location(dimension, [Math.floor(x), Math.floor(y), Math.floor(z)]);
     }
+    offset(x, y, z){
+        const location = this.clone();
+        location.x += x;
+        location.y += y;
+        location.z += z;
+        return location;
+    }
+    
+    getVanillaBlockLocation(){
+        let { x, y, z } = this;
+        return new Minecraft.BlockLocation(Math.floor(x), Math.floor(y), Math.floor(z));
+    }
+    getVanillaLocation(){
+        let { x, y, z } = this;
+        return new Minecraft.Location(x, y, z);
+    }
     
     isLoaded(){
         throw new Error("not implemented yet");
@@ -218,14 +234,14 @@ class Location {
         throw new Error("not implemented yet");
     }
     equals(loc){
-        let fromLocation = makeLocation(loc);
+        let fromLocation = new Location(loc);
         let { x, y, z, rx, ry, dimension } = this;
         if (fromLocation.x === x
         && fromLocation.y === y
         && fromLocation.z === z
         && fromLocation.rx === rx
         && fromLocation.ry === ry
-        && fromValueGetDimension(fromLocation.dimension) === dimension){
+        && fromLocation.dimension === dimension){
             return true;
         } else {
             return false;
@@ -236,7 +252,7 @@ class Location {
     }
     
     toString(){
-        return Object.prototype.valueOf.call(this.toJSON());
+        return "Location: " + JSON.stringify(this.toJSON());
     }
     toJSON(){
         let { x, y, z, rx, ry } = this;
@@ -256,10 +272,10 @@ function fromValueGetDimension(value){
     let validValues = ["overworld", "the_end", "the end", "nether", "theEnd", 0, -1, 1];
     if (value instanceof Minecraft.Dimension){
         return value;
-    } else if (Object.values(MinecraftDimensionTypes).includes(value) || validValues.includes(value)){
-        return dim(v);
+    } else if (Object.values(Minecraft.MinecraftDimensionTypes).includes(value) || validValues.includes(value)){
+        return dim(value);
     } else {
-        throw newError("unknown dimension");
+        throw new Error("unknown dimension");
     }
 }
 
@@ -435,7 +451,7 @@ function makeLocation(values){
             let hasRotation = false;
             
             if (hasKeys(values, "dimension")){
-                dimension = values.dimemsion;
+                dimension = values.dimension;
                 hasDim = true;
             }
             

@@ -40,8 +40,8 @@ class Entity {
     
     get [Symbol.toStringTag](){
         if (this instanceof Entity)
-            return `[object Entity]: { type: ${this.typeId} }`;
-        return "[object Object]";
+            return `Entity: { type: ${this.typeId} }`;
+        return "Object";
     }
     
     get entityType(){
@@ -126,7 +126,7 @@ class Entity {
      * @param {
      */
     teleport(arg1, arg11, arg2, arg21, arg22){
-        let args = [arg1, arg11, arg2, arg21, arg22].filter(v => v != null);
+        let args = [arg1, arg11, arg2, arg21, arg22].filter(v => v !== undefined);
         if (args.length <= 2){
             let keepVelocity = null;
             if (args.length === 2){
@@ -134,7 +134,11 @@ class Entity {
             }
             let location = new Location(...args);
             let { rx, ry, dimension } = location;
-            this.vanillaEntity.teleport(location, dimension, rx, ry, keepVelocity);
+            if (keepVelocity === null){
+                this.vanillaEntity.teleport(location, dimension, rx, ry);
+            } else {
+                this.vanillaEntity.teleport(location, dimension, rx, ry, keepVelocity);
+            }
         } else {
             this.vanillaEntity.teleport(...args);
         }
@@ -152,8 +156,8 @@ class Entity {
     
     /**
      * 从一个实体中获得YoniEntity
-     * @param 可以被认为是实体的东西
-     * @return {Entity} 如果无法获得，返回null
+     * @param {Minecraft.Entity|Minecraft.Player|Gametest.SimulatedPlayer|Entity|Player|SimulatedPlayer|any} entity - 可以被认为是实体的东西
+     * @return {?Entity} 如果无法获得，返回null
      */
     static from(entity){
         // 如果有记录，直接返回对应实体
@@ -197,8 +201,8 @@ class Entity {
      * @param {Minecraft.EntityQueryOptions}
      * @return {Entity[]}
      */
-    static getAliveEntities(...args){
-        return getAliveEntities().map(_=>Entity.from(_));
+    static getAliveEntities(option){
+        return getAliveEntities(option).map(_=>Entity.from(_));
     }
     
     static getHealthComponent(entity){
@@ -224,8 +228,8 @@ class Entity {
      * @param {Minecraft.EntityQueryOptions}
      * @return {Entity[]}
      */
-    static getLoadedEntities(...args){
-        return getLoadedEntities().map(_=> Entity.from(_));
+    static getLoadedEntities(option){
+        return getLoadedEntities(option).map(_=> Entity.from(_));
     }
     
     /**
@@ -376,9 +380,11 @@ class Player extends Entity {
     get experienceLevel(){
         let level = 0;
         for (let i = 16384; i >= 1; i /= 2){
-            let arr = VanillaWorld.getPlayers({ minLevel: i});
-            if (Array.from(arr).includes(this.vanillaEntity)){
-                level += i;
+            level += i;
+            let rt = VanillaWorld.getPlayers({ minLevel: level });
+            if ( ! Array.from( rt ).includes( this.vanillaEntity ) )
+            {
+                level -= i;
             }
         }
         return level;
@@ -458,24 +464,41 @@ function defineEntityPrototypeFor(targetPrototype, srcPrototype){
 }
 
 function getAliveEntities(option){
+    if (option != null && ("location" in option || "maxDistance" in option || "minDistance" in option) && !("dimension" in option)){
+        throw new Error("'location', 'maxDistance' or 'minDistance' usage in options is not allow, unless specified 'dimension' filed");
+    }
     let entities = [];
-    
-    Object.values(Minecraft.MinecraftDimensionTypes)
-        .forEach((dimid)=>{
+    if (option?.dimension != null){
+        let absoluteLocation = null;
+        try {
+            absoluteLocation = new Location(option);
+        } catch (e){
+            const error = new Error("failed to cover to absolute Location, may not have 'location' field ?");
+            error.cause = e;
+            throw error;
+        }
+        let absoluteDimension = absoluteLocation.dimension;
+        if (absoluteDimension !== null){
+            entities = Array.from(absoluteDimension.getEntities(option));
+        }
+    } else {
+        for (let dimid of Object.values(Minecraft.MinecraftDimensionTypes)){
             for (let ent of VanillaWorld.getDimension(dimid).getEntities(option)){
                 entities.push(ent);
             }
-        });
+        }
+    }
+    
     return entities;
 }
 
 function getLoadedEntities(option){
-    if (("location" in option || "maxDistance" in option || "minDistance" in option) && !("dimension" in option)){
+    if (option != null && ("location" in option || "maxDistance" in option || "minDistance" in option) && !("dimension" in option)){
         throw new Error("'location', 'maxDistance' or 'minDistance' usage in options is not allow, unless specified 'dimension' filed");
     }
     let entities = [];
     let players = [];
-    if (option.dimension != null){
+    if (option?.dimension != null){
         let absoluteLocation = new Location(option);
         let absoluteDimension = absoluteLocation.dimension;
         if (absoluteDimension !== null){
