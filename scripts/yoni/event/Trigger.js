@@ -74,7 +74,7 @@ class Trigger {
     
     /**
      * @param {any[]} eventValues
-     * @param {any[]} filters
+     * @param {any[]|any} filters
      * @return {boolean}
      */
     filterResolver(eventValues, filters){

@@ -69,7 +69,13 @@ function getTargetEntities(){
                 });
         }
     });
-    return Array.from(new Set(selectedEntities));
+    return Array.from(
+        new Set(
+            selectedEntities.map(e =>
+                Entity.from(e)
+            )
+        )
+    );
 }
 
 const schedule = new Schedule ({
