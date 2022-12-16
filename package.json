@@ -1,5 +1,9 @@
 {
   "dependencies": {
-    "@minecraft/server": "^1.0.0"
+    "@minecraft/server": "^1.1.0-beta.release.1.19.50",
+    "@minecraft/server-admin": "^1.0.0-beta.release.1.19.50",
+    "@minecraft/server-gametest": "^1.0.0-beta.release.1.19.50",
+    "@minecraft/server-net": "^1.0.0-beta.release.1.19.50",
+    "@minecraft/server-ui": "^1.0.0-beta.release.1.19.50"
   }
 }
