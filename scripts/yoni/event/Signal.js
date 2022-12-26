@@ -70,7 +70,7 @@ class Signal extends IEventSignal {
             throw new Error("not a function in arguments[0]");
         const trigger = this.#trigger;
         
-        if ("onSubscribe" in trigger.onSubscribe)
+        if ("onSubscribe" in trigger)
             trigger.onSubscribe(callback, filters); //触发
         
         if (filters.length === 1)
