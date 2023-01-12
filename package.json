@@ -4,6 +4,7 @@
     "@minecraft/server-admin": "^1.0.0-beta.release.1.19.50",
     "@minecraft/server-gametest": "^1.0.0-beta.release.1.19.50",
     "@minecraft/server-net": "^1.0.0-beta.release.1.19.50",
-    "@minecraft/server-ui": "^1.0.0-beta.release.1.19.50"
+    "@minecraft/server-ui": "^1.0.0-beta.release.1.19.50",
+    "lokijs": "^1.5.12"
   }
 }
