@@ -34,7 +34,6 @@ import {
 } from "./schedule.js";
 import { isDebug } from "./debug.js";
 import * as YoniUtilUtils from "./util/utils.js";
-import FastScoreboard from "./util/FastScoreboard.js";
 import { ChatCommand } from "./util/ChatCommand.js";
 import { Location } from "./Location.js";
 
@@ -78,7 +77,6 @@ const Utils = (()=>{
     }
     return obj;
 })()
-Utils.FastScoreboard = FastScoreboard;
 globalThis.YoniUtils = Utils;
 
 export {

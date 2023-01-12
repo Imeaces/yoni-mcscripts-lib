@@ -1,4 +1,55 @@
-import { Logger } from "yoni/util/Logger.js";
+import { Logger } from "./util/Logger.js";
+
+function Loader(basepath){
+    if (new.target) return;
+}
+Loader.default = Loader(".");
+Loader.logger = new Logger("Scripts Loader");
+Loader.prototype.basedir = ".";
+Loader.prototype.getPath = function getPath(path){
+    
+    path = this.basedir + "/" + path;
+    let floor = path.split(/(?<!\\)\//).filter(str => str !== "");
+    let pathFloor = [];
+    for (let path of floor){
+        let lastFloorIdx = (pathFloor.length === 0)
+            ? (0)
+            : (pathFloor.length - 1);
+        let lastFloor = pathFloor[lastFloorIdx];
+        if (path === "."){
+            if (pathFloor.length !== 0){
+                continue;
+            }
+        } else if (path === ".."){
+            if (lastFloor !== ".."){
+                pathFloor.pop();
+                continue;
+            }
+        }
+        pathFloor.push(path);
+    }
+    let pathStr = "";
+    for (let i = 0; i<pathFloor.length; i++){
+        //这部分代码不格式化是因为当时在想应该怎么写逻辑
+        //没心思格式化（纯人手写的，用的MT管理器）
+        //然后觉得很有趣，就留了下来
+        if (i===(pathFloor.length-1)){
+            if (pathFloor[i].endsWith(".js")){
+                //warn: file name doesn't ends with ".js"
+            }
+            pathStr += pathFloor[i];
+        }else {
+            pathStr += pathFloor[i] + "/";
+        }
+    }
+    return pathStr;
+}
+Loader.prototype.load = function load(...paths){
+    
+}
+
+
+
 const logger = new Logger("Loader");
 
 let successCount = 0;
@@ -46,3 +97,6 @@ load.getLoader = (base)=>{
 };
 
 export { load };
+
+export default Loader;
+export { Loader };

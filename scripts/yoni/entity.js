@@ -2,11 +2,14 @@ import {
     Minecraft,
     Gametest,
     VanillaWorld, 
-    StatusCode } from "yoni/basis.js";
-import { dealWithCmd } from "yoni/lib/utils.js";
-import { Location } from "yoni/Location.js";
-import { Command } from "yoni/command.js";
-import { Entry } from "yoni/scoreboard/Entry.js";
+    StatusCode,
+    dim } from "./basis.js";
+import { dealWithCmd } from "./lib/utils.js";
+import { Location } from "./Location.js";
+import { Command } from "./command.js";
+import { Entry } from "./scoreboard/Entry.js";
+import { PlayerOnScreenDisplay } from "./entity/player/PlayerOnScreenDisplay.js";
+import { copyPropertiesWithoutOverride } from "./lib/copyPropertiesWithoutOverride.js";
 
 const { EntityTypes } = Minecraft;
 
@@ -18,6 +21,9 @@ const entitySymbol = Symbol();
  * @typedef {Entity|Player|SimulatedPlayer} YoniEntityType
  * @typedef {Minecraft.Player|Minecraft.Entity|Gametest.SimulatedPlayer} MinecraftEntityType
  * @typedef {YoniEntityType|MinecraftEntityType} EntityType
+ */
+/**
+ * 代表一个实体
  */
 class Entity {
     
@@ -166,7 +172,8 @@ class Entity {
      * 当传入了5个参数，被认为是原版的方法
      * yoni方法中，第一个参数认为是位置，第二个参数认为是keepVelocity
      * 原版方法中参数顺序为[location, dimension, rx, ry, keepVelocity?=null]
-     * @param {import("./Location.js").Location1Arg|import("@minecraft/server").Vector3} argLocation
+     * 所以你可以直接传入实体对象、方块对象、或者普通位置对象，或者接口
+     * @param {import("./Location.js").Location1Arg|Minecraft.Vector3} argLocation
      * @param {Minecraft.Dimension} [argDimension]
      * @param {number} [argRx]
      * @param {number} [argRy]
@@ -279,13 +286,109 @@ class Entity {
     }
     
     /**
+     * @param {import('./Location.js').DimensionLike}
+     * @param {Minecraft.EntityQueryOptions} [options]
+     */
+    static getDimensionEntities(dimension, options, optionClass = Minecraft.EntityQueryOptions){
+        if (!dimension){
+            let ents = Object
+                .getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
+                .map(k => VanillaWorld.getDimension(k))
+                .map(dim => dim.getEntities());
+            let generator = function * (){
+                for (let es of ents){
+                    yield* es;
+                }
+            }
+            return generator();
+        }
+        
+        if (!options){
+            return dim(dimension).getEntities();
+        }
+        
+        let useInterface = false;
+        let requireTest = false;
+        try {
+            useInterface = this.#useInterface;
+            if (useInterface === null){
+                requireTest = true;
+            }
+        } catch {
+            requireTest = true;
+        }
+        
+        if (requireTest){
+            try {
+                new Minecraft.EntityQueryOptions();
+                useInterface = false;
+            } catch {
+                useInterface = true;
+            }
+            try {
+                this.#useInterface = useInterface;
+            } catch {}
+        }
+        
+        let useOptions = options;
+        if (!useInterface){
+            useOptions = new Minecraft.EntityQueryOptions();
+            
+            Object.assign(useOptions, options);
+        }
+        
+        return dim(dimension).getEntities(useOptions);
+    }
+    static #useInterface = null;
+    /**
+     * @param {import('./Location.js').DimensionLike}
+     * @param {Minecraft.EntityQueryOptions} [options]
+     */
+    static getWorldPlayers(options, optionClass = Minecraft.EntityQueryOptions){
+        if (!options){
+            return VanillaWorld.getPlayers();
+        }
+        
+        let useInterface = false;
+        let requireTest = false;
+        try {
+            useInterface = this.#useInterface2;
+            if (useInterface === null){
+                requireTest = true;
+            }
+        } catch {
+            requireTest = true;
+        }
+        
+        if (requireTest){
+            try {
+                new Minecraft.EntityQueryOptions();
+                useInterface = false;
+            } catch {
+                useInterface = true;
+            }
+            try {
+                this.#useInterface2 = useInterface;
+            } catch {}
+        }
+        
+        let useOptions = options;
+        if (!useInterface){
+            useOptions = new Minecraft.EntityQueryOptions();
+            
+            Object.assign(useOptions, options);
+        }
+        
+        return dim(dimension).getEntities(useOptions);
+    }
+    static #useInterface2 = null;
+    
+    /**
      * 获取所有存在的实体（包括死亡的玩家）
-     * 注意，此方法的closest, farthest功能在在一定程度上遭到破坏
-     * @param {Minecraft.EntityQueryOptions} option
      * @returns {EntityType[]}
      */
-    static getLoadedEntities(option){
-        return getLoadedEntities(option).map(_=> Entity.from(_));
+    static getLoadedEntities(){
+        return getLoadedEntities().map(_=> Entity.from(_));
     }
     
     /**
@@ -331,7 +434,17 @@ class Entity {
      */
     static hasFamilies(entity, ...families){
         entity = Entity.getMinecraftEntity(entity);
-        return getLoadedEntities({ dimension: entity.dimension, type: entity.typeId, families: families }).includes(entity);
+        const dimension = entity.dimension;
+        const tryEntities = Entity.getDimensionEntities(dimension, {
+                type: entity.typeId,
+                families: families
+        });
+        for (const cEntity of tryEntities){
+            if (entity === cEntity){
+                return true;
+            }
+        }
+        return false;
     }
     
     /**
@@ -342,9 +455,16 @@ class Entity {
      */
     static hasAnyFamily(entity, ...families){
         entity = Entity.getMinecraftEntity(entity);
+        const dimension = entity.dimension;
         for (const family of families){
-            if (getLoadedEntities({ dimension: entity.dimension, type: entity.typeId, families: families }).includes(entity)){
-                return true;
+            const tryEntities = Entity.getDimensionEntities(dimension, {
+                type: entity.typeId,
+                families: Array.of(family)
+            });
+            for (const cEntity of tryEntities){
+                if (entity === cEntity){
+                    return true;
+                }
             }
         }
         return false;
@@ -357,7 +477,7 @@ class Entity {
      * @returns {boolean}
      */
     static hasFamily(entity, family){
-        return Entity.hasAnyFamily(entity, family);
+        return Entity.hasFamilies(entity, family);
     }
     
     /**
@@ -457,11 +577,23 @@ class Player extends Entity {
     
     get [Symbol.toStringTag](){
         if (this instanceof Player)
-            return `[object Player]: { type: ${this.typeId} }`;
-        return "[object Object]";
+            return `Player: { type: ${this.typeId}, name: ${this.name} }`;
+        return "Object";
+    }
+    
+    #onScreenDisplay = null;
+    get onScreenDisplay(){
+        if (this.vanillaEntity.onScreenDisplay){
+            return this.vanillaEntity.onScreenDisplay;
+        }
+        if (this.#onScreenDisplay === null){
+            this.#onScreenDisplay = new PlayerOnScreenDisplay(this);
+        }
+        return this.#onScreenDisplay;
     }
     
     /**
+     * 玩家的经验等级
      * @type {number}
      */
     get experienceLevel(){
@@ -477,17 +609,18 @@ class Player extends Entity {
         return level;
     }
     
-   /**
+    /**
+     * 设置玩家的经验等级
      * @param {number} level
      */
-   setExperienceLevel(level){
+    setExperienceLevel(level){
        if (isFinite(level) && level >= 0 && Number.isInteger(level)){
            return Promise.all([
                Command.addExecute(Command.PRIORITY_HIGH, this, "xp -24791l @s"),
                Command.addExecute(Command.PRIORITY_HIGH, this, `xp ${level}l @s`)
            ]);
        } else {
-           throw new TypeError("level not allowed");
+           throw new TypeError("level not finite");
        }
     }
     
@@ -512,11 +645,27 @@ class Player extends Entity {
     }
     
     /**
+     * 以原始json文本的形式给玩家发送消息
      * @param {Minecraft.IRawMessage} rawtext 
      */
     sendRawMessage(rawtext){
         let command = "tellraw @s " + JSON.stringify(rawtext, dealWithCmd);
         return Command.addExecute(Command.PRIORITY_HIGH, this, command);
+    }
+     
+    get gamemode(){
+        for (let gm of Object.getOwnPropertyNames(Minecraft.GameMode).map(k=>Minecraft.GameMode[k])){
+            for (let player of VanillaWorld.getPlayers({gamemode: gm})){
+                if (Entity.isSameEntity(this, player)){
+                    return gm;
+                }
+            }
+        }
+        throw new Error("unknown gamemode");
+    }
+    set gamemode(v){
+        let command = `gamemode ${v} @s`;
+        return Command.addExecute(Command.PRIORITY_HIGHEST, this, command);
     }
 }
 
@@ -528,87 +677,20 @@ class SimulatedPlayer extends Player {
     }
 }
 
-function defineEntityPrototypeFor(targetPrototype, srcPrototype){
-    let undefinedKeys = [];
-    for (let key in srcPrototype){
-        if (key in targetPrototype){
-            continue;
-        }
-        
-        let propertyDescriptor = Object.getOwnPropertyDescriptor(srcPrototype, key);
-        if ("value" in propertyDescriptor && typeof propertyDescriptor.value === "function"){
-            Object.defineProperty(targetPrototype, key, {
-                configurable: true,
-                enumerable: false,
-                writable: false,
-                value: function (){
-                    return this.vanillaEntity[key].apply(this.vanillaEntity, arguments);
-                }
-            });
-        } else {
-            Object.defineProperty(targetPrototype, key, {
-                configurable: true,
-                enumerable: false,
-                get: function (){
-                    return this.vanillaEntity[key];
-                },
-                set: function (value){
-                    this.vanillaEntity[key] = value;
-                }
-            });
-        }
-    }
-}
-
-function getAliveEntities(option){
-    if (option != null && ("location" in option || "maxDistance" in option || "minDistance" in option) && !("dimension" in option)){
-        throw new Error("'location', 'maxDistance' or 'minDistance' usage in options is not allow, unless specified 'dimension' filed");
-    }
+function getAliveEntities(){
     let entities = [];
-    if (option?.dimension != null){
-        let absoluteLocation = null;
-        try {
-            absoluteLocation = new Location(option);
-        } catch (e){
-            const error = new Error("failed to cover to absolute Location, may not have 'location' field ?");
-            error.cause = e;
-            throw error;
-        }
-        let absoluteDimension = absoluteLocation.dimension;
-        if (absoluteDimension !== null){
-            entities = Array.from(absoluteDimension.getEntities(option));
-        }
-    } else {
-        for (let dimid of Object.values(Minecraft.MinecraftDimensionTypes)){
-            for (let ent of VanillaWorld.getDimension(dimid).getEntities(option)){
-                entities.push(ent);
-            }
+    for (let dimid of Object.values(Minecraft.MinecraftDimensionTypes)){
+        for (let ent of VanillaWorld.getDimension(dimid).getEntities()){
+            entities.push(ent);
         }
     }
     
     return entities;
 }
 
-function getLoadedEntities(option){
-    if (option != null && ("location" in option || "maxDistance" in option || "minDistance" in option) && !("dimension" in option)){
-        throw new Error("'location', 'maxDistance' or 'minDistance' usage in options is not allow, unless specified 'dimension' filed");
-    }
-    let entities = [];
-    let players = [];
-    if (option?.dimension != null){
-        let absoluteLocation = new Location(option);
-        let absoluteDimension = absoluteLocation.dimension;
-        if (absoluteDimension !== null){
-            entities = Array.from(absoluteDimension.getEntities(option));
-            //如果有这个属性的话，获取玩家会报错
-            if (! ("entityType" in option && option.entityType === "minecraft:player")){
-                players = Array.from(absoluteDimension.getPlayers(option));
-            }
-        }
-    } else {
-        entities = getAliveEntities(option);
-        players = Array.from(VanillaWorld.getPlayers(option));
-    }
+function getLoadedEntities(){
+    let entities = getAliveEntities();
+    let players = Array.from(VanillaWorld.getPlayers());
     
     //如果玩家实体对象不在entities中，则推入
     players
@@ -624,9 +706,9 @@ function getLoadedEntities(option){
 
 
 /* 修补 */
-defineEntityPrototypeFor(Entity.prototype, Minecraft.Entity.prototype);
-defineEntityPrototypeFor(Player.prototype, Minecraft.Player.prototype);
-defineEntityPrototypeFor(SimulatedPlayer.prototype, Gametest.SimulatedPlayer.prototype);
+copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "vanillaEntity");
+copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity");
+copyPropertiesWithoutOverride(SimulatedPlayer.prototype, Gametest.SimulatedPlayer.prototype, "vanillaEntity");
 /*修复结束*/
 
 export default Entity;

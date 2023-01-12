@@ -1,7 +1,8 @@
 import { say } from "./util/utils.js";
 import { printError } from "./util/console.js";
 import { VanillaWorld, dim } from "./basis.js";
-import { Entry, EntryType, Scoreboard } from "./scoreboard.js";
+//import { Entry, EntryType, Scoreboard } from "./scoreboard.js";
+import { Entry, EntryType, Scoreboard } from "./scoreboard_only.js";
 
 async function print(msg){
     await say(msg);
@@ -63,15 +64,19 @@ async function print(msg){
     await print("再次添加test");
     obj = Scoreboard.addObjective("test");
 
-    await print("设置虚拟玩家的分数");
+    await print("设置虚拟玩家“awa”的分数");
     obj.setScore("awa", 6666);
+    await print("设置虚拟玩家“866test”的分数，这个有点特别，但是还是可以正常设置");
+    obj.setScore("866test", 688);
 
     await print("展示给你看看");
     Scoreboard.setDisplayAtSlot("sidebar", {objective: obj});
 
-    await print("最后列出所有人的分数给你看看");
+    await print("最后列出3个人的分数给你看看，具体是哪三个我也不清楚，可能也没有三个");
+    let count = 1;
     let objects = Scoreboard.getObjectives();
     for (let e of Scoreboard.getEntries()) {
+        if (count ++ > 3) break;
         await print(e.displayName + "的分数");
         for (let obj of objects){
             await print(`${obj.displayName}(${obj.id}): ${obj.getScore(e)}`);
@@ -85,20 +90,6 @@ async function print(msg){
     await print("比如，如果某个实体没有真正设置分数，它的显示名称会为undefined，也就是没有");
     await print("但是由于我好像改了，所以上边的那句话可能是错的");
     await print("建议自己看代码怎么实现的");
-
-    let count = 0;
-    let cit = dim(0).getEntities()[Symbol.iterator]();
-    let val = cit.next();
-    while (val.done === false) {
-        if (++count > 15) {
-            await print("太多了点，就不继续了");
-            break;
-        }
-        await print(Entry.guessEntry(val.value).displayName);
-        await obj.setScore(val.value, 2976);
-        await print(Entry.guessEntry(val.value).displayName);
-        val = cit.next();
-    }
 
     await print("还有一个特性");
     try {
@@ -114,6 +105,6 @@ async function print(msg){
 
 })()
 .catch(async (e)=>{
-    await print("运行代码时出现未知的问题，如果您是通过/reload进行的测试，那么这可能是一个bug，您可以将详细信息告知我，我会尽可能的修复。否则可能是由于玩家尚未进入游戏导致无法进行测试，在加载完毕后使用/reload来查看测试即可");
+    await print("运行代码时出现未知的问题，如果您是通过/reload进行的测试，那么这可能是一个bug，您可以将详细信息告知我，我会尽可能的修复。否则可能是由于玩家尚未进入游戏导致无法进行测试，在加载完毕后使用/reload来查看测试即可。如果您是在1.19.60.25中进行的测试，此版本无法正常使用/reload，故无法进行测试。");
     printError(e);
 });

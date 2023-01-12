@@ -10,4 +10,4 @@ export function isDebug(){
 }
 
 
-runTaskIfDebug(()=>load("yoni/debug_func.js"));
+runTaskIfDebug(()=>load("./debug_func.js"));

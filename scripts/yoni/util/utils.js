@@ -1,6 +1,6 @@
-import { VanillaWorld, overworld } from "yoni/basis.js";
-import { Command } from "yoni/command.js";
-import { dealWithCmd } from "yoni/lib/utils.js";
+import { VanillaWorld, overworld } from "../basis.js";
+import { Command } from "../command.js";
+import { dealWithCmd } from "../lib/utils.js";
 
 export async function say(msg = "", displayNameOrSender="commands.origin.script"){
     let runner;
@@ -28,6 +28,7 @@ export async function say(msg = "", displayNameOrSender="commands.origin.script"
 }
 
 export async function send(receiver, message){
-    let rawtext = JSON.stringify({rawtext:[{translate: String(message)}]}, dealWithCmd)
-    return await Command.fetchExecute(receiver, `tellraw @s ${rawtext}`);
+    if (receiver.tell){ return receiver.tell(dealWithCmd(message, message)); };
+    let rawtext = JSON.stringify({rawtext:[{text: message}]}, dealWithCmd);
+    await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
 }

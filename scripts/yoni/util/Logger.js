@@ -1,28 +1,30 @@
-import { VanillaWorld } from "yoni/basis.js";
+import { VanillaWorld } from "../basis.js";
 import { getErrorMsg } from "./console.js";
-import { Command } from "yoni/command.js";
-import { dealWithCmd } from "yoni/lib/utils.js";
+import { Command } from "../command.js";
+import { dealWithCmd } from "../lib/utils.js";
 
 import {
     outputContentLog,
     debug,
     logLevel as configLogLevel,
     overrideDefaultConsole
-} from "yoni/config.js";
+} from "../config.js";
 
 async function send(receiver, message){
-    let rawtext = JSON.stringify({rawtext:[{translate: String(message)}]}, dealWithCmd)
-    Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
+    if (receiver.tell){ return receiver.tell(dealWithCmd(message, message)); };
+    let rawtext = JSON.stringify({rawtext:[{text: message}]}, dealWithCmd);
+    await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
 }
 
 let isNoticeLoggerUsage = false;
 
 let specificTag = "yoni:console";
 
+let originalConsole = console;
+
 let outputToConsole = (()=>{
-    const console = globalThis.console;
     return function (...args){
-        console.warn(...args);
+        originalConsole.warn(...args);
     };
 })();
 
@@ -119,11 +121,12 @@ async function printLog(time, level, msg, ...rps){
     let outputText = "[{} {}]{}";
     outputText = transferHolder(outputText, time, levelName, msg);
     
-    outputText = "§中" + outputText;
-    
     if (outputContentLog || level === "LOG"){
         outputToConsole(outputText);
     }
+    
+    outputText = "§中" + outputText;
+    
     consoles.forEach(pl=>send(pl, outputText));
     
 }
@@ -158,37 +161,28 @@ export class Logger {
         };
         const levelOutputs = {};
         const getOutput = (prop)=>{
-            
             let lv = getLevelCode(prop);
-                
             if (lv > logLevel) return ()=>{};
-            
             return (...args)=>{
                 log(lv, ...args);
             };
         };
+        const getValues = () => {
+             return Object.keys(levelOutputs).values();
+        }
         Object.keys(levels).forEach((key)=>{
             levelOutputs[key] = getOutput(key);
         });
+        levelOutputs[Symbol.iterator] = getValues;
         return new Proxy(levelOutputs, {
             get: (levelOutputs, prop)=>{
                 if (typeof prop === "symbol"){
-                    if (prop === Symbol.iterator){
-                        return function*(){
-                            for (let key of Object.keys(levelOutputs)){
-                                yield levelOutputs[key];
-                            }
-                        };
-                    }
-                    return;
+                    return levelOutputs[prop];
                 }
-                
                 if (Object.prototype.hasOwnProperty.call(levelOutputs, prop)){
                     return levelOutputs[prop];
                 }
-                
                 return getOutput(prop);
-                
             }
         });
     }
@@ -207,7 +201,7 @@ if (overrideDefaultConsole){
 }
 
 if (debug)
-import("yoni/util/ChatCommand.js")
+import("../util/ChatCommand.js")
 .then(m=>{
     m.ChatCommand.registerPrefixCommand("$", "log", (sender, rawCommand, label, args)=>{
         if (!debug) return;

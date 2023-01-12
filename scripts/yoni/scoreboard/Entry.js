@@ -1,22 +1,23 @@
-import { VanillaScoreboard, Minecraft } from "../basis.js";
+import { VanillaScoreboard, Minecraft, Gametest } from "../basis.js";
 import { YoniEntity } from "../entity.js";
+import { UnknownEntryError } from "./ScoreboardError.js";
+import { useOptionalFasterCode } from "../config.js";
 
 let idRecords = new Map();
 let nameRecords = new Map();
 let entityRecords = new WeakMap();
 let scbidRecords = new WeakMap();
 
-/** @enum {Minecraft.ScoreboardIdentityType} */
+/** @enum */
 const EntryType = {
     PLAYER: Minecraft.ScoreboardIdentityType.player,
     ENTITY: Minecraft.ScoreboardIdentityType.entity,
     FAKE_PLAYER: Minecraft.ScoreboardIdentityType.fakePlayer
-    
 }
 
 /**
  * @interface
- * @typedef {Object} EntryOption
+ * @typedef EntryOption
  * @property {string} [name]
  * @property {number} [id]
  * @property {Minecraft.ScoreboardIdentity} [scbid]
@@ -30,8 +31,10 @@ const EntryType = {
 class Entry {
     
     /**
-     * @param {Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} any
-     * @returns {Entry}
+     * 从可能为分数持有者的值获取其对象。
+     * @param {Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} any - 可能为分数持有者的值
+     * @returns {Entry} 与 `any` 对应的分数持有者对象。
+     * @throws 若未能根据值得到可能的分数持有者对象，抛出 `UnknownEntryError`。
      */
     static guessEntry(any){
         if (any instanceof Minecraft.ScoreboardIdentity)
@@ -42,12 +45,12 @@ class Entry {
             return this.getEntry({name: any, type: EntryType.FAKE_PLAYER});
         if (!isNaN(Number(any)))
             return this.getEntry({id: any});
-        throw new Error("Sorry, couldn't guess the entry");
+        throw new UnknownEntryError();
     }
     
     /**
-     * 
-     * @param {EntryOption} option 
+     * 根据 `option` 接口获得分数持有者对象。
+     * @param {EntryOption} option
      * @returns {Entry}
      */
     static getEntry(option){
@@ -60,7 +63,7 @@ class Entry {
             name = scbid.displayName;
             
         //优先级: entity, scbid, id, name
-        if (entityRecords.has(entity))
+        if (type !== EntryType.FAKE_PLAYER && entityRecords.has(entity))
             entry = entityRecords.get(entity);
         else if (type === EntryType.FAKE_PLAYER && nameRecords.has(name))
             entry = nameRecords.get(name);
@@ -74,7 +77,7 @@ class Entry {
         if (type != null && entry.type !== type)
             throw new Error("entry type do not matches");
             
-        if (entry.getVanillaEntity() != null)
+        if (type !== EntryType.FAKE_PLAYER && entry.getVanillaEntity() != null)
             entityRecords.set(entry.getVanillaEntity(), entry);
         if (entry.id !== undefined)
             idRecords.set(entry.id, entry);
@@ -86,6 +89,16 @@ class Entry {
         return entry;
     }
     
+    /**
+     * 根据 `option` 获得原始分数持有者对象（需要启用 `useOptionalFasterCode`）。
+     * @function getVanillaScoreboardParticipant
+     * @param {EntryOption} option
+     * @returns {Minecraft.ScoreboardIdentity}
+     */
+    static getVanillaScoreboardParticipant(){
+        throw new Error("To use this function, you have to enable 'useOptionalFasterCode' in the config");
+    }
+    
     #type;
     #id;
     #name;
@@ -93,7 +106,7 @@ class Entry {
     #entity;
     
     /**
-     * Type of the scoreboard identity.
+     * 分数持有者的类型
      * @returns {EntryType}
      */
     get type(){
@@ -101,7 +114,7 @@ class Entry {
     }
     
     /**
-     * Identifier of the scoreboard identity.
+     * 分数持有者的标识符
      * @returns {number}
      */
     get id(){
@@ -111,7 +124,7 @@ class Entry {
     }
     
     /**
-     * Returns the player-visible name of this identity.
+     * 一个“玩家可见的”名称
      * @returns {string}
      */
     get displayName(){
@@ -127,6 +140,7 @@ class Entry {
     }
     
     /**
+     * 原始分数持有者对象，可能为空。
      * @returns {Minecraft.ScoreboardIdentity|undefined}
      */
     get vanillaScbid(){
@@ -139,23 +153,31 @@ class Entry {
     }
     
     /**
-     * If the scoreboard identity is an entity or player, returns 
-     * the entity that this scoreboard item corresponds to.
-     * @returns {Minecraft.Entity}
+     * 如果此分数持有者不是虚拟玩家，返回此分数持有者对应实体的对象。
+     * @returns {YoniEntity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
      */
     getEntity(){
-        if (this.#type === EntryType.FAKE_PLAYER)
-            this.#entity = null;
-        return YoniEntity.from(this.#entity);
+        return YoniEntity.from(this.getVanillaEntity());
     }
     
+    /**
+     * If the scoreboard identity is an entity or player, returns 
+     * the entity that this scoreboard item corresponds to.
+     * @returns {Minecraft.Entity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
+     * @throws 若实体尚未加载或已死亡，将抛出错误。
+     */
     getVanillaEntity(){
         if (this.#type === EntryType.FAKE_PLAYER)
             this.#entity = null;
+        else if (this.#entity === null)
+            this.#entity = this.vanillaScbid.getEntity();
         return this.#entity;
     }
     
-    /** @returns {Entry} Returns self, after update the vanillaScbid record */
+    /**
+     * 更新此分数持有者对象与原始分数持有者对象的映射关系。
+     * @returns {Entry} 更新完成后，返回对象自身。
+     */
     update(){
         if (this.#type === EntryType.FAKE_PLAYER){
             this.#vanillaScbid = undefined;
@@ -176,13 +198,12 @@ class Entry {
      * @hideconstructor
      */
     constructor(option){
-        let { entity, id, name, scbid, type } = option;
-        
+        let { entity, name, id, scbid, type } = option;
         //处理时使用原版实体对象
         entity = (entity instanceof YoniEntity) ? entity.vanillaEntity : entity;
         
         if (entity !== undefined){
-            if (entity instanceof Minecraft.Player)
+            if (entity instanceof Minecraft.Player || entity instanceof Gametest.SimulatedPlayer)
                 type = EntryType.PLAYER;
             else if (entity instanceof Minecraft.Entity)
                 type = EntryType.ENTITY;
@@ -190,23 +211,26 @@ class Entry {
             scbid = entity.scoreboard;
             id = scbid?.id;
         } else {
-            let condF = null;
-            if (type === EntryType.FAKE_PLAYER && name !== "" && name !== scbid?.displayName){
-                condF = (_)=>{
-                    return _.displayName === name && type === _.type;
-                };
-            } else if (id !== undefined && scbid === undefined){
-                condF = (_)=>{
-                    return _.id === id;
-                };
-            }
-            
-            if (condF !== null){
-                scbid = undefined;
-                for (let s of VanillaScoreboard.getParticipants()){
-                    if (condF(s)){
-                        scbid = s;
-                        break;
+            if (useOptionalFasterCode){
+                scbid = Entry.getVanillaScoreboardParticipant(option);
+            } else {
+                let condF = null;
+                if (type === EntryType.FAKE_PLAYER && name !== "" && name !== scbid?.displayName){
+                    condF = (scbid) => {
+                        return (scbid.displayName === name && type === scbid.type);
+                    }
+                } else if (id !== undefined && scbid === undefined){
+                    condF = (scbid) => {
+                        return scbid.id === id;
+                    }
+                }
+                if (condF !== null){
+                    scbid = undefined;
+                    for (let s of VanillaScoreboard.getParticipants()){
+                        if (condF(s)){
+                            scbid = s;
+                            break;
+                        }
                     }
                 }
             }
@@ -214,7 +238,14 @@ class Entry {
                 type = scbid.type;
                 name = scbid.displayName;
                 id = scbid.id;
-                entity = scbid.getEntity();
+                if (type !== EntryType.FAKE_PLAYER){
+                    entity = null;
+                    try {
+                        entity = scbid.getEntity();
+                    } catch {
+                        entity = null;
+                    }
+                }
             } else if (id !== undefined){
                 throw new Error(`Unable to determine the scbid ${id}`);
             }
@@ -231,3 +262,83 @@ class Entry {
 
 export { Entry, EntryType };
 export default Entry;
+
+if (useOptionalFasterCode){
+//缓存分数持有者映射
+import("../schedule.js")
+.then(m => m.YoniScheduler)
+.then((YoniScheduler) => {
+    YoniScheduler.runCycleTickTask(async ()=>{
+        for (let scbid of VanillaScoreboard.getParticipants()){
+            Entry.getEntry({ scbid: scbid, id: scbid.id, type: scbid.type }); //to cache entry result
+            await 1; //pause async function
+        }
+    }, 5, 10, true); //5t后，开始每10t运行一次任务，异步
+});
+
+//使用getVanillaScoreboardParticipant获取scbid
+(function (){
+    let cacheTimeout = 500;
+    
+    let parts;
+    let lastCacheTime = -1;
+    
+    let entityRecords;
+    let idRecords;
+    let nameRecords;
+    
+    const updateCache = () => {
+    
+        entityRecords = new WeakMap();
+        idRecords = new Map();
+        nameRecords = new Map();
+        
+        lastCacheTime = Date.now();
+        parts = VanillaScoreboard.getParticipants();
+        
+        for (let part of parts){
+            idRecords.set(part.id, part);
+            if (part.type !== EntryType.FAKE_PLAYER){
+                try {
+                    entityRecords.set(part.getEntity(), part);
+                } catch {
+                }
+            } else {
+                nameRecords.set(part.displayName, part);
+            }
+        }
+    };
+    
+    Entry.getVanillaScoreboardParticipant = function getVanillaScoreboardParticipant(option){
+        if (Date.now() - lastCacheTime > cacheTimeout){
+            updateCache();
+        }
+        
+        let { type, entity, id, name, scbid } = option;
+        entity = (entity instanceof YoniEntity) ? entity.vanillaEntity : entity;
+        
+        if (scbid instanceof Minecraft.ScoreboardIdentity) return scbid;
+        
+        //entity not null, type not fakeplayer
+        if (entity && (type && type !== EntryType.FAKE_PLAYER || !type)){
+            scbid = entityRecords.get(entity);
+        }
+        
+        //name not null, scbid is null, type is faleplayer or null
+        if (!scbid && name && (type && type === EntryType.FAKE_PLAYER || !type)){
+            scbid = nameRecords.get(name);
+        }
+        
+        
+        //name not null, scbid is null, type is null
+        if (!scbid && id != null){
+            scbid = idRecords.get(name);
+            if (type && scbid.type !== type)
+                scbid = null;
+        }
+        
+        return scbid;
+    }
+})();
+
+}

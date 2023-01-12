@@ -49,13 +49,13 @@ export function clearInterval(intervalId){
 async function hasTask(fid){
     return taskMap.has(fid);
 }
-async function getTimeMs(){
+function getTimeMs(){
     return Date.now();
 }
 async function countTimeAndRun(fid, i, args){
     const startTime = Date.now();
     while (await hasTask(fid)){
-        const currentTime = await getTimeMs();
+        const currentTime = getTimeMs();
         let f = null;
         if (currentTime - startTime >= i
         || currentTime < startTime){
@@ -71,7 +71,7 @@ async function countTimeAndRun(fid, i, args){
 async function countIntervalTimeAndRun(fid, i, args){
     const startTime = Date.now();
     while (await hasTask(fid)){
-        const currentTime = await getTimeMs();
+        const currentTime = getTimeMs();
         let f = null;
         if (currentTime - startTime >= i
         || currentTime < startTime){
@@ -84,7 +84,19 @@ async function countIntervalTimeAndRun(fid, i, args){
         }
     }
 }
-async function printError(...args){
-    let printFunc = (console.error) ?? (console.log) ?? (print) ?? (()=>{});
-    await printFunc(...args);
-}
+let printError = (()=>{
+    let printFunc;
+    if (console.error){
+        printFunc = async (e) =>
+            console.error(`${e.name}: ${e.message}\n${e.stack}`);
+    } else if (console.log){
+        printFunc = async (e) =>
+            console.log(`${e.name}: ${e.message}\n${e.stack}`);
+    } else if (print){
+        printFunc = async (e) =>
+            print(`${e.name}: ${e.message}\n${e.stack}`);
+    } else {
+        printFunc = async () => {};
+    }
+    return printFunc;
+})();
