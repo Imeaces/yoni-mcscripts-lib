@@ -1,0 +1,34 @@
+export declare function getErrorMsg(msg?: string, err?: string): {
+    msg: string;
+    errMsg: string;
+};
+export declare function printError(...args: any[]): void;
+export declare const formatStr: {
+    black: string;
+    dark_blue: string;
+    dark_green: string;
+    dark_aqua: string;
+    dark_red: string;
+    dark_purple: string;
+    gold: string;
+    gray: string;
+    dark_gray: string;
+    blue: string;
+    green: string;
+    aqua: string;
+    red: string;
+    light_purple: string;
+    yellow: string;
+    white: string;
+    minecoin_gold: string;
+    obfuscated: string;
+    bold: string;
+    italic: string;
+    reset: string;
+    unknownVal: string;
+};
+export declare function visualizeFunction(func: any): void;
+export declare function visualizeValue(any: any): void;
+export declare function visualizeObject(object: any): void;
+export declare function visualizeError(): void;
+export declare function visualizeArray(): void;
