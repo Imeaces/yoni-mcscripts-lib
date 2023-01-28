@@ -4,7 +4,7 @@
 
 尝试由JSDoc生成文档中……尚未开始
 
-暂时不打算转到typescript，由于我并没有运行vscode或其他ide的条件（没电脑，如果手机的话体验也不太行）
+正在转到typescript，但由于我并没有运行vscode或其他ide的条件，所以进展缓慢，现在只是单纯的改了文件后缀
 
 您可以用这种方法来使用
 ```js
@@ -33,6 +33,8 @@ await obj.postResetScore(onePlayer);
 Utils.say(`玩家 ${onePlayer.name} 在 ${obj.displayName} 上的分数为 ${obj.getScore(onePlayer)}`); //分数为 undefined
 
 })();
+
+```
 
 项目中使用了 lokiJS，这是一个以 JavaScript 编写的数据库访问接口，根据 MIT 协议授权许可。  
 可以在 GitHub 上找到他的源代码：<https://github.com/techfort/LokiJS>
