@@ -15,7 +15,7 @@ import { EntityClassRegistry } from "./EntityClassRegistry.js";
 const { MinecraftEntityTypes } = Minecraft;
 
 class Player extends Entity {
-    get entityType(): Minecraft.EntityType{
+    get entityType(){
         return MinecraftEntityTypes.player;
     }
     

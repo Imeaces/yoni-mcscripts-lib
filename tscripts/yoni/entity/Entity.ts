@@ -27,19 +27,19 @@ class Entity extends EntityBase {
         return "Object (Entity)";
     }
     
-    get id() : number { 
+    get id() { 
         return this.vanillaEntity.id;
     }
 
-    get typeId(): string {
+    get typeId() {
         return this.vanillaEntity.typeId ?? this.vanillaEntity.id;
     }
 
-    get velocity(){
+    get velocity() {
         return this.vanillaEntity.velocity;
     }
     
-    get entityType(): {
+    get entityType() {
         return EntityTypes.get(this.typeId);
     }
     
