@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { ScoreboardObjectiveEntryIndexMapper } from "./n0_block_device.js";
+import { ScoreboardObjectiveEntryIndexMapper } from "./n0_block_device_raw_addr.js";
 // length 最小值为1
 // index 最小值为 0
 /**
@@ -14,37 +14,45 @@ export class ByteBlock {
         return this.#identity;
     }
     get length() {
-        return this.#mapper.length;
+        return this.#mapper.length * 4;
     }
     set length(v) {
-        this.#mapper.length = v;
+        this.#mapper.length = parseInt(v / 4);
     }
     close() {
         throw new Error("Unknown file.");
     }
-    constructor(blockId) {
-        this.#mapper = new ScoreboardObjectiveEntryIndexMapper(blockId);
+    constructor(blockId, mapper = new ScoreboardObjectiveEntryIndexMapper(blockId)) {
+        this.#identity = blockId;
+        this.#mapper = mapper;
     }
     #offset = "0";
-    static getPositionBetweensPosition4Range(position, length) {
+    static getPositionBetweensPosition4Range(position, length, totalLength) {
         let object = { range: [0, 0], startOffset: 0, endOffset: 0, length: length };
         let start = position;
         let end = position + length;
         object.range[0] = parseInt(start / 4);
         object.range[1] = parseInt(end / 4);
+        if (object.range[1] > totalLength)
+            throw new RangeError(`end index ${object.range[1]} > totalLength ${totalLength}`);
         object.startOffset = start - object.range[0] * 4;
         object.endOffset = object.range[1] * 4 - end;
         return object;
     }
     read(position, length) {
-        let p4range = ByteBlock.getPositionBetweensPosition4Range(position, length);
+        let p4range = ByteBlock.getPositionBetweensPosition4Range(position, length, this.#mapper.length);
         let result = [];
         let startOffset = p4range.startOffset;
         for (let p4 = p4range.range[0]; p4 <= p4range.range[1]; p4++) {
             let b4arr = this.#read4(p4);
             let idx = startOffset;
             startOffset = 0;
-            let endIdx = 4 + (p4 === p4range.range[1]) ? p4range.endOffset : 0;
+            let endIdx = 4;
+            if (p4 === p4range.range[1]) {
+                if (p4range.endOffset === 0)
+                    break;
+                endIdx += p4range.endOffset;
+            }
             let barr = b4arr.slice(idx, endIdx);
             for (let i = 0; i < barr.length; i++) {
                 result.push(barr[i]);
@@ -53,7 +61,7 @@ export class ByteBlock {
         return result;
     }
     write(buffer, position, length = buffer.length) {
-        let p4range = ByteBlock.getPositionBetweensPosition4Range(position, length);
+        let p4range = ByteBlock.getPositionBetweensPosition4Range(position, length, this.#mapper.length);
         let { startOffset, endOffset } = p4range;
         let idx = 0;
         for (let p4 = p4range.range[0]; p4 <= p4range.range[1]; p4++) {
@@ -72,15 +80,17 @@ export class ByteBlock {
             else {
                 b4arr = [];
             }
-            console.debug("startOffset: " + startOffset);
-            console.debug("startOffset: " + endIdx);
             for (let i = startOffset; i < endIdx; i++) {
                 b4arr[i] = buffer[idx++];
             }
             startOffset = 0;
-            console.debug(b4arr);
             this.#mod4(p4, b4arr);
         }
+    }
+    trim(position, length) {
+    }
+    trim4(position4) {
+        delete this.#mapper[position4];
     }
     seek(offset, whence) { }
     putByte(byte) { }

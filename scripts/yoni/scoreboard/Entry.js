@@ -2,8 +2,15 @@
 import { VanillaScoreboard, Minecraft, Gametest } from "../basis.js";
 import { EntityBase } from "../entity/EntityBase.js";
 import { UnknownEntryError } from "./ScoreboardError.js";
-import { useOptionalFasterCode } from "../config.js";
-let idRecords = new Map();
+import { debug, useOptionalFasterCode, enableScoreboardIdentityByNumberIdQuery } from "../config.js";
+/**
+ * 理论上，存十万条就很卡了
+ * 那个时候，建议还是直接让游戏操控吧
+ */
+let idRecords;
+if (enableScoreboardIdentityByNumberIdQuery) {
+    idRecords = new Map();
+}
 let nameRecords = new Map();
 let entityRecords = new WeakMap();
 let scbidRecords = new WeakMap();
@@ -39,8 +46,11 @@ class Entry {
             return this.getEntry({ entity: any });
         if (typeof any === "string")
             return this.getEntry({ name: any, type: EntryType.FAKE_PLAYER });
-        if (!isNaN(Number(any)))
+        if (!isNaN(Number(any))) {
+            if (!enableScoreboardIdentityByNumberIdQuery)
+                throw new Error("scbid search by number id is disable, set 'enableScoreboardIdentityByNumberIdQuery' to 'true' to enable it");
             return this.getEntry({ id: any });
+        }
         throw new UnknownEntryError();
     }
     /**
@@ -61,7 +71,8 @@ class Entry {
             entry = nameRecords.get(name);
         else if (scbidRecords.has(scbid))
             entry = scbidRecords.get(scbid);
-        else if (idRecords.has(id))
+        else if (enableScoreboardIdentityByNumberIdQuery
+            && idRecords.has(id))
             entry = idRecords.get(id);
         else
             entry = new Entry(option);
@@ -82,7 +93,8 @@ class Entry {
                 entityRecords.set(entity, entry);
             }
         }
-        if (entry.id !== undefined)
+        if (enableScoreboardIdentityByNumberIdQuery
+            && entry.id !== undefined)
             idRecords.set(entry.id, entry);
         if (entry.vanillaScbid !== undefined)
             scbidRecords.set(entry.vanillaScbid, entry);
@@ -211,32 +223,30 @@ class Entry {
             id = scbid?.id;
         }
         else {
-            if (useOptionalFasterCode) {
-                scbid = Entry.getVanillaScoreboardParticipant(option);
+            let condF = null;
+            if (scbid == null
+                && type === EntryType.FAKE_PLAYER
+                && name !== ""
+                && name != null) {
+                condF = (scbid) => {
+                    return (scbid.displayName === name && type === scbid.type);
+                };
             }
-            else {
-                let condF = null;
-                if (type === EntryType.FAKE_PLAYER && name !== "" && name !== scbid?.displayName) {
-                    condF = (scbid) => {
-                        return (scbid.displayName === name && type === scbid.type);
-                    };
-                }
-                else if (id !== undefined && scbid === undefined) {
-                    condF = (scbid) => {
-                        return scbid.id === id;
-                    };
-                }
-                if (condF !== null) {
-                    scbid = undefined;
-                    for (let s of VanillaScoreboard.getParticipants()) {
-                        if (condF(s)) {
-                            scbid = s;
-                            break;
-                        }
+            else if (scbid == null && id !== null) {
+                condF = (scbid) => {
+                    return scbid.id === id;
+                };
+            }
+            if (condF !== null) {
+                scbid = undefined;
+                for (let s of VanillaScoreboard.getParticipants()) {
+                    if (condF(s)) {
+                        scbid = s;
+                        break;
                     }
                 }
             }
-            if (scbid !== undefined) {
+            if (scbid != null) {
                 type = scbid.type;
                 name = scbid.displayName;
                 id = scbid.id;
@@ -250,7 +260,7 @@ class Entry {
                     }
                 }
             }
-            else if (id !== undefined) {
+            else if (id != null) {
                 throw new Error(`Unable to determine the scbid ${id}`);
             }
         }
@@ -269,63 +279,25 @@ if (useOptionalFasterCode) {
         .then(m => m.YoniScheduler)
         .then((YoniScheduler) => {
         YoniScheduler.runCycleTickTask(async () => {
+            let count = 0;
             for (let scbid of VanillaScoreboard.getParticipants()) {
-                Entry.getEntry({ scbid: scbid, id: scbid.id, type: scbid.type }); //to cache entry result
-                await 1; //pause async function
+                if (!scbid) {
+                    //scbid为空
+                    //可能是mojang抽风了
+                    //不用担心，忽略就行
+                    //就是可能会报错
+                    //那个没办法
+                    //存多了就会这样
+                    //目前没法解决
+                    continue;
+                }
+                await Entry.getEntry({ scbid: scbid, id: scbid.id, type: scbid.type }); //to cache entry result
+                count++;
+                //pause async function
             }
-        }, 5, 10, true); //5t后，开始每10t运行一次任务，异步
+            if (debug) {
+                console.trace("重新映射了{}位分数持有者的Entry", count);
+            }
+        }, 0, 200, true); //每200t运行一次任务，异步
     });
-    //使用getVanillaScoreboardParticipant获取scbid
-    (function () {
-        let cacheTimeout = 500;
-        let parts;
-        let lastCacheTime = -1;
-        let entityRecords;
-        let idRecords;
-        let nameRecords;
-        const updateCache = () => {
-            entityRecords = new WeakMap();
-            idRecords = new Map();
-            nameRecords = new Map();
-            lastCacheTime = Date.now();
-            parts = VanillaScoreboard.getParticipants();
-            for (let part of parts) {
-                idRecords.set(part.id, part);
-                if (part.type !== EntryType.FAKE_PLAYER) {
-                    try {
-                        entityRecords.set(part.getEntity(), part);
-                    }
-                    catch {
-                    }
-                }
-                else {
-                    nameRecords.set(part.displayName, part);
-                }
-            }
-        };
-        Entry.getVanillaScoreboardParticipant = function getVanillaScoreboardParticipant(option) {
-            if (Date.now() - lastCacheTime > cacheTimeout) {
-                updateCache();
-            }
-            let { type, entity, id, name, scbid } = option;
-            entity = (entity instanceof EntityBase) ? entity.vanillaEntity : entity;
-            if (scbid instanceof Minecraft.ScoreboardIdentity)
-                return scbid;
-            //entity not null, type not fakeplayer
-            if (entity && (type && type !== EntryType.FAKE_PLAYER || !type)) {
-                scbid = entityRecords.get(entity);
-            }
-            //name not null, scbid is null, type is faleplayer or null
-            if (!scbid && name && (type && type === EntryType.FAKE_PLAYER || !type)) {
-                scbid = nameRecords.get(name);
-            }
-            //name not null, scbid is null, type is null
-            if (!scbid && id != null) {
-                scbid = idRecords.get(name);
-                if (type && scbid.type !== type)
-                    scbid = null;
-            }
-            return scbid;
-        };
-    })();
 }

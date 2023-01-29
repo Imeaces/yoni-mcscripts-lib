@@ -1,13 +1,13 @@
 // @ts-nocheck
-export function toIntAddress(address) {
+export function toIntAddress(address, addrnums = addressNumbers) {
     address = String(address);
-    return Number(coverBase(address, 10, addressNumbers.length));
+    return Number(coverBase(address, 10, addrnums.length));
 }
-export function toAddress(int) {
+export function toAddress(int, addrnums = addressNumbers) {
     int = Number(int | 0);
     if (int > Number.MAX_SAFE_INTEGER || int < 0)
         throw new Error("number out of range");
-    let rt = coverBase(int, addressNumbers.length, 10);
+    let rt = coverBase(int, addrnums.length, 10);
     return rt;
 }
 let addressNumbers = (function () {
@@ -24,7 +24,7 @@ export { addressNumbers };
  */
 export function getNumArr(num, base = 10, numbers = addressNumbers) {
     let arr = [];
-    num = String(num).toUpperCase();
+    num = 字母变大写(num);
     let fs = false;
     if (num.startsWith("-")) {
         num = num.slice(1);
@@ -116,4 +116,16 @@ export function coverBase(num, base, oldBase = 10, numbers = addressNumbers) {
         nDA = nDA.Quotient;
     } while (nDA[0] !== 0);
     return getNum(newNumArr, base);
+}
+function 字母变大写(str) {
+    str = String(str);
+    let nstr = "";
+    let requireToUpperCase = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"];
+    for (let c in str) {
+        c = str[c];
+        if (requireToUpperCase.includes(c))
+            c = c.toUpperCase();
+        nstr += c;
+    }
+    return nstr;
 }

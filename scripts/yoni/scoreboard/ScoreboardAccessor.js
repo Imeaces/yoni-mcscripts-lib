@@ -6,6 +6,7 @@ import { YoniScheduler } from "../schedule.js";
 const oj = new WeakMap();
 //提升缓存有效时间可以一定程度上提高性能，但也可能导致来不及写入，还可能导致数据不同步。以游戏刻为单位
 const cacheTickLength = 5;
+YoniScheduler.runCycleTickTask(() => ScoreboardAccessor.writedCountInCurrentTick = 0, 0, 1);
 export function ScoreboardAccessor(objective) {
     objective = (objective instanceof Objective) ? objective : Scoreboard.getObjective(objective);
     if (oj.has(objective)) {
@@ -17,16 +18,27 @@ export function ScoreboardAccessor(objective) {
     YoniScheduler.runCycleTickTask(async function () {
         if (cacheRead.size !== 0) {
             cacheRead.clear();
+            console.debug("移除了{}条缓存", cacheRead.size);
         }
         if (caches.size === 0) {
             return;
         }
-        for (let kV of caches.entries()) {
-            caches.delete(kV[0]);
-            if (kV[1] !== undefined)
-                await objective.postSetScore(kV[0], kV[1]);
-            else
-                await objective.postResetScore(kV[0]);
+        for (;;) {
+            let promise = [];
+            for (let kV of caches.entries()) {
+                caches.delete(kV[0]);
+                if (kV[1] !== undefined)
+                    promise[promise.length] = objective.postSetScore(kV[0], kV[1]);
+                else
+                    promise[promise.length] = objective.postResetScore(kV[0]);
+                if (ScoreboardAccessor.writedCountInCurrentTick++ >= ScoreboardAccessor.maxWritePerTick)
+                    break;
+            }
+            await Promise.all(promise);
+            if (caches.size === 0) {
+                console.debug("缓存写入完毕");
+                break;
+            }
         }
     }, cacheTickLength, cacheTickLength, true);
     let target = new Object(null);
@@ -133,3 +145,5 @@ export function ScoreboardAccessor(objective) {
     oj.set(objective, proxy);
     return proxy;
 }
+ScoreboardAccessor.maxWritePerTick = 64;
+ScoreboardAccessor.writedCountInCurrentTick = 0;

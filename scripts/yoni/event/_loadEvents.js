@@ -1,12 +1,12 @@
+import { logger } from "./logger.js";
 // @ts-nocheck
-import { load } from "../loader.js";
-const loader = load.getLoader("./event/");
-const eventList = new Set()
-    .add("entity/EntityMovementEvent.js")
-    .add("player/PlayerDeadEvent.js")
-    .add("player/PlayerRespawnEvent.js")
-    .add("player/PlayerJoinedEvent.js")
-    .add("player/PlayerTeleportDimensionEvent.js")
-    .add("world/raid/RaidTriggerEvent.js")
-    .add("world/TickEvent.js");
-Array.from(eventList).forEach(path => loader(path));
+const eventList = [
+    "./entity/EntityMovementEvent.js",
+    "./player/PlayerDeadEvent.js",
+    "./player/PlayerRespawnEvent.js",
+    "./player/PlayerJoinedEvent.js",
+    "./player/PlayerTeleportDimensionEvent.js",
+    "./world/raid/RaidTriggerEvent.js",
+    "./world/TickEvent.js",
+];
+eventList.map(path => import(path)).forEach(pro => pro.catch(logger.error));

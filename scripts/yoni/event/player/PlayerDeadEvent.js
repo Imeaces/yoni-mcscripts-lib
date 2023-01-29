@@ -2,6 +2,7 @@
 import { EventListener, EventSignal, EventTriggerBuilder } from "../../event.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { EntityBase } from "../../entity.js";
+import { overworld } from "../../basis.js";
 export class PlayerDeadEvent extends PlayerEvent {
     constructor(player) {
         super(player);
@@ -34,5 +35,8 @@ const trigger = new EventTriggerBuilder()
     EventListener.unregister(eventId0);
     EventListener.unregister(eventId1);
 })
-    .build()
-    .registerEvent();
+    .build();
+if (overworld.runCommand)
+    import("./PlayerDeadEvent.v1.19.30.js");
+else
+    trigger.registerEvent();

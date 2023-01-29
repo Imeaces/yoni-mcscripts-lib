@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { Minecraft, Gametest, VanillaWorld, dim } from "../basis.js";
+import { Minecraft, VanillaWorld, dim } from "../basis.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
 /**
  * @typedef {Entity|Player|SimulatedPlayer} YoniEntityType
@@ -21,7 +21,7 @@ class EntityBase {
      */
     constructor(entity) {
         //如果不是MCEntity则报错
-        if (!Entity.isMinecraftEntity(entity))
+        if (!EntityBase.isMinecraftEntity(entity))
             throw new TypeError("There is not a Minecraft Entity type");
         Object.defineProperty(this, "vanillaEntity", {
             configurable: false,
@@ -319,13 +319,7 @@ class EntityBase {
      * @returns {boolean}
      */
     static isMinecraftEntity(object) {
-        if (object instanceof Minecraft.Entity)
-            return true;
-        if (object instanceof Minecraft.Player)
-            return true;
-        if (object instanceof Gametest.SimulatedPlayer)
-            return true;
-        return false;
+        return EntityClassRegistry.includesInSrcPrototype(Object.getPrototypeOf(object));
     }
     /**
      * 检测两个参数是否为同一实体

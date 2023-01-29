@@ -1,8 +1,10 @@
 // @ts-nocheck
-import { VanillaWorld, StatusCode, VanillaScoreboard } from "../basis.js";
+import { Minecraft, VanillaWorld, StatusCode, VanillaScoreboard, overworld } from "../basis.js";
 import { Command } from "../command.js";
 import { Entry, EntryType } from "./Entry.js";
-import { NameConflictError, ScoreRangeError, ObjectiveUnregisteredError } from "./ScoreboardError.js";
+import { NameConflictError, ScoreRangeError, ObjectiveUnregisteredError, UnknownEntryError } from "./ScoreboardError.js";
+import { enableScoreboardIdentityByNumberIdQuery, emitLegacyMode } from "../config.js";
+import { EntityBase } from "../entity.js";
 /**
  * @typedef {import("../entity.js").YoniEntity} YoniEntity
  */
@@ -134,7 +136,7 @@ class Objective {
      */
     postAddScore(entry, score) {
         checkScoreIsInRange(score);
-        return this.#postPlayersCommand("add", entry, score)
+        return this.#postPlayerCommand("add", entry, score)
             .then(() => { });
     }
     /**
@@ -169,7 +171,7 @@ class Objective {
             if (min > max) {
                 throw new Error("min > max");
             }
-            return this.#postPlayersCommand("random", entry, min, max)
+            return this.#postPlayerCommand("random", entry, min, max)
                 .then(() => { });
         }
     }
@@ -182,7 +184,7 @@ class Objective {
      */
     async postRemoveScore(entry, score) {
         checkScoreIsInRange(score);
-        return this.#postPlayersCommand("remove", entry, score)
+        return this.#postPlayerCommand("remove", entry, score)
             .then(() => { });
     }
     /**
@@ -191,7 +193,7 @@ class Objective {
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
      */
     postResetScore(entry) {
-        return this.#postPlayersCommand("reset", entry)
+        return this.#postPlayerCommand("reset", entry)
             .then(() => { });
     }
     /**
@@ -217,7 +219,7 @@ class Objective {
      */
     postSetScore(entry, score) {
         checkScoreIsInRange(score);
-        return this.#postPlayersCommand("set", entry, score)
+        return this.#postPlayerCommand("set", entry, score)
             .then(() => score);
     }
     /**
@@ -253,46 +255,125 @@ class Objective {
      * @throws 未知的命令错误。
      * @throws 若尝试为虚拟玩家设置分数，且世界中有相同名字的玩家时，抛出 `NameConflictError`。
      */
-    #postPlayersCommand(option, entry, ...args) {
-        if (!(entry instanceof Entry))
-            entry = Entry.guessEntry(entry);
-        if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY) {
+    #postPlayerCommand(option, entry, ...args) {
+        let { entity, name, type } = Objective.findCommandRequirement(entry);
+        if (type === EntryType.PLAYER || type === EntryType.ENTITY) {
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", this.#id);
-            let ent = entry.getEntity();
-            if (ent === undefined) {
-                throw new InternalError("Could not find the entity");
-            }
-            return Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, cmd, ...args)
+            return Command.addExecuteParams(Command.PRIORITY_HIGHEST, entity, cmd, ...args)
                 .then((rt) => {
                 if (rt.statusCode === StatusCode.success) {
                     return true;
                 }
                 this.checkUnregistered();
                 //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
-                throw new InternalError(`Could not ${option} score, `
-                    + "maybe entity or player disappeared?"
-                    + "\n  cause by: "
-                    + rt.statusMessage);
-            });
-        }
-        else if ([...VanillaWorld.getPlayers({ name: entry.displayName })].length === 0) {
-            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, entry.displayName, this.#id);
-            return Command.addParams(Command.PRIORITY_HIGHEST, cmd, ...args)
-                .then((rt) => {
-                if (rt.statusCode === StatusCode.success) {
-                    return true;
-                }
-                this.checkUnregistered();
-                //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
-                throw new InternalError(`Could not ${option} score, `
+                throw new Error(`Could not ${option} score, `
                     + "maybe entity or player disappeared?"
                     + "\n  cause by: "
                     + rt.statusMessage);
             });
         }
         else {
-            throw new NameConflictError(entry.displayName);
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, this.#id);
+            return Command.addParams(Command.PRIORITY_HIGHEST, cmd, ...args)
+                .then((rt) => {
+                if (rt.statusCode === StatusCode.success) {
+                    return true;
+                }
+                this.checkUnregistered();
+                if ([...VanillaWorld.getPlayers({ name })].length !== 0)
+                    throw new NameConflictError(name);
+                //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+                throw new Error(`Could not ${option} score, `
+                    + "maybe entity or player disappeared?"
+                    + "\n  cause by: "
+                    + rt.statusMessage);
+            });
         }
+    }
+    /**
+     * 为分数持有者在记分项上执行特定的操作。
+     * @param {string} option - 操作类型。
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可能为分数持有者的值。
+     * @param {...any} args - 操作所需要的参数。
+     * @throws 未知的命令错误。
+     * @throws 若尝试为虚拟玩家设置分数，且世界中有相同名字的玩家时，抛出 `NameConflictError`。
+     */
+    __playerCommand(option, entry, ...args) {
+        let { entity, name, type } = Objective.findCommandRequirement(entry);
+        if (type === EntryType.PLAYER || type === EntryType.ENTITY) {
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", this.#id);
+            cmd = Command.getCommand(cmd, ...args);
+            let result = Command.execute(entity, cmd);
+            if (result.statusCode !== StatusCode.success) {
+                this.checkUnregistered();
+                //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+                throw new Error(`Could not ${option} score, `
+                    + "maybe entity or player disappeared?"
+                    + "\n  cause by: "
+                    + result.statusMessage);
+            }
+        }
+        else {
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, this.#id);
+            cmd = Command.getCommand(cmd, ...args);
+            let result = Command.run(entity, cmd);
+            if (result.statusCode !== StatusCode.success) {
+                this.checkUnregistered();
+                if ([...VanillaWorld.getPlayers({ name })].length !== 0)
+                    throw new NameConflictError(name);
+                //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+                throw new Error(`Could not ${option} score, `
+                    + "maybe entity or player disappeared?"
+                    + "\n  cause by: "
+                    + rt.statusMessage);
+            }
+        }
+    }
+    /**
+     * 寻找用于在记分项上执行特定的操作的与分数持有者有关的信息。
+     * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可能为分数持有者的值。
+     */
+    static findCommandRequirement(entry) {
+        let name = null;
+        let type = null;
+        let entity = null;
+        if (entry instanceof Entry || entry instanceof Minecraft.ScoreboardIdentity) {
+            type = entry.type;
+            if (type === EntryType.ENTITY || type === EntryType.PLAYER) {
+                try {
+                    entity = entry.getEntity();
+                }
+                catch {
+                    throw new Error("Could not find the entity");
+                }
+                if (entity == null)
+                    throw new Error("Could not find the entity");
+            }
+            else {
+                name = entry.displayName;
+                type = EntryType.FAKE_PLAYER;
+            }
+        }
+        else if (entry instanceof EntityBase || entry instanceof Minecraft.Entity || entry instanceof Minecraft.Player) {
+            if (EntityBase.entityIsPlayer(entry))
+                type = EntryType.PLAYER;
+            else
+                type = EntryType.ENTITY;
+            entity = entry;
+        }
+        else if (typeof entry === "string") {
+            type = EntryType.FAKE_PLAYER;
+            name = entry;
+        }
+        else if (isFinite(Number(entry))) {
+            if (!enableScoreboardIdentityByNumberIdQuery)
+                throw new Error("scbid search by number id is disable, set 'enableScoreboardIdentityByNumberIdQuery' to 'true' to enable it");
+            return Objective.findCommandRequirement(Entry.getEntry({ id: entry }));
+        }
+        else {
+            throw new UnknownEntryError();
+        }
+        return { type, entity, name };
     }
     /**
      * 获取分数持有者在记分项上的分数。
@@ -393,7 +474,7 @@ class Objective {
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      * @throws 若 `useBuiltIn` 为 `false` ，且 `min > max` 。
      */
-    randomScore(entry, min = -2147483647, max = 2147483647, useBuiltIn = false) {
+    randomScore(entry, min = -2147483647, max = 2147483647, useBuiltIn = true) {
         return this.postRandomScore.apply(this, arguments);
     }
     /**
@@ -411,8 +492,8 @@ class Objective {
      * @deprecated 由于新版本移除了runCommand()，故原有的方法
      * 不再可用，请改用 {@link Objective.postAddScore}。
      * @param {Entry|Minecraft.ScoreboardIdentity|Minecraft.Entity|Minecraft.Player|string|number|YoniEntity} entry - 可能为分数持有者的值。
-     * @param {number} score - 要增加的分数。
-     * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
+     * @param score - 要增加的分数。
+     * @returns 执行成功后，此 `Promise` 将会敲定。
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
     addScore(entry, score) {
@@ -466,6 +547,58 @@ class ScoreInfo {
     toString() {
         return `ScoreInfo { Score: ${this.score}, Entry: ${this.getEntry().id} }`;
     }
+}
+if (emitLegacyMode) {
+    Objective.prototype.addScore = function addScore(entry, score) {
+        if (overworld.runCommand) {
+            checkScoreIsInRange(score);
+            this.__playerCommand("add", entry, score);
+            return;
+        }
+        return this.postAddScore.apply(this, arguments);
+    };
+    Objective.prototype.removeScore = function removeScore(entry, score) {
+        if (overworld.runCommand) {
+            checkScoreIsInRange(score);
+            this.__playerCommand("remove", entry, score);
+            return;
+        }
+        return this.postRemoveScore.apply(this, arguments);
+    };
+    Objective.prototype.setScore = function setScore(entry, score) {
+        if (overworld.runCommand) {
+            checkScoreIsInRange(score);
+            this.__playerCommand("set", entry, score);
+            return score;
+        }
+        return this.postSetScore.apply(this, arguments);
+    };
+    Objective.prototype.resetScore = function resetScore(entry) {
+        if (overworld.runCommand) {
+            this.__playerCommand("reset", entry);
+            return;
+        }
+        return this.postResetScore.apply(this, arguments);
+    };
+    Objective.prototype.randomScore = function randomScore(entry, min, max, useBuiltin = true) {
+        if (overworld.runCommand) {
+            checkScoreIsInRange(min, max);
+            if (useBuiltIn) {
+                let vals = max - min;
+                let randomScore = vals * Math.random();
+                let result = Math.round(randomScore + min);
+                return this.setScore(entry, result);
+            }
+            else {
+                if (min > max) {
+                    throw new Error("min > max");
+                }
+                this.__playerCommand("random", entry, min, max);
+            }
+            return;
+        }
+        return this.postRandomScore.apply(this, arguments);
+    };
 }
 export { Objective, ScoreInfo };
 export default Objective;

@@ -21,7 +21,13 @@ export class EntityClassRegistry {
     static from(entity) {
         if (entity instanceof EntityBase)
             return entity;
-        let prototypeObject = Object.getPrototypeOf(entity);
+        let prototypeObject;
+        try {
+            prototypeObject = Object.getPrototypeOf(entity);
+        }
+        catch {
+            return null;
+        }
         let mappingClass = null;
         if (EntityClassRegistry.#entityClassPrototypeRegistry.has(prototypeObject))
             mappingClass = EntityClassRegistry.#entityClassPrototypeRegistry.get(prototypeObject);
@@ -46,5 +52,17 @@ export class EntityClassRegistry {
         EntityClassRegistry.#entityClassRegistry.delete(originalEntityClass);
         EntityClassRegistry.#entitySrcClassPrototypeRegistry.delete(entityClass.prototype);
         EntityClassRegistry.#entitySrcClassRegistry.delete(entityClass);
+    }
+    static includesInSrcPrototype(object) {
+        return EntityClassRegistry.#entityClassPrototypeRegistry.has(object);
+    }
+    static includesInMappedPrototype(object) {
+        return EntityClassRegistry.#entitySrcClassPrototypeRegistry.has(object);
+    }
+    static includesInSrcClass(object) {
+        return EntityClassRegistry.#entityClassRegistry.has(object);
+    }
+    static includesInMappedClass(object) {
+        return EntityClassRegistry.#entitySrcClassRegistry.has(object);
     }
 }

@@ -45,7 +45,7 @@ class World {
      * @returns {Player[]}
      */
     getPlayers() {
-        return Array.from(VanillaWorld.getPlayers()).map(e => EntityBase.from);
+        return Array.from(VanillaWorld.getPlayers()).map(EntityBase.from);
     }
     /**
      */

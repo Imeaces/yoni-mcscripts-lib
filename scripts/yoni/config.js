@@ -14,6 +14,10 @@ export const useOptionalFasterCode = true;
 export const disableDangerousCode = false;
 //是否覆盖默认的console对象为Logger对象
 export const overrideDefaultConsole = true;
+//启用根据数字ID查询scbid的功能（不推荐）
+export const enableScoreboardIdentityByNumberIdQuery = false;
+//使用更复杂的代码（可能也更好）去尝试兼容旧版本，这可能会降低性能
+export const emitLegacyMode = true;
 /* 以下为非配置区 */
 export function isDebug() {
     return debug;

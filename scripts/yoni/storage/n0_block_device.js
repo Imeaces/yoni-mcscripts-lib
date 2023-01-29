@@ -14,7 +14,7 @@ export class ScoreboardObjectiveEntryIndexMapper {
             configurable: false,
             enumerable: false,
             // 这里定义块设备的地址数，它的值乘以4便是可存储的字节数
-            value: 16777216,
+            value: 65536,
             writable: true,
         });
         let proxy = new Proxy(self, {

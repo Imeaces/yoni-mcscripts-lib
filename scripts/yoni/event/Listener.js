@@ -1,8 +1,7 @@
 // @ts-nocheck
 import { debug } from "../config.js";
-import { Logger } from "../util/Logger.js";
 import { EventTypes, EventRegisterListener, getIdentifierInfo } from "./Types.js";
-const logger = new Logger("Event");
+import { logger } from "./logger.js";
 /**
  * 事件监听管理
  * 不建议移除事件，由于移除事件的机制为设空回调，导致移除事件并不是真正的移除，大量移除事件导致事件遗留，可能影响性能
