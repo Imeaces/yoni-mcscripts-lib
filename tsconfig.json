@@ -168,7 +168,7 @@
     "paths": {}
   },
   "include": [
-    "scripts/src/**/*.ts"
+    "scripts/src/**/*.ts",
     "scripts/src/**/*.js"
   ],
   "exclude": [
