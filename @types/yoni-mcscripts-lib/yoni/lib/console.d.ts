@@ -1,1 +1,1 @@
-export declare function consoleFormat(object: any, depth?: number): any;
+export function consoleFormat(object: any, depth?: number): any;

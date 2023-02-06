@@ -1,2 +1,2 @@
-export declare class KeyValueStorage {
+export class KeyValueStorage {
 }

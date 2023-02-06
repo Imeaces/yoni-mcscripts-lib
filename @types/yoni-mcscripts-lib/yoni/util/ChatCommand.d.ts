@@ -1,7 +1,6 @@
 export default class ChatCommand {
-    #private;
+    static set defaultPrefix(arg: string);
     static get defaultPrefix(): string;
-    static set defaultPrefix(i: string);
     static receiveBeforeChatEvent(event: any): void;
     static registerPrefixCommand(...args: any[]): void;
     /**
@@ -9,12 +8,12 @@ export default class ChatCommand {
      * @param {string} command
      * @param {(sender:YoniEntity, rawCommand:string, label:string, args:string[])=>void} executor
      */
-    static registerCommand(command: any, executor: any): void;
+    static registerCommand(command: string, executor: (sender: YoniEntity, rawCommand: string, label: string, args: string[]) => void): void;
     static unregisterCommand(command: any): void;
     static registerNonPrefixCommand(command: any, executor: any): void;
     static unregisterNonPrefixCommand(command: any): void;
     static registerCustomPrefixCommand(prefix: any, command: any, executor: any): void;
     static unregisterCustomPrefixCommand(prefix: any, command: any): void;
-    static getParameters(commandContent: any): never[];
+    static "__#11@#invokeCommand"(options: any): void;
+    static getParameters(commandContent: any): string[];
 }
-export { ChatCommand };

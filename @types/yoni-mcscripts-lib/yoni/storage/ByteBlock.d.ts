@@ -11,6 +11,8 @@ export declare class ByteBlock {
     set length(v: number);
     constructor(blockId: any, mapper?: ScoreboardObjectiveEntryIndexMapper);
     static getPositionBetweensPosition4Range(position: number, length: number, totalLength: number): Position4Range;
+    readBlockAsync(position: any, length: any, blockLength?: number): number[];
+    readAsync(position: any, length: any): AsyncGenerator<number, void, unknown>;
     read(position: number, length: number): number[];
     write(buffer: any, position: any, length?: any): void;
     trim(position: any, length: any): void;

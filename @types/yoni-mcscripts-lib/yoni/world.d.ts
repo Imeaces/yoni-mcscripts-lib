@@ -1,44 +1,48 @@
+import { dim, Minecraft } from "./basis.js";
 import Scoreboard from "./scoreboard.js";
-/**
- * @typedef {import("./entity.js").YoniEntity} Entity
- * @typedef {import("./entity.js").YoniPlayer} Player
- */
+import { Entity, Player } from "./entity.js";
 /**
  * 代表一种与世界的关系。
  */
-declare class World {
+declare class WorldClass {
     #private;
-    static get instance(): null;
+    static get instance(): WorldClass;
     /**
      * @private
      * @hideconstructor
      */
     constructor();
     /**
-     * 获取一个包含了游戏中的所有玩家的对象的数组。
+     * 查找游戏中符合特定条件的玩家。
+     * @param {Minecraft.EntityQueryOptions} options
      * @yields {Player}
      */
-    selectPlayers(options: any): Generator<any, void, unknown>;
+    selectPlayers<Player>(options: Minecraft.EntityQueryOptions): Generator<Player, void, unknown>;
     /**
-     * @ignore
+     * 查找游戏中符合特定条件的玩家。
+     * @param {Minecraft.EntityQueryOptions} [option]
+     * @yields {Player}
      */
-    selectEntities(options: any): void;
+    getPlayers<Player>(option?: Minecraft.EntityQueryOptions): Generator<Player, void, unknown>;
     /**
      * 获取一个包含了游戏中的所有玩家的对象的数组。
      * @returns {Player[]}
      */
-    getPlayers(): any[];
-    /**
-     */
-    getAllPlayers(): any[];
+    getAllPlayers(): Player[];
     /**
      * 获取一个包含了当前世界中已经加载的所有实体的对象的数组。
-     * @returns {Entity[]}
      */
-    getLoadedEntities(): any[];
-    getAliveEntities(): any[];
+    getLoadedEntities(): Entity[];
+    /**
+     * 查找游戏中符合特定条件的实体。
+     * @param {Minecraft.EntityQueryOptions} options
+     * @yields {Entity}
+     */
+    selectEntities<Entity>(option: Minecraft.EntityQueryOptions): Generator<Entity, void, unknown>;
+    getAliveEntities(): Entity[];
     get scoreboard(): typeof Scoreboard;
-    get getDimension(): (dimid?: number) => any;
+    get getDimension(): typeof dim;
 }
-export default World;
-export { World };
+declare const world: WorldClass;
+export default world;
+export { world as World };

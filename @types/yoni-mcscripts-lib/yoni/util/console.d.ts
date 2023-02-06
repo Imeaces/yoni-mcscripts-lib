@@ -1,34 +1,34 @@
-export declare function getErrorMsg(msg?: string, err?: string): {
+export function getErrorMsg(msg?: string, err?: string): {
     msg: string;
     errMsg: string;
 };
-export declare function printError(...args: any[]): void;
-export declare const formatStr: {
-    black: string;
-    dark_blue: string;
-    dark_green: string;
-    dark_aqua: string;
-    dark_red: string;
-    dark_purple: string;
-    gold: string;
-    gray: string;
-    dark_gray: string;
-    blue: string;
-    green: string;
-    aqua: string;
-    red: string;
-    light_purple: string;
-    yellow: string;
-    white: string;
-    minecoin_gold: string;
-    obfuscated: string;
-    bold: string;
-    italic: string;
-    reset: string;
-    unknownVal: string;
-};
-export declare function visualizeFunction(func: any): void;
-export declare function visualizeValue(any: any): void;
-export declare function visualizeObject(object: any): void;
-export declare function visualizeError(): void;
-export declare function visualizeArray(): void;
+export function printError(...args: any[]): void;
+export function visualizeFunction(func: any): void;
+export function visualizeValue(any: any): void;
+export function visualizeObject(object: any): void;
+export function visualizeError(): void;
+export function visualizeArray(): void;
+export namespace formatStr {
+    const black: string;
+    const dark_blue: string;
+    const dark_green: string;
+    const dark_aqua: string;
+    const dark_red: string;
+    const dark_purple: string;
+    const gold: string;
+    const gray: string;
+    const dark_gray: string;
+    const blue: string;
+    const green: string;
+    const aqua: string;
+    const red: string;
+    const light_purple: string;
+    const yellow: string;
+    const white: string;
+    const minecoin_gold: string;
+    const obfuscated: string;
+    const bold: string;
+    const italic: string;
+    const reset: string;
+    const unknownVal: string;
+}

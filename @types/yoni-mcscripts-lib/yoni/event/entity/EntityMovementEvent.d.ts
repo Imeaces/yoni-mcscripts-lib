@@ -1,16 +1,16 @@
-import { EventSignal } from "../../event.js";
-import { EntityEvent } from "./EntityEvent.js";
-export declare class EntityMovementEventSignal extends EventSignal {
+export class EntityMovementEventSignal extends EventSignal {
     subscribe(callback: any, options: any): void;
 }
-export declare class EntityMovementEvent extends EntityEvent {
-    #private;
-    get cancel(): boolean;
+export class EntityMovementEvent extends EntityEvent {
+    constructor(entity: any, from: any, to: any, movementKeys: any);
     /**
      * 如果取消跨维度移动事件的话，可能会导致游戏崩溃
      */
-    set cancel(bool: boolean);
+    set cancel(arg: boolean);
+    get cancel(): boolean;
     get from(): any;
     get to(): any;
-    constructor(entity: any, from: any, to: any, movementKeys: any);
+    #private;
 }
+import { EventSignal } from "../../event.js";
+import { EntityEvent } from "./EntityEvent.js";

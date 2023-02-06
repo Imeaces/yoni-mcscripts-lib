@@ -1,52 +1,84 @@
-import { Minecraft } from "./basis.js";
+export default Location;
+export type NetherDimensionLike = -1 | 'minecraft:nether' | 'nether';
+export type OverworldDimensionLike = 0 | 'minecraft:overworld' | 'overworld';
+export type TheEndDimensionLike = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
+export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension;
+export type ILocation = {
+    x: number;
+    y: number;
+    z: number;
+    rx?: number;
+    ry?: number;
+    dimension?: DimensionLike;
+};
+export type ILocationArray = [number, number, number] | [number, number, number, number, number] | [DimensionLike, number, number, number] | [DimensionLike, number, number, number, number, number];
+export type ILocationCoords = {
+    x: number;
+    y: number;
+    z: number;
+};
+export type ILocationCoordsWithDimension = {
+    x: number;
+    y: number;
+    z: number;
+    dimension: DimensionLike;
+};
+export type ILocationCoordsWithRotation = {
+    x: number;
+    y: number;
+    z: number;
+    rx: number;
+    ry: number;
+};
+export type ILocationCoordsArray = [number, number, number];
+export type ILocationCoordsArrayWithDimension = [DimensionLike, number, number, number];
+export type ILocationCoordsArrayWithRotation = [number, number, number, number, number];
+export type ILocationRotation = {
+    rx: number;
+    ry: number;
+};
+export type ILocationRotationValue = {
+    x: number;
+    y: number;
+};
+export type ILocationRotationArray = [number, number];
+export type ILocationOfObject = {
+    location: ILocationCoords;
+    rotation: ILocationRotationValue;
+    dimension: DimensionLike;
+};
+export type Location1Arg = ILocationOfObject | ILocation | ILocationArray;
+export type LocationArgs1Params = [Location1Arg];
+export type LocationArgs2Params = [DimensionLike, ILocationCoords | ILocationCoordsWithRotation | [number, number, number] | [number, number, number, number, number]] | [ILocationCoords | [number, number, number] | ILocationCoordsWithDimension | [DimensionLike, number, number, number], ILocationRotation | [number, number]];
+export type LocationArgs3Params = [DimensionLike, ILocationCoords | [number, number, number], ILocationRotation | [number, number]] | ILocationCoords;
+export type LocationArgsMoreParams = ILocationArray;
+export type LocationParams = [Location1Arg] | LocationArgs2Params | LocationArgs3Params | LocationArgsMoreParams;
 /**
  * 一个复杂点的Location类
  */
-declare class Location {
-    #private;
+export class Location {
     /**
      * @param {number} v
      * @returns {number}
      */
-    static normalizePitch(v: any): any;
+    static normalizePitch(v: number): number;
     /**
      * @param {number} v
      * @returns {number}
      */
-    static normalizeYaw(v: any): any;
+    static normalizeYaw(v: number): number;
     /**
-     * @type {number}
+     * 将一个Location对象转换为一段字符串
+     * @param {Location} v
+     * @returns {string}
      */
-    get x(): number;
-    set x(v: number);
+    static serialize(v: Location): string;
     /**
-     * @type {number}
+     * 将一段由Location对象转换后的字符串转换为Location对象
+     * @param {string} v
+     * @returns {Location}
      */
-    get y(): number;
-    set y(v: number);
-    /**
-     * @type {number}
-     */
-    get z(): number;
-    set z(v: number);
-    /**
-     * @type {number}
-     */
-    get rx(): number;
-    set rx(v: number);
-    /**
-     * @type {number}
-     */
-    get ry(): number;
-    set ry(v: number);
-    /**
-     * @type {Minecraft.Dimension}
-     */
-    get dimension(): any;
-    /**
-     * @param {number|string|Minecraft.Dimension} v
-     */
-    set dimension(v: any);
+    static deserialize(v: string): Location;
     /**
      * @desc 代表一个MC中的位置，其中包括维度，坐标，旋转角
      * @desc 您可以以多种形式传递参数来构造一个Location
@@ -92,31 +124,64 @@ declare class Location {
      * @desc [x, y, z]
      * @param {LocationParams} values
      */
-    constructor(...values: any[]);
+    constructor(...values: LocationParams);
+    set x(arg: number);
+    /**
+     * @type {number}
+     */
+    get x(): number;
+    set y(arg: number);
+    /**
+     * @type {number}
+     */
+    get y(): number;
+    set z(arg: number);
+    /**
+     * @type {number}
+     */
+    get z(): number;
+    set rx(arg: number);
+    /**
+     * @type {number}
+     */
+    get rx(): number;
+    set ry(arg: number);
+    /**
+     * @type {number}
+     */
+    get ry(): number;
+    /**
+     * @param {number|string|Minecraft.Dimension} v
+     */
+    set dimension(arg: Minecraft.Dimension);
+    /**
+     * @type {Minecraft.Dimension}
+     */
+    get dimension(): Minecraft.Dimension;
     /**
      * @param {LocationParams} values
      */
-    add(...values: any[]): this;
+    add(...values: LocationParams): Location;
     /**
      * @param {LocationParams} values
      */
-    subtract(...values: any[]): this;
+    subtract(...values: LocationParams): Location;
     /**
      * @param {LocationParams} values
      */
-    multiply(...values: any[]): this;
+    multiply(...values: LocationParams): Location;
     /**
      * 将坐标设置为原点
      */
-    zero(): this;
+    zero(): Location;
     /**
      * @param {Location1Arg} loc
      */
-    distance(loc: any): number;
+    distance(loc: Location1Arg): number;
     /**
      * @param {Location1Arg} loc
      */
-    distancrSquared(loc: any): number;
+    distancrSquared(loc: Location1Arg): number;
     getLength(): void;
     getLengthSquared(): void;
     toVector(): void;
@@ -125,7 +190,7 @@ declare class Location {
     /**
      * @returns {Minecraft.Block} 此位置上的方块
      */
-    getBlock(): any;
+    getBlock(): Minecraft.Block;
     getBlockX(): number;
     getBlockY(): number;
     getBlockZ(): number;
@@ -139,15 +204,15 @@ declare class Location {
      * @param {number} y
      * @param {number} z
      */
-    offset(x: any, y: any, z: any): Location;
+    offset(x: number, y: number, z: number): Location;
     /**
      * @returns {Minecraft.BlockLocation} 根据此位置创建一个原版的Minecraft.BlockLocation
      */
-    getVanillaBlockLocation(): this | Minecraft.BlockLocation;
+    getVanillaBlockLocation(): Minecraft.BlockLocation;
     /**
      * @returns {Minecraft.Location} 根据此位置创建一个原版的Minecraft.Location
      */
-    getVanillaLocation(): this | Minecraft.Location;
+    getVanillaLocation(): Minecraft.Location;
     getVanillaVector(): Minecraft.Vector;
     isLoaded(): void;
     getChunk(): void;
@@ -155,11 +220,11 @@ declare class Location {
     /**
      * @param {Location1Arg} loc
      */
-    equals(loc: any): boolean;
+    equals(loc: Location1Arg): boolean;
     /**
      * @param {Location1Arg} loc
      */
-    equalsPosition(loc: any): boolean;
+    equalsPosition(loc: Location1Arg): boolean;
     clone(): Location;
     toString(): string;
     toJSON(): {
@@ -168,20 +233,8 @@ declare class Location {
         z: number;
         rx: number;
         ry: number;
-        dimension: any;
+        dimension: string;
     };
-    /**
-     * 将一个Location对象转换为一段字符串
-     * @param {Location} v
-     * @returns {string}
-     */
-    static serialize(v: any): string;
-    /**
-     * 将一段由Location对象转换后的字符串转换为Location对象
-     * @param {string} v
-     * @returns {Location}
-     */
-    static deserialize(v: any): Location;
+    #private;
 }
-export default Location;
-export { Location };
+import { Minecraft } from "./basis.js";

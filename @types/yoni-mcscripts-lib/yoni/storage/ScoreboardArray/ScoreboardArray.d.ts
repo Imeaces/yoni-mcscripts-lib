@@ -5,5 +5,5 @@ declare class ScoreboardArray {
     /**
      * @type {number}
      */
-    length: any;
+    length: number;
 }

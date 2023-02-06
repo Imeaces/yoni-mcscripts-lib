@@ -1,6 +1,4 @@
-import { Player } from "./Player.js";
-declare class SimulatedPlayer extends Player {
+export default SimulatedPlayer;
+export class SimulatedPlayer {
     get [Symbol.toStringTag](): string;
 }
-export default SimulatedPlayer;
-export { SimulatedPlayer };

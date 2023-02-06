@@ -1,1 +1,1 @@
-export declare function dealWithCmd(key: any, value: any): any;
+export function dealWithCmd(key: any, value: any): any;

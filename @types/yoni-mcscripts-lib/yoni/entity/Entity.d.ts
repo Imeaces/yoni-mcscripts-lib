@@ -1,3 +1,6 @@
+import { Minecraft } from "../basis.js";
+import { Location } from "../Location.js";
+import { Entry } from "../scoreboard/Entry.js";
 import { EntityBase } from "./EntityBase.js";
 /**
  * @typedef {Entity|Player|SimulatedPlayer} YoniEntityType
@@ -7,12 +10,64 @@ import { EntityBase } from "./EntityBase.js";
 /**
  * 代表一个实体
  */
-declare class Entity extends EntityBase {
+declare class Entity extends EntityBase implements Minecraft.Entity {
     get [Symbol.toStringTag](): string;
-    get id(): number;
-    get typeId(): string;
+    get id(): any;
+    get typeId(): any;
     get velocity(): any;
-    get entityType(): {};
+    get entityType(): Minecraft.EntityType;
+    get dimension(): any;
+    getMinecraftEntity(): any;
+    get location(): Location;
+    get uniqueId(): any;
+    get scoreboard(): Entry;
+    isAliveEntity(): any;
+    isAlive(): boolean;
+    getCurrentHealth(): any;
+    getHealthComponent(): any;
+    getInventory(): Minecraft.InventoryComponentContainer;
+    getMaxHealth(): any;
+    /**
+     * @param {string} family
+     */
+    hasFamily(family: any): boolean;
+    /**
+     *
+     * @param  {...string} families
+     * @returns
+     */
+    hasAnyFamily(...families: any[]): boolean;
+    /**
+     *
+     * @param {string} cmd
+     * @returns {Promise<Minecraft.CommandResult>}
+     */
+    fetchCommand(cmd: any): Promise<import("../command.js").CommandResult>;
+    /**
+     * @param {string} message
+     */
+    say(message: any): Promise<import("../command.js").CommandResult>;
+    /**
+     * @param {number} v
+     */
+    setCurrentHealth(v: any): void;
+    /**
+     * 传入位置，将实体传送到指定位置
+     * 允许两种长度的参数，由于此特性，补全提示可能会出现一些错误，已在补全中尝试修复。
+     * 当传入了1个参数，被认为是yoni的方法
+     * 当传入了2个参数，被认为是yoni的方法
+     * 当传入了4个参数，被认为是原版的方法
+     * 当传入了5个参数，被认为是原版的方法
+     * yoni方法中，第一个参数认为是位置，第二个参数认为是keepVelocity
+     * 原版方法中参数顺序为[location, dimension, rx, ry, keepVelocity?=null]
+     * 所以你可以直接传入实体对象、方块对象、或者普通位置对象，或者接口
+     * @param {import("./Location.js").Location1Arg|Minecraft.Vector3} argLocation
+     * @param {Minecraft.Dimension} [argDimension]
+     * @param {number} [argRx]
+     * @param {number} [argRy]
+     * @param {boolean} [keepVelocity]
+     */
+    teleport(...args: [import("./Location.js").Location1Arg | Minecraft.Vector3, boolean]): void;
 }
 export default Entity;
 export { Entity };

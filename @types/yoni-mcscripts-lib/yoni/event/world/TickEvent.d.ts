@@ -1,8 +1,9 @@
-import { EventSignal, Event } from "../../event.js";
-export declare class TickEventSignal extends EventSignal {
+export class TickEventSignal extends EventSignal {
 }
-export declare class TickEvent extends Event {
+export class TickEvent extends Event {
+    constructor(currentTick: any, deltaTime: any);
     get currentTick(): any;
     get deltaTime(): any;
-    constructor(currentTick: any, deltaTime: any);
 }
+import { EventSignal } from "../../event.js";
+import { Event } from "../../event.js";

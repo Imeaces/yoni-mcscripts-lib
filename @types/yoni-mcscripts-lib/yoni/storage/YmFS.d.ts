@@ -1,2 +1,2 @@
-export declare class YmFSAddressManager {
+export class YmFSAddressManager {
 }

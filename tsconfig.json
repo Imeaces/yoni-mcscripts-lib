@@ -64,7 +64,7 @@
     // "noResolve": true,
 /* Disallow 'import's, 'require's or '<reference>'s from expanding the number of files TypeScript should add to a project. */
     /* JavaScript Support */
-    "allowJs": false,
+    "allowJs": true,
 /* Allow JavaScript files to be a part of your program. Use the 'checkJS' option to get errors from these files. */
     "checkJs": false,
 /* Enable error reporting in type-checked JavaScript files. */
@@ -111,7 +111,7 @@
 /* Disable emitting files if any type checking errors are reported. */
     // "preserveConstEnums": true,
 /* Disable erasing 'const enum' declarations in generated code. */
-    "declarationDir": "scripts/@types/yoni-mcscripts-lib",
+    "declarationDir": "@types/yoni-mcscripts-lib",
 /* Specify the output directory for generated declaration files. */
     // "preserveValueImports": true,
 /* Preserve unused imported values in the JavaScript output that would otherwise be removed. */

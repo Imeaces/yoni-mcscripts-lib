@@ -1,4 +1,4 @@
-export declare class RegionManager {
+export class RegionManager {
 }
-export declare class Region {
+export class Region {
 }

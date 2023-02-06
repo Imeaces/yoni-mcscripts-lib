@@ -1,9 +1,10 @@
+export class PlayerRespawnEventSignal extends EventSignal {
+}
+export class PlayerRespawnEvent extends PlayerEvent {
+    constructor(player: any, coords: any);
+    sourceLocation: any;
+    currentLocation: Location & import("@minecraft/server").Vector3;
+}
 import { EventSignal } from "../../event.js";
 import { PlayerEvent } from "./PlayerEvent";
-export declare class PlayerRespawnEventSignal extends EventSignal {
-}
-export declare class PlayerRespawnEvent extends PlayerEvent {
-    sourceLocation: any;
-    currentLocation: any;
-    constructor(player: any, coords: any);
-}
+import { Location } from "../../Location.js";

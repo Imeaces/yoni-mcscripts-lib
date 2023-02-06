@@ -1,17 +1,15 @@
-export declare function toIntAddress(address: any, addrnums?: string[]): number;
-export declare function toAddress(int: any, addrnums?: string[]): string;
-declare let addressNumbers: string[];
-export { addressNumbers };
+export function toIntAddress(address: any, addrnums?: string[]): number;
+export function toAddress(int: any, addrnums?: string[]): string;
 /**
  * 分割数字
  */
-export declare function getNumArr(num: any, base?: number, numbers?: string[]): never[];
+export function getNumArr(num: any, base?: number, numbers?: string[]): (string | number)[];
 /**
  * @returns {string}
  */
-export declare function getNum(numArr: any, base?: number, numbers?: string[]): string;
-export declare function splitNumberArr(numArr: any, sp: any, base?: number): {
-    Quotient: never[];
+export function getNum(numArr: any, base?: number, numbers?: string[]): string;
+export function splitNumberArr(numArr: any, sp: any, base?: number): {
+    Quotient: number[];
     Remainder: number;
 };
 /**
@@ -20,4 +18,5 @@ export declare function splitNumberArr(numArr: any, sp: any, base?: number): {
  * @param {number} oldBase - 数字的旧基底
  * @param {string[]} numbers - 用于表示数字的一个字符串序列
  */
-export declare function coverBase(num: any, base: any, oldBase?: number, numbers?: string[]): string;
+export function coverBase(num: number | string, base: number, oldBase?: number, numbers?: string[]): string;
+export let addressNumbers: string[];

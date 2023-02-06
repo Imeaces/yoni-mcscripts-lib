@@ -1,7 +1,7 @@
 import { EventTrigger } from "./Trigger.js";
 declare class TriggerBuilder {
     #private;
-    constructor(identifier: any);
+    constructor(identifier?: any);
     id(identifier: any): this;
     identifier(): this;
     namespace(): this;

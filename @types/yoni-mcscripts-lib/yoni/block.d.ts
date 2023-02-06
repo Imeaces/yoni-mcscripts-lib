@@ -1,10 +1,10 @@
-import Location from "./Location.js";
-export declare class Block {
+export class Block {
     static isBlock(object: any): boolean;
-    get location(): Location;
     /**
      * @param {Minecraft.Block}
      */
-    constructor();
+    constructor(...args: any[]);
+    get location(): any;
+    vanillaBlock: any;
 }
 export default Block;

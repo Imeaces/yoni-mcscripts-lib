@@ -1,14 +1,18 @@
-import { Logger } from "./util/Logger.js";
-declare function Loader(basepath: any): void;
-declare namespace Loader {
-    var _a: void;
-    export var logger: Logger;
-    export { _a as default };
-}
-declare function load(...paths: any[]): Promise<never[]>;
-declare namespace load {
-    var getLoader: (base: any) => (path: any) => void;
-}
-export { load };
 export default Loader;
-export { Loader };
+export function load(...paths: any[]): Promise<any[]>;
+export namespace load {
+    function getLoader(base: any): (path: any) => void;
+}
+export function Loader(basepath: any): void;
+export class Loader {
+    constructor(basepath: any);
+    basedir: string;
+    getPath(path: any): string;
+    load(...paths: any[]): void;
+}
+export namespace Loader {
+    const _default: void;
+    export { _default as default };
+    export const logger: Logger;
+}
+import { Logger } from "./util/Logger.js";

@@ -3,8 +3,8 @@ declare class Trigger implements IEventTrigger {
     #private;
     constructor(identifier: any, signal?: null);
     get identifier(): string;
-    get namespace(): null;
-    get eventName(): null;
+    get namespace(): string | null;
+    get eventName(): string;
     signal: any;
     getCallbacks: any;
     /**

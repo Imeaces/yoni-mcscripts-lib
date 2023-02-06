@@ -3,4 +3,3 @@ export default class Database {
     static getDatabase(name: any): void;
     static createDatsbase(name: any): void;
 }
-export { Database };

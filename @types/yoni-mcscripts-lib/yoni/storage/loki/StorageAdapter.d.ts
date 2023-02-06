@@ -1,7 +1,6 @@
 declare class StorageAdapter {
-    #private;
+    static "__#23@#save"(name: any, copyOfLokiDb: any): Promise<void>;
     mode: string;
-    constructor();
     exportDatabase(dbname: any, getCopy: any, callback: any): Promise<void>;
     loadDatabase(dbname: any, callback: any): void;
 }

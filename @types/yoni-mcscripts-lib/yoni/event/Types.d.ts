@@ -1,13 +1,11 @@
-export declare function getIdentifierInfo(identifier: any): {
+export function getIdentifierInfo(identifier: any): {
     id: string;
-    name: null;
-    namespace: null;
+    name: string;
+    namespace: string | null;
 };
-declare class EventRegisterListener {
-    static add(eventTypeIdentifier: any, callback: any): void;
-    static register(eventType: any): Promise<void>;
-}
-declare class Types {
+export const events: {};
+export default Types;
+export class Types {
     static register(identifier: any, eventType: any): void;
     static registerNamespace(namespace: any, namespaceEventTypes: any): void;
     /**
@@ -25,8 +23,8 @@ declare class Types {
     static getEventTypes(): Map<any, any>;
     static getAll(): Generator<any, void, any>;
 }
-export declare const events: {};
-export default Types;
-export { Types };
+export class EventRegisterListener {
+    static add(eventTypeIdentifier: any, callback: any): void;
+    static register(eventType: any): Promise<void>;
+}
 export { Types as EventTypes };
-export { EventRegisterListener };

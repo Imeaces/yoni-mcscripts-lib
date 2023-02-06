@@ -1,20 +1,15 @@
-export declare class MyBigInt {
-    #private;
-    get raw(): unknown[];
-    constructor(num: any);
-    valueOf(): unknown[];
-    toString(): string;
+export class MyBigInt {
     static numberStrs: readonly string[];
     /**
      * 转化数字为一个数组
      */
-    static _getRawNumber(theNumber: any, base?: number, numbers?: readonly string[]): never[];
+    static _getRawNumber(theNumber: any, base?: number, numbers?: readonly string[]): (string | number)[];
     /**
      * @returns {string}
      */
     static _getNumberOfRawNumber(rawNumber: any, base?: number, numbers?: readonly string[]): string;
     static _splitRawNumber(rawNumber: any, divisor: any, base?: number): {
-        Quotient: never[];
+        Quotient: number[];
         Remainder: number;
     };
     /**
@@ -29,5 +24,10 @@ export declare class MyBigInt {
     static multiply(): void;
     static split(): void;
     static equals(a: any, b: any): void;
+    constructor(num: any);
+    get raw(): (string | number)[];
+    valueOf(): (string | number)[];
+    toString(): string;
+    #private;
 }
 export { MyBigInt as BigInt };

@@ -1,3 +1,2 @@
-declare let loki: any;
 export default loki;
-export { loki };
+export let loki: any;

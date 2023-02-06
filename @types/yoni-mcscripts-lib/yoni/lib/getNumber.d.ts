@@ -1,1 +1,1 @@
-export declare function getNumber(n: any): any;
+export function getNumber(n: any): any;

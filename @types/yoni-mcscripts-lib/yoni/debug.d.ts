@@ -1,2 +1,2 @@
-export declare function runTaskIfDebug(callback: any): Promise<void>;
-export declare function isDebug(): boolean;
+export function runTaskIfDebug(callback: any): Promise<void>;
+export function isDebug(): boolean;

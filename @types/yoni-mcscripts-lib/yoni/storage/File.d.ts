@@ -1,3 +1,2 @@
 declare class File {
-    constructor();
 }

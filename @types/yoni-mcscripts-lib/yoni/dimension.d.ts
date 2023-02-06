@@ -1,3 +1,3 @@
-export declare class Dimension {
+export class Dimension {
     static from(dim: any): void;
 }

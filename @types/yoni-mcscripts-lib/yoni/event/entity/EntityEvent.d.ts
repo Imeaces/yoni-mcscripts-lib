@@ -1,6 +1,6 @@
-import { Event } from "../../event.js";
-export declare class EntityEvent extends Event {
+export class EntityEvent extends Event {
+    constructor(entity: any, ...args: any[]);
     get entity(): any;
     get entityType(): any;
-    constructor(entity: any, ...args: any[]);
 }
+import { Event } from "../../event.js";

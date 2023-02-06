@@ -1,5 +1,5 @@
-export declare function ScoreboardAccessor(objective: any): any;
-export declare namespace ScoreboardAccessor {
-    var maxWritePerTick: number;
-    var writedCountInCurrentTick: number;
+export function ScoreboardAccessor(objective: any): any;
+export namespace ScoreboardAccessor {
+    const maxWritePerTick: number;
+    const writedCountInCurrentTick: number;
 }

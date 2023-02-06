@@ -1,9 +1,9 @@
-import { EventSignal } from "../../event.js";
-import { PlayerEvent } from "./PlayerEvent.js";
-export declare class PlayerTeleportDimensionEvent extends PlayerEvent {
+export class PlayerTeleportDimensionEvent extends PlayerEvent {
+    constructor(player: any, fromDimension: any, toDimension: any);
     fromDimension: any;
     toDimension: any;
-    constructor(player: any, fromDimension: any, toDimension: any);
 }
-export declare class PlayerTeleportDimensionEventSignal extends EventSignal {
+export class PlayerTeleportDimensionEventSignal extends EventSignal {
 }
+import { PlayerEvent } from "./PlayerEvent.js";
+import { EventSignal } from "../../event.js";

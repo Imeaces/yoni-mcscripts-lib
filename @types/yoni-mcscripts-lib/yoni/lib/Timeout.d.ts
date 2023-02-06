@@ -4,19 +4,19 @@
  * @param {...any} [args]
  * @returns {number} timeoutId
  */
-export declare function setTimeout(func: any, delay?: number, ...args: any[]): number;
+export function setTimeout(func: () => void, delay?: number, ...args?: any[] | undefined): number;
 /**
  * @param {number} timeoutId
  */
-export declare function clearTimeout(timeoutId: any): void;
+export function clearTimeout(timeoutId: number): void;
 /**
  * @param {()=>void} func
  * @param {number} delay
  * @param {...any} [args]
  * @returns {number} intervalId
  */
-export declare function setInterval(func: any, delay?: number, ...args: any[]): number;
+export function setInterval(func: () => void, delay?: number, ...args?: any[] | undefined): number;
 /**
  * @param {number} intervalId
  */
-export declare function clearInterval(intervalId: any): void;
+export function clearInterval(intervalId: number): void;
