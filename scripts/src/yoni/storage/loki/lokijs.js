@@ -3,7 +3,7 @@
  GitHub 存储库链接：https://github.com/techfort/LokiJS
  源代码使用了 MIT license 进行授权许可。
  
- 修改了导出方式以使其可以被 import 语句导入。
+ 修改了导出方式以使其可以被 import 语句导入，并补全不存在的函数以及对象。
 
 Copyright (c) 2015 TechFort <joe.minichino@gmail.com>
 
@@ -13,6 +13,9 @@ The above copyright notice and this permission notice shall be included in all c
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
+ 
+import { setTimeout, clearTimeout, setInterval, clearInterval } from "./TimeoutSupport.js";
+import { console } from "../../util/Logger.js";
 
 /**
  * LokiJS
