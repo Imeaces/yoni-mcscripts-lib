@@ -63,7 +63,7 @@ class WorldClass {
             .map(dimid => dim(dimid))
             .map(dim => Array.from(dim.getEntities()))
             .flat()
-            .map(ent => EntityBase.from(ent));
+            .map(ent => EntityBase.from(ent) as unknown as Entity);
     }
 
     /**

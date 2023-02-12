@@ -416,7 +416,7 @@ class Objective {
         } else if (isFinite(Number(one))){
             if (!enableScoreboardIdentityByNumberIdQuery)
                 throw new Error("scbid search by number id is disable, set 'enableScoreboardIdentityByNumberIdQuery' to 'true' to enable it");
-            return Objective.findCommandRequirement(Entry.getEntry({id: Number(one)}));
+            return Objective.findCommandRequirement(Entry.findEntry({id: Number(one)}));
         } else {
             throw new UnknownEntryError();
         }
@@ -460,7 +460,7 @@ class Objective {
         if (!Array.isArray(arr)){
             arr = Array.from(arr);
         }
-        return arr.map((scbid: Minecraft.ScoreboardIdentity) => Entry.getEntry({scbid, type: scbid.type}) );
+        return arr.map((scbid: Minecraft.ScoreboardIdentity) => Entry.findEntry({scbid, type: scbid.type}) );
     }
     
     /**

@@ -135,6 +135,10 @@ class Listener {
         return this.#index ++;
     }
     
+    /**
+     * unregister event listener
+     * @param {number} id - eventId
+     */
     static unregister(id){
         if (this.#callbacks[id] !== null){
             this.#callbacks[id] = null;

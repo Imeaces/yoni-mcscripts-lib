@@ -1,15 +1,16 @@
-import { EntityBase } from "../../entity.js";
+import { Player } from "../../entity.js";
 import { EventListener, EventSignal, EventTriggerBuilder } from "../../event.js";
 import { PlayerEvent } from "./PlayerEvent";
-import { VanillaWorld } from "../../basis.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
 import { Location } from "../../Location.js";
+import { PlayerDeadEvent } from "./PlayerDeadEvent.js";
+import { World } from "../../world.js";
 
 export class PlayerRespawnEventSignal extends EventSignal {}
-export class PlayerRespawnEvent extends PlayerEvent{
-    sourceLocation;
-    currentLocation;
-    constructor(player, coords){
+export class PlayerRespawnEvent extends PlayerEvent {
+    sourceLocation: Location;
+    currentLocation: Location;
+    constructor(player: Player, coords: Location){
         super(player);
         this.sourceLocation = coords;
         this.currentLocation = this.player.location;
@@ -20,16 +21,17 @@ const DeadPlayers = new WeakSet();
 const DeadPlayerLocationRecords = new WeakMap();
 
 /**
- * @type {number | null}
+ * @type {number}
  */
-let eventId0 = null;
+let eventId0: number;
+
 const schedule = new Schedule({
     async: false,
     type: Schedule.tickCycleSchedule,
     delay: 0,
     period: 1
 }, ()=>{
-    let players = Array.from(VanillaWorld.getPlayers());
+    let players: Player[] = Array.from(World.getPlayers());
     if (players.length === 0){
         YoniScheduler.removeSchedule(schedule);
         return;
@@ -38,19 +40,19 @@ const schedule = new Schedule({
         if (!DeadPlayers.has(player)){
             return;
         }
-        if (EntityBase.getCurrentHealth(player) > 0){
-            let coords = DeadPlayerLocationRecords.get(player);
+        if (player.getCurrentHealth() > 0){
+            let location = DeadPlayerLocationRecords.get(player);
             DeadPlayers.delete(player);
             DeadPlayerLocationRecords.delete(player);
-            trigger.fireEvent(player, coords);
+            trigger.fireEvent(player, location);
         }
     });
 });;
 
 function start(){
-    eventId0 = EventListener.register("yonimc:playerDead", (event)=>{
+    eventId0 = EventListener.register("yoni:playerDead", (event: PlayerDeadEvent) => {
         let player = event.player;
-        let location = new Location(player);
+        let location = player.location;
         DeadPlayers.add(player);
         DeadPlayerLocationRecords.set(player, location);
         if (!schedule.isQueue()){

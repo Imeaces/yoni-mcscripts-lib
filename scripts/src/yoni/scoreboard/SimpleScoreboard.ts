@@ -296,7 +296,7 @@ export default class SimpleScoreboard {
         if (!Array.isArray(arr)){
             arr = Array.from(arr);
         }
-        return arr.map(scbid => Entry.getEntry({ scbid, type: scbid.type }));
+        return arr.map(scbid => Entry.findEntry({ scbid, type: scbid.type }));
     }
     
     /**

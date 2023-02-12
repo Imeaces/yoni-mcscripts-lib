@@ -6,7 +6,8 @@ import {
     dim } from "../basis.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
 
-import { EntityType, EntityType, MinecraftEntityType } from "./EntityTypeDefs.js";
+import { EntityType, YoniEntityType, MinecraftEntityType } from "./EntityTypeDefs.js";
+import Player from "./Player.js";
 
 /**
  * 代表一个实体
@@ -61,10 +62,10 @@ class EntityBase {
     /**
      * 检测某个实体是否为玩家
      * @param {EntityType} entity 要检测的实体
-     * @returns {Boolean}
+     * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity){
+    static entityIsPlayer(entity): entity is Player {
         entity = EntityBase.getMinecraftEntity(entity);
         if (entity instanceof Minecraft.Player)
             return true;
@@ -105,16 +106,16 @@ class EntityBase {
      * @param {EntityType} entity
      * @returns {number}
      */
-    static getCurrentHealth(entity){
+    static getCurrentHealth(entity: EntityType): number{
         let component = EntityBase.getHealthComponent(entity);
         return (component === undefined) ? 0 : component.current;
     }
     
     /**
-     * @param {import('.../Location.js').DimensionLike}
+     * @param {import('../Location.js').DimensionLike} dimension
      * @param {Minecraft.EntityQueryOptions} [options]
      */
-    static getDimensionEntities(dimension, options, optionClass = Minecraft.EntityQueryOptions){
+    static getDimensionEntities(dimension: import('../Location.js').DimensionLike, options: Minecraft.EntityQueryOptions, optionClass = Minecraft.EntityQueryOptions){
         if (!dimension){
             let ents = Object
                 .getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)

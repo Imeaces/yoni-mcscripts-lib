@@ -7,7 +7,7 @@ const EntityTypes = Minecraft.EntityTypes;
 export class PlayerEvent extends Event {
     constructor(player: Player, ...args: any[]){
         super(...args);
-        this.#player = EntityBase.from(player);
+        this.#player = EntityBase.from(player) as unknown as Player;
     }
     /**
      * @type {Player}
