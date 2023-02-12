@@ -1,21 +1,26 @@
+/*
+ LokiJS 作者：techfort
+ GitHub 存储库链接：https://github.com/techfort/LokiJS
+ 源代码使用了 MIT license 进行授权许可。
+ 
+ 修改了导出方式以使其可以被 import 语句导入。
+
+Copyright (c) 2015 TechFort <joe.minichino@gmail.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
 /**
  * LokiJS
  * @author Joe Minichino <joe.minichino@gmail.com>
  *
  * A lightweight document oriented javascript database
  */
-(function (root, factory) {
-  if (typeof define === 'function' && define.amd) {
-    // AMD
-    define([], factory);
-  } else if (typeof exports === 'object') {
-    // CommonJS
-    module.exports = factory();
-  } else {
-    // Browser globals
-    root.loki = factory();
-  }
-}(globalThis, function () {
+export const loki = function () {
 
   return (function () {
     'use strict';
@@ -415,7 +420,7 @@
 
       var valueFound = false;
       var element;
-      if (root !== null && typeof root === 'object' && path in root) {
+      if (typeof root === 'object' && path in root) {
         element = root[path];
       }
       if (pathOffset + 1 >= paths.length) {
@@ -1774,43 +1779,27 @@
           copyColl.dirty = false;
         }
 
-        if (coll.getData) {
-          if ((options && options.hasOwnProperty(coll.name)) || !copyColl.disableFreeze || copyColl.autoupdate) {
-            throw new Error("this collection cannot be loaded lazily: " + coll.name);
-          }
-          copyColl.getData = coll.getData;
-          Object.defineProperty(copyColl, 'data', {
-            /* jshint loopfunc:true */
-            get: function() {
-              var data = this.getData();
-              this.getData = null;
-              Object.defineProperty(this, 'data', { value: data });
-              return data;
-            }
-            /* jshint loopfunc:false */
-          });
-        } else {
-          // load each element individually
-          clen = coll.data.length;
-          j = 0;
-          if (options && options.hasOwnProperty(coll.name)) {
-            loader = makeLoader(coll);
+        // load each element individually
+        clen = coll.data.length;
+        j = 0;
+        if (options && options.hasOwnProperty(coll.name)) {
+          loader = makeLoader(coll);
 
-            for (j; j < clen; j++) {
-              collObj = loader(coll.data[j]);
-              copyColl.data[j] = collObj;
-              copyColl.addAutoUpdateObserver(collObj);
-              if (!copyColl.disableFreeze) {
-                deepFreeze(copyColl.data[j]);
-              }
+          for (j; j < clen; j++) {
+            collObj = loader(coll.data[j]);
+            copyColl.data[j] = collObj;
+            copyColl.addAutoUpdateObserver(collObj);
+            if (!copyColl.disableFreeze) {
+              deepFreeze(copyColl.data[j]);
             }
-          } else {
-            for (j; j < clen; j++) {
-              copyColl.data[j] = coll.data[j];
-              copyColl.addAutoUpdateObserver(copyColl.data[j]);
-              if (!copyColl.disableFreeze) {
-                deepFreeze(copyColl.data[j]);
-              }
+          }
+        } else {
+
+          for (j; j < clen; j++) {
+            copyColl.data[j] = coll.data[j];
+            copyColl.addAutoUpdateObserver(copyColl.data[j]);
+            if (!copyColl.disableFreeze) {
+              deepFreeze(copyColl.data[j]);
             }
           }
         }
@@ -7754,4 +7743,4 @@
     return Loki;
   }());
 
-}));
+};
