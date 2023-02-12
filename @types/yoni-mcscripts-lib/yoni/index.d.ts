@@ -26,9 +26,6 @@ import { EntityBase } from "./entity.js";
 import { Player } from "./entity.js";
 import { Entity } from "./entity.js";
 import { SimulatedPlayer } from "./entity.js";
-import { YoniEntity } from "./entity.js";
-import { YoniPlayer } from "./entity.js";
-import { YoniSimulatedPlayer } from "./entity.js";
 export const Utils: {};
 export namespace Yoni {
     export function isDebug(): boolean;
@@ -45,4 +42,4 @@ export namespace Vanilla {
 }
 import { injectGlobal } from "./config.js";
 import { debug } from "./config.js";
-export { EventTypes, EventListener, EventSignal, events, Scoreboard, Objective, Entry, World, dim, Minecraft, MinecraftGui, Gametest, VanillaWorld, VanillaEvents, VanillaScoreboard, runTask, Logger, log, console, Location, YoniScheduler, Schedule, Command, ChatCommand, EntityBase, Player, Entity, SimulatedPlayer, YoniEntity, YoniPlayer, YoniSimulatedPlayer };
+export { EventTypes, EventListener, EventSignal, events, Scoreboard, Objective, Entry, World, dim, Minecraft, MinecraftGui, Gametest, VanillaWorld, VanillaEvents, VanillaScoreboard, runTask, Logger, log, console, Location, YoniScheduler, Schedule, Command, ChatCommand, EntityBase, Player, Entity, SimulatedPlayer };

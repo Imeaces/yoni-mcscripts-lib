@@ -33,4 +33,4 @@ declare class Player extends Entity {
 }
 declare type YoniPlayer = Player & Minecraft.Player;
 export default YoniPlayer;
-export { YoniPlayer as Player };
+export { YoniPlayer, Player };

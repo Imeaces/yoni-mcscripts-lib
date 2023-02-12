@@ -1,6 +1,5 @@
 import { Minecraft } from "../basis.js";
 import { Location } from "../Location.js";
-import { Entry } from "../scoreboard/Entry.js";
 import { EntityBase } from "./EntityBase.js";
 /**
  * @typedef {Entity|Player|SimulatedPlayer} YoniEntityType
@@ -20,10 +19,10 @@ declare class Entity extends EntityBase implements Minecraft.Entity {
     getMinecraftEntity(): any;
     get location(): Location;
     get uniqueId(): any;
-    get scoreboard(): Entry;
+    get scoreboard(): any;
     isAliveEntity(): any;
     isAlive(): boolean;
-    getCurrentHealth(): any;
+    getCurrentHealth(): number;
     getHealthComponent(): any;
     getInventory(): Minecraft.InventoryComponentContainer;
     getMaxHealth(): any;
@@ -69,5 +68,6 @@ declare class Entity extends EntityBase implements Minecraft.Entity {
      */
     teleport(...args: [import("./Location.js").Location1Arg | Minecraft.Vector3, boolean]): void;
 }
-export default Entity;
-export { Entity };
+declare type YoniEntity = Entity & Minecraft.Entity;
+export default YoniEntity;
+export { YoniEntity, Entity };

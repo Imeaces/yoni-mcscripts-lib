@@ -217,7 +217,7 @@ declare class Objective {
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
     addScore(one: EntryValueType, score: number): void;
-    __doPlayerCommand(option: any, one: any, ...args: any[]): void;
+    __doPlayerCommand(option: string, one: EntryValueType, ...args: any[]): void;
 }
 export { Objective, ScoreInfo };
 export default Objective;

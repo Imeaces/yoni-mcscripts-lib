@@ -6,9 +6,9 @@ export default class ChatCommand {
     /**
      *
      * @param {string} command
-     * @param {(sender:YoniEntity, rawCommand:string, label:string, args:string[])=>void} executor
+     * @param {(sender: YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor
      */
-    static registerCommand(command: string, executor: (sender: YoniEntity, rawCommand: string, label: string, args: string[]) => void): void;
+    static registerCommand(command: string, executor: (sender: YoniPlayer, rawCommand: string, label: string, args: string[]) => void): void;
     static unregisterCommand(command: any): void;
     static registerNonPrefixCommand(command: any, executor: any): void;
     static unregisterNonPrefixCommand(command: any): void;

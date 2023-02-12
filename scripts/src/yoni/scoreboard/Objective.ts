@@ -17,6 +17,7 @@ import {
     emitLegacyMode
 } from "../config.js";
 import { EntityBase } from "../entity.js";
+import { EntityType } from "../entity/EntityTypeDefs.js";
 import { Command } from "../command.js";
 
 /**
@@ -381,9 +382,9 @@ class Objective {
      * @param {EntryValueType} one - 可能为分数持有者的值。
      */
     static findCommandRequirement(one: EntryValueType): {name?: string, type: EntryType, entity?: EntityBase | Minecraft.Entity, scbid?: Minecraft.ScoreboardIdentity, entry?: Entry }{
-        let name = null;
-        let type = null;
-        let entity = null;
+        let name: string | undefined = undefined;
+        let type: EntryType | Minecraft.ScoreboardIdentityType;
+        let entity: EntityType | undefined = undefined;
         let scbid = (one instanceof Minecraft.ScoreboardIdentity) ? one : undefined;
         let entry = (one instanceof Entry) ? one : undefined;
         

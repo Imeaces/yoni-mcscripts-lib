@@ -20,6 +20,10 @@ export class Listener {
      * @return {number} - id of the callback
      */
     static register(eventType: any, callback: Function, ...eventFilters: any[]): number;
-    static unregister(id: any): void;
+    /**
+     * unregister event listener
+     * @param {number} id - eventId
+     */
+    static unregister(id: number): void;
 }
 export { Listener as EventListener };

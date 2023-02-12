@@ -2,13 +2,15 @@
 
 对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加
 
+当前支持的游戏版本为1.19.50、1.19.30（需要手动修改导入模块名）
+
 尝试由JSDoc生成文档中……尚未开始
 
 正在转到typescript，但由于我并没有运行vscode或其他ide的条件，所以进展缓慢，现在只是单纯的改了文件后缀
 
 您可以用这种方法来使用
 ```js
-import "yoni/index.js";
+import { Scoreboard, Utils } from "yoni/index.js";
 
 (async function (){
 //部分函数为异步函数，故需要在异步函数内用await调用

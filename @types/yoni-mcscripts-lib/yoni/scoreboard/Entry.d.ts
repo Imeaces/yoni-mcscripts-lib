@@ -1,6 +1,6 @@
 import { Minecraft } from "../basis.js";
 import { EntityBase } from "../entity/EntityBase.js";
-import { Entity } from "../entity/Entity.js";
+import Entity from "../entity/Entity.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 /**
  * 一系列用于查询 Entry 的信息。
@@ -13,7 +13,7 @@ import { EntryType, EntryValueType } from "./EntryType.js";
  * @property {EntryType} [type]
  */
 /**
- * 一系列用于查询 Entry 的信息。
+ * 一系列用于查询记录的信息。
  */
 export interface EntryQueryOptions {
     /**
@@ -38,30 +38,30 @@ export interface EntryQueryOptions {
     type?: EntryType | Minecraft.ScoreboardIdentityType;
 }
 /**
- * Contains an identity of the scoreboard item.
+ * 代表记分板上 持有着一系列分数记录的对象（分数持有者）。
  */
 declare class Entry {
     #private;
     /**
-     * 从可能为分数持有者的值获取其对象。
-     * @param {EntryValueType} one - 可能为分数持有者的值
+     * 寻找指定对象在记分板上使用的分数持有者对象。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
      * @returns {Entry} 与 `one` 对应的分数持有者对象。
      * @throws 若未能根据值得到可能的分数持有者对象，抛出 `UnknownEntryError`。
      */
     static guessEntry(one: EntryValueType): Entry;
     /**
-     * 根据 `option` 接口获得分数持有者对象。
+     * 查找符合 `option` 中列出的条件的分数持有者对象。
      * @param {EntryQueryOptions} option
      * @returns {Entry}
      */
-    static getEntry(option: EntryQueryOptions): Entry;
+    static findEntry(option: EntryQueryOptions): Entry;
     /**
-     * 根据 `option` 获得原始分数持有者对象（需要启用 `useOptionalFasterCode`）。
-     * @function getVanillaScoreboardParticipant
+     * 获取所有记分标识符对象。
      * @param {EntryQueryOptions} option
-     * @returns {Minecraft.ScoreboardIdentity}
+     * @returns {Minecraft.ScoreboardIdentity[]}
      */
-    static getAndUpdateVanillaScoreboardParticipants(): void;
+    static getVanillaScoreboardParticipants(): Readonly<Minecraft.ScoreboardIdentity[]>;
+    static findVanillaScoreboardParticipant(filter: (scbid: Minecraft.ScoreboardIdentity) => boolean): Minecraft.ScoreboardIdentity | undefined;
     /**
      * 分数持有者的类型。
      * @returns {EntryType}
@@ -82,12 +82,16 @@ declare class Entry {
      * @returns {Minecraft.ScoreboardIdentity|undefined}
      */
     get vanillaScbid(): Minecraft.ScoreboardIdentity | undefined;
+    static isScbidValidity(scbid: any): boolean;
+    /**
+     * 检查传入的值是否为可用的分数持有者对象。若不是，则抛出错误。
+     */
+    static checkScbidValidity(scbid: any): boolean;
     /**
      * 更新Entry
      * @param {Entry} entry
-     * @param {boolean} force
      */
-    static updateEntry(entry: Entry, force?: boolean): void;
+    static updateEntry(entry: Entry): void;
     /**
      * 如果此分数持有者不是虚拟玩家，返回此分数持有者对应实体的对象。
      * @returns {Entity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
@@ -96,10 +100,11 @@ declare class Entry {
     /**
      * If the scoreboard identity is an entity or player, returns
      * the entity that this scoreboard item corresponds to.
-     * @returns {Minecraft.Entity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
+     * @returns {Minecraft.Entity} 记分对象所对应的实体对象。
      * @throws 若实体尚未加载或已死亡，将抛出错误。
+     * @throws 若记分对象不是实体类型，将抛出错误。
      */
-    getVanillaEntity(): Minecraft.Entity | null;
+    getVanillaEntity(): Minecraft.Entity;
     /**
      * 更新此分数持有者对象与原始分数持有者对象的映射关系。
      * @returns {Entry} 更新完成后，返回对象自身。
