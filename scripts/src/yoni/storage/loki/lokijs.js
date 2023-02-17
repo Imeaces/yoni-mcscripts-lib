@@ -15,7 +15,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
  */
  
 import { setTimeout, clearTimeout, setInterval, clearInterval } from "./TimeoutSupport.js";
-import { console } from "../../util/Logger.js";
+import { Logger } from "../../util/Logger.js";
+
+const console = new Logger("Loki");
 
 /**
  * LokiJS
@@ -23,7 +25,7 @@ import { console } from "../../util/Logger.js";
  *
  * A lightweight document oriented javascript database
  */
-export const loki = function () {
+export const Loki = function () {
 
   return (function () {
     'use strict';
@@ -7747,3 +7749,23 @@ export const loki = function () {
   }());
 
 };
+
+export const {
+    deepFreeze,
+    freeze,
+    unFreeze,
+    LokiOps,
+    Collection,
+    DynamicView,
+    Resultset,
+    KeyValueStore,
+    LokiMemoryAdapter,
+    LokiPartitioningAdapter,
+    LokiLocalStorageAdapter,
+    LokiFsAdapter,
+    persistenceAdapters,
+    aeq,
+    lt,
+    gt,
+    Comparators,
+} = Loki;

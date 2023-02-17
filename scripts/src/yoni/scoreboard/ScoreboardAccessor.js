@@ -158,6 +158,7 @@ export function ScoreboardAccessor(objective) {
     
     return proxy;
 }
+
 ScoreboardAccessor.maxWritePerTick = 64;
 ScoreboardAccessor.writedCountInCurrentTick = 0;
     

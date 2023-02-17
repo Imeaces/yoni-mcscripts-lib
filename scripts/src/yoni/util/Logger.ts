@@ -147,35 +147,12 @@ export class Logger {
         printLog(time, "LOG", ...args);
     }
     
-    0: (...args: string[]) => void;
-    1: (...args: string[]) => void;
-    2: (...args: string[]) => void;
-    3: (...args: string[]) => void;
-    4: (...args: string[]) => void;
-    5: (...args: string[]) => void;
-    fatal: (...args: string[]) => void;
-    error: (...args: string[]) => void;
-    warn: (...args: string[]) => void;
-    info: (...args: string[]) => void;
-    debug: (...args: string[]) => void;
-    trace: (...args: string[]) => void;
-    f: (...args: string[]) => void;
-    e: (...args: string[]) => void;
-    w: (...args: string[]) => void;
-    i: (...args: string[]) => void;
-    d: (...args: string[]) => void;
-    t: (...args: string[]) => void;
-    warning: (...args: string[]) => void;
-    err: (...args: string[]) => void;
-    fail: (...args: string[]) => void;
-    ex: (...args: string[]) => void;
-    notice: (...args: string[]) => void;
-    log: (...args: string[]) => void;
-    severe: (...args: string[]) => void;
+    /**
+     * 以指定的等级输出日志。
+     */
+    [n: string]: (...args: any[]) => void;
     
-    name;
     constructor(name=""){
-        this.name = name;
         const log = async (lv, msg="", ...rps)=>{
             let time = getTimeString();
             if (msg !== "" && rps.length === 0){
@@ -183,7 +160,7 @@ export class Logger {
             }
             if (name.trim() !== ""){
                 msg = "[{}]: " + msg;
-                printLog(time, lv, msg, this.name, ...rps);
+                printLog(time, lv, msg, name, ...rps);
             } else {
                 printLog(time, lv, msg, ...rps);
             }
@@ -207,11 +184,11 @@ export class Logger {
             get: (levelOutputs, prop)=>{
                 if (typeof prop === "symbol"){
                     return levelOutputs[prop];
-                }
-                if (Object.prototype.hasOwnProperty.call(levelOutputs, prop)){
+                } else if (Object.prototype.hasOwnProperty.call(levelOutputs, prop)){
                     return levelOutputs[prop];
+                } else {
+                    return getOutput(prop);
                 }
-                return getOutput(prop);
             }
         });
     }
