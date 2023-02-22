@@ -18,7 +18,7 @@ class EntityBase {
      * @type {MinecraftEntityType}
      */
     // @ts-ignore
-    vanillaEntity;
+    readonly vanillaEntity: MinecraftEntityType;
     
     /**
      * @hideconstructor
@@ -65,7 +65,7 @@ class EntityBase {
      * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity): entity is Player {
+    static entityIsPlayer(entity: EntityType): entity is Player {
         entity = EntityBase.getMinecraftEntity(entity);
         if (entity instanceof Minecraft.Player)
             return true;

@@ -1,3 +1,12 @@
+/**
+ * 任务是否会异步执行。
+ * @name Schedule#async
+ * @readonly
+ * @type {boolean}
+ */
+/**
+ * 任务类
+ */
 export class Schedule {
     static timeCycleSchedule: string;
     static timeDelaySchedule: string;
@@ -5,30 +14,65 @@ export class Schedule {
     static tickDelaySchedule: string;
     /**
      *
-     * @param {{async?: boolean, type: any, period?:number, delay?:number}} props
+     * @param {{async?: boolean, type: string, period?: number, delay?: number}} props
      * @param {() => void} callback
      */
     constructor(props: {
         async?: boolean | undefined;
-        type: any;
+        type: string;
         period?: number | undefined;
         delay?: number | undefined;
     }, callback: () => void);
-    id: number;
-    isQueue(): boolean;
-    isRunning(): boolean;
-    get isLastSuccess(): boolean;
-    get lastSuccessTime(): any;
     /**
-     * 获取此任务最后一次执行时抛出错误的时间。
-     * 对于同步任务，无法获取由于Minecraft挂断执行导致的错误，这种错误无法被捕获，故无法记录。
+     * 任务的内部ID。
+     * @readonly
+     * @type {number}
      */
-    get lastFailTime(): any;
-    get lastExecuteTime(): any;
+    readonly id: number;
+    /**
+     * 任务将以多大的间隔循环运行。
+     * @readonly
+     * @type {number}
+     */
+    readonly period: number;
+    /**
+     * 任务将在放入队列多长时间后运行。
+     * @readonly
+     * @type {number}
+     */
+    readonly delay: number;
+    /**
+     * 任务是否已经添加到执行队列。
+     * @returns {boolean}
+     */
+    isQueue(): boolean;
+    /**
+     * 任务是否正在执行。
+     * @returns {boolean}
+     */
+    isRunning(): boolean;
+    /**
+     * @type {number}
+     */
+    get isLastSuccess(): number;
+    /**
+     * 获取此任务最后一次成功运行（没有抛出错误）的时间。
+     * @returns {number} 如果没有运行过，将返回 `-1`。
+     */
+    get lastSuccessTime(): number;
+    /**
+     * 获取此任务在运行时，最后一次抛出错误的时间。
+     * 另外，对于同步任务，无法捕获看门狗挂断导致的错误，故无法记录。
+     * @returns {number} 如果没有抛出过错误，将返回 `-1`。
+     */
+    get lastFailTime(): number;
+    /**
+     * 获取此任务最后一次运行的时间。
+     * @returns {number} 如果没有运行过，将返回 `-1`。
+     */
+    get lastExecuteTime(): number;
     async: boolean;
-    period: number | undefined;
-    delay: number | undefined;
-    type: any;
+    type: string;
     run(...args: any[]): void;
     runAsync(...args: any[]): Promise<void>;
 }
@@ -47,43 +91,43 @@ export default class YoniScheduler {
      */
     static removeSchedule(schedule: number | Schedule): boolean;
     /**
-     * 执行一个任务（以尽量快的速度）
-     * @param {() => {}} 需要执行的任务
-     * @param {boolean} 是否异步执行
+     * 创建任务并在其中运行回调函数。
+     * @param {() => void} callback 需要执行的函数。
+     * @param {boolean} async 是否异步执行。
      * @returns {number} taskId
      */
-    static runTask(callback: any, async?: boolean): number;
+    static runTask(callback: () => void, async?: boolean): number;
     /**
-     * 在delay毫秒之后，执行一个任务
-     * @param {() => void} callback - 需要执行的任务
-     * @param {number} delay - 延时多少毫秒后开始执行
-     * @param {boolean} async - 是否异步执行
+     * 在 `delay` 毫秒之后调用一个函数。
+     * @param {() => void} callback - 需要执行的函数。
+     * @param {number} delay - 延迟的毫秒数。
+     * @param {boolean} async - 是否异步执行。
      * @returns {number} taskId
      */
     static runDelayTimerTask(callback: () => void, delay: number, async?: boolean): number;
     /**
-     * 在delay刻之后，执行一个任务
-     * @param {() => void} callback - 需要执行的任务
-     * @param {number} period - 每隔多少刻触发一次
-     * @param {boolean} async - 是否异步执行
+     * 在 `delay` 个游戏刻之后调用一个函数。
+     * @param {() => void} callback - 需要执行的函数。
+     * @param {number} delay - 延迟的游戏刻。
+     * @param {boolean} async - 是否异步执行。
      * @returns {number} taskId
      */
-    static runDelayTickTask(callback: () => void, delay: any, async?: boolean): number;
+    static runDelayTickTask(callback: () => void, delay: number, async?: boolean): number;
     /**
-     * 在delay毫秒之后，以固定period执行一个任务
-     * @param {() => void} callback - 需要执行的任务
-     * @param {number} delay - 延时多少毫秒后开始执行
-     * @param {number} period - 每隔多少毫秒触发一次
-     * @param {boolean} async - 是否异步执行
+     * 在 `delay` 毫秒之后，开始以 `period` 毫秒的间隔调用一个函数。
+     * @param {() => void} callback - 需要执行的函数。
+     * @param {number} delay - 延迟的毫秒树。
+     * @param {number} period - 每次调用间隔的毫秒数。
+     * @param {boolean} async - 是否异步执行。
      * @returns {number} taskId
      */
     static runCycleTimerTask(callback: () => void, delay: number, period: number, async?: boolean): number;
     /**
-     * 在delay刻之后，以固定period执行一个任务
-     * @param {() => void} callback - 需要执行的任务
-     * @param {number} delay - 延时多少刻后开始执行
-     * @param {number} period - 每隔多少刻触发一次
-     * @param {boolean} async - 是否异步执行
+     * 在 `delay` 个游戏刻之后，开始以 `period` 个游戏刻的间隔调用一个函数。
+     * @param {() => void} callback - 需要执行的函数。
+     * @param {number} delay - 延迟的游戏刻。
+     * @param {number} period - 每次调用间隔的游戏刻。
+     * @param {boolean} async - 是否异步执行。
      * @returns {number} taskId
      */
     static runCycleTickTask(callback: () => void, delay: number, period: number, async?: boolean): number;

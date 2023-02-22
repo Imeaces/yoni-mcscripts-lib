@@ -107,7 +107,7 @@
 /* Disable emitting declarations that have '@internal' in their JSDoc comments. */
     // "noEmitHelpers": true,
 /* Disable generating custom helper functions like '__extends' in compiled output. */
-    // "noEmitOnError": true,
+    "noEmitOnError": false,
 /* Disable emitting files if any type checking errors are reported. */
     // "preserveConstEnums": true,
 /* Disable erasing 'const enum' declarations in generated code. */
@@ -126,7 +126,7 @@
     "forceConsistentCasingInFileNames": true, /* Ensure that casing is correct in imports. */
     /* Type Checking */
     "strict": true, /* Enable all strict type-checking options. */
-    "noImplicitAny": false,
+    "noImplicitAny": true,
 /* Enable error reporting for expressions and declarations with an implied 'any' type. */
     "strictNullChecks": true,
 /* When type checking, take into account 'null' and 'undefined'. */

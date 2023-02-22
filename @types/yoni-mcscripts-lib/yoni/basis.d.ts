@@ -8,7 +8,7 @@ export declare const VanillaScoreboard: Minecraft.Scoreboard;
 export declare const MinecraftSystem: Minecraft.System;
 export declare const SystemEvents: Minecraft.SystemEvents;
 /**
- * @param {(...args) => void} callback
+ * @param {(...args: any[]) => void} callback
  * @param {...any} args
  */
 export declare const runTask: (callback: any, ...args: any[]) => void;

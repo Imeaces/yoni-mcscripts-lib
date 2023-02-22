@@ -140,7 +140,7 @@ export default class Command {
      * @param {string[]} commands - command
      * @returns {Promise<CommandResult[]>}
      */
-    static postExecute(sender: any, commands: any): Promise<never[]>;
+    static postExecute(sender: any, commands: any): Promise<any[]>;
     static run(command: any): any;
     static execute(sender: any, command: any): any;
 }

@@ -1,30 +1,33 @@
-import { VanillaWorld, dim, Minecraft } from "./basis.js";
+import { VanillaWorld, Minecraft } from "./basis.js";
+import { getAllDims } from "./dim.js";
 import { EntityBase } from "./entity.js";
 import Scoreboard from "./scoreboard.js";
-import { copyPropertiesWithoutOverride, assignAllPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
+import { Dimension } from "./dimension.js";
+import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
 import { Entity, Player } from "./entity.js";
 
-/**
- * 代表一种与世界的关系。
- */
-class WorldClass {
-    // @ts-ignore
-    static #instance: WorldClass = null;
-    static get instance(){
-        if (!WorldClass.#instance) WorldClass.#instance = new WorldClass();
-        return WorldClass.#instance;
+class World {
+    static isWorld(object: any){
+        return object instanceof Minecraft.World || object instanceof World;
     }
     
+    //@ts-ignore
+    readonly vanillaWorld: Minecraft.World;
+    get scoreboard(){
+        return Scoreboard;
+    }
     /**
-     * @private
-     * @hideconstructor
+     * @param {Minecraft.World}
      */
-    constructor(){
-        if (WorldClass.#instance)
-            throw new TypeError("not a constructor");
+    constructor(vanillaWorld: Minecraft.World){
+        Object.defineProperty(this, "vanillaWorld", {
+            configurable: false,
+            enumerable: false,
+            writable: false,
+            value: vanillaWorld
+        });
     }
-    
     /**
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} options
@@ -35,7 +38,6 @@ class WorldClass {
             yield EntityBase.from(pl) as unknown as Player;
         }
     }
-    
     /**
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} [option]
@@ -48,64 +50,54 @@ class WorldClass {
     }
     
     /**
-     * 获取一个包含了游戏中的所有玩家的对象的数组。
-     * @returns {Player[]}
+     * 获取与 `dimid` 对应的维度对象。
+     * @param {string|number} dimid
+     * @returns {Dimension}
      */
-    getAllPlayers(): Player[]{
+    getDimension(dimid: string|number){
+        return Dimension.dim(dimid);
+    }
+    
+    /**
+     * 获取一个游戏中的所有玩家的对象。
+     * @returns {Player[]} 一个包含了游戏中所有玩家的对象的数组。
+     */
+    getAllPlayers(): Player[] {
         return Array.from(this.getPlayers());
     }
     
     /**
      * 获取一个包含了当前世界中已经加载的所有实体的对象的数组。
      */
-    getLoadedEntities(): Entity[]{
-        return Object.getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
-            .map(dimid => dim(dimid))
+    getLoadedEntities(): Entity[] {
+        return getAllDims()
             .map(dim => Array.from(dim.getEntities()))
             .flat()
             .map(ent => EntityBase.from(ent) as unknown as Entity);
     }
-
     /**
      * 查找游戏中符合特定条件的实体。
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {Entity}
      */
     * selectEntities<Entity>(option: Minecraft.EntityQueryOptions) {
-        let dimids = Object.getOwnPropertyNames(Minecraft.MinecraftDimensionTypes);
-        for (let dimid of dimids){
-            let d = dim(dimid);
+        for (let d of getAllDims()){
             for (let entity of d.getEntities(option)){
                 yield EntityBase.from(entity) as unknown as Entity;
             }
         }
     }
-
     getAliveEntities(){
         return this.getLoadedEntities()
             .filter((ent) => ent.isAlive());
     }
-    get scoreboard(){
-        return Scoreboard;
-    }
-    get getDimension(){
-        return dim;
-    }
 }
 
-// @ts-ignore
-const world: WorldClass = WorldClass;
+copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanillaWorld");
 
-const VanillaWorldSymbol = Symbol("VanillaWorld");
+type YoniWorld = World & Minecraft.World;
 
-// @ts-ignore
-WorldClass[VanillaWorldSymbol] = VanillaWorld;
+const world = new World(VanillaWorld);
 
-// @ts-ignore
-copyPropertiesWithoutOverride(WorldClass.prototype, Minecraft.World.prototype, VanillaWorldSymbol);
-
-// @ts-ignore
-assignAllPropertiesWithoutOverride(WorldClass, WorldClass.instance);
-
-export default world;
-export { world as World };
+export { world as World, YoniWorld };
+export default World;

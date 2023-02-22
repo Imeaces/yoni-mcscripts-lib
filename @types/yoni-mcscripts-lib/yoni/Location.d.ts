@@ -1,8 +1,9 @@
 export default Location;
+export type Vector3 = ILocationCoords;
 export type NetherDimensionLike = -1 | 'minecraft:nether' | 'nether';
 export type OverworldDimensionLike = 0 | 'minecraft:overworld' | 'overworld';
 export type TheEndDimensionLike = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
-export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension;
+export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension | YoniDimension | Dimension;
 export type ILocation = {
     x: number;
     y: number;
@@ -44,8 +45,8 @@ export type ILocationRotationValue = {
 export type ILocationRotationArray = [number, number];
 export type ILocationOfObject = {
     location: ILocationCoords;
-    rotation: ILocationRotationValue;
-    dimension: DimensionLike;
+    rotation?: ILocationRotationValue;
+    dimension?: DimensionLike;
 };
 export type Location1Arg = ILocationOfObject | ILocation | ILocationArray;
 export type LocationArgs1Params = [Location1Arg];
@@ -54,9 +55,10 @@ export type LocationArgs3Params = [DimensionLike, ILocationCoords | [number, num
 export type LocationArgsMoreParams = ILocationArray;
 export type LocationParams = [Location1Arg] | LocationArgs2Params | LocationArgs3Params | LocationArgsMoreParams;
 /**
- * 一个复杂点的Location类
+ * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
  */
 export class Location {
+    static "__#2@#checkReadOnly"(v: any): void;
     /**
      * @param {number} v
      * @returns {number}
@@ -79,6 +81,16 @@ export class Location {
      * @returns {Location}
      */
     static deserialize(v: string): Location;
+    /**
+     * @param {LocationParams} values
+     * @returns {Readonly<Location>}
+     */
+    static createReadonly(...values: LocationParams): Readonly<Location>;
+    /**
+     * @param {Location}
+     * @returns {Readonly<Location>}
+     */
+    static makeReadonly(v: any): Readonly<Location>;
     /**
      * @desc 代表一个MC中的位置，其中包括维度，坐标，旋转角
      * @desc 您可以以多种形式传递参数来构造一个Location
@@ -130,46 +142,82 @@ export class Location {
      * @type {number}
      */
     get x(): number;
+    /**
+     * 设置此位置对应的 z 轴坐标。
+     * @param {number} v
+     */
+    setX(v: number): void;
     set y(arg: number);
     /**
      * @type {number}
      */
     get y(): number;
+    /**
+     * 设置此位置对应的 z 轴坐标。
+     * @param {number} v
+     */
+    setY(v: number): void;
     set z(arg: number);
     /**
      * @type {number}
      */
     get z(): number;
+    /**
+     * 设置此位置对应的 z 轴坐标。
+     * @param {number} v
+     */
+    setZ(v: number): void;
+    /**
+     * 设置此位置对应的坐标。
+     * @param {number} x
+     * @param {number} y
+     * @param {number} z
+     */
+    setPosition(x: number, y: number, z: number): Location;
     set rx(arg: number);
     /**
      * @type {number}
      */
     get rx(): number;
+    /**
+     * 设置此位置对应的 pitch 角。
+     * @param {number} v
+     */
+    setRx(v: number): Location;
     set ry(arg: number);
     /**
+     * 此位置对应的 yaw 角。
      * @type {number}
      */
     get ry(): number;
     /**
-     * @param {number|string|Minecraft.Dimension} v
+     * 设置此位置对应的 yaw 角。
+     * @param {number} v
      */
-    set dimension(arg: Minecraft.Dimension);
+    setRy(v: number): Location;
+    set dimension(arg: YoniDimension);
     /**
-     * @type {Minecraft.Dimension}
+     * 此位置所在的维度。
+     * @type {YoniDimension}
      */
-    get dimension(): Minecraft.Dimension;
+    get dimension(): YoniDimension;
     /**
-     * @param {LocationParams} values
+     * 设置此位置所在的维度
+     * @param {number|string|Minecraft.Dimension|YoniDimension|Dimension} v
      */
-    add(...values: LocationParams): Location;
+    setDimension(v: number | string | Minecraft.Dimension | YoniDimension | Dimension): Location;
     /**
-     * @param {LocationParams} values
+     * @param {Location1Arg} value
      */
-    subtract(...values: LocationParams): Location;
+    add(value: Location1Arg): Location;
     /**
-     * @param {LocationParams} values
+     * @param {Location1Arg} value
      */
-    multiply(...values: LocationParams): Location;
+    subtract(value: Location1Arg): Location;
+    /**
+     * @param {Location1Arg} value
+     */
+    multiply(value: Location1Arg): Location;
     /**
      * 将坐标设置为原点
      */
@@ -188,9 +236,9 @@ export class Location {
     getDirection(): void;
     setDirection(): void;
     /**
-     * @returns {Minecraft.Block} 此位置上的方块
+     * @returns {YoniBlock} 此位置上的方块
      */
-    getBlock(): Minecraft.Block;
+    getBlock(): YoniBlock;
     getBlockX(): number;
     getBlockY(): number;
     getBlockZ(): number;
@@ -238,3 +286,6 @@ export class Location {
     #private;
 }
 import { Minecraft } from "./basis.js";
+import { Dimension } from "./dimension.js";
+import { YoniDimension } from "./dimension.js";
+import { YoniBlock } from "./block.js";

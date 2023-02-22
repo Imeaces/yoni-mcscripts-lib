@@ -14,6 +14,7 @@ export default class ChatCommand {
     static unregisterNonPrefixCommand(command: any): void;
     static registerCustomPrefixCommand(prefix: any, command: any, executor: any): void;
     static unregisterCustomPrefixCommand(prefix: any, command: any): void;
-    static "__#11@#invokeCommand"(options: any): void;
+    static "__#12@#invokeCommand"(options: any): void;
     static getParameters(commandContent: any): string[];
 }
+import { YoniPlayer } from "../entity.js";

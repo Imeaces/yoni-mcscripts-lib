@@ -1,5 +1,5 @@
 import { Minecraft } from "../basis.js";
-import { EntityType, YoniEntityType } from "./EntityTypeDefs.js";
+import { EntityType, YoniEntityType, MinecraftEntityType } from "./EntityTypeDefs.js";
 import Player from "./Player.js";
 /**
  * 代表一个实体
@@ -9,7 +9,7 @@ declare class EntityBase {
     /**
      * @type {MinecraftEntityType}
      */
-    vanillaEntity: any;
+    readonly vanillaEntity: MinecraftEntityType;
     /**
      * @hideconstructor
      * @param {MinecraftEntityType} entity
@@ -35,7 +35,7 @@ declare class EntityBase {
      * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity: any): entity is Player;
+    static entityIsPlayer(entity: EntityType): entity is Player;
     /**
      * 获取所有存活的实体
      * @param {Minecraft.EntityQueryOptions} option

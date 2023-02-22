@@ -12,7 +12,7 @@ export const MinecraftSystem: Minecraft.System = Minecraft.system;
 export const SystemEvents: Minecraft.SystemEvents = MinecraftSystem.events;
 
 /**
- * @param {(...args) => void} callback 
+ * @param {(...args: any[]) => void} callback 
  * @param {...any} args
  */
 export const runTask = (callback, ...args) => {

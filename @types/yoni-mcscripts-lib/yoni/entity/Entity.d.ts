@@ -11,14 +11,14 @@ import { EntityBase } from "./EntityBase.js";
  */
 declare class Entity extends EntityBase implements Minecraft.Entity {
     get [Symbol.toStringTag](): string;
-    get id(): any;
-    get typeId(): any;
-    get velocity(): any;
+    get id(): string;
+    get typeId(): string;
+    get velocity(): Minecraft.Vector;
     get entityType(): Minecraft.EntityType;
-    get dimension(): any;
-    getMinecraftEntity(): any;
+    get dimension(): Minecraft.Dimension;
+    getMinecraftEntity(): import("./EntityTypeDefs.js").MinecraftEntityType;
     get location(): Location;
-    get uniqueId(): any;
+    get uniqueId(): string;
     get scoreboard(): any;
     isAliveEntity(): any;
     isAlive(): boolean;
@@ -66,7 +66,7 @@ declare class Entity extends EntityBase implements Minecraft.Entity {
      * @param {number} [argRy]
      * @param {boolean} [keepVelocity]
      */
-    teleport(...args: [import("./Location.js").Location1Arg | Minecraft.Vector3, boolean]): void;
+    teleport(...args: [import("./Location.js").Location1Arg | Minecraft.Vector3] | [import("./Location.js").Location1Arg | Minecraft.Vector3, boolean]): void;
 }
 declare type YoniEntity = Entity & Minecraft.Entity;
 export default YoniEntity;

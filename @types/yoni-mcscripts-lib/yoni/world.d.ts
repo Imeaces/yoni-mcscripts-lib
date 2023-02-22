@@ -1,17 +1,14 @@
-import { dim, Minecraft } from "./basis.js";
+import { Minecraft } from "./basis.js";
 import Scoreboard from "./scoreboard.js";
 import { Entity, Player } from "./entity.js";
-/**
- * 代表一种与世界的关系。
- */
-declare class WorldClass {
-    #private;
-    static get instance(): WorldClass;
+declare class World {
+    static isWorld(object: any): boolean;
+    readonly vanillaWorld: Minecraft.World;
+    get scoreboard(): typeof Scoreboard;
     /**
-     * @private
-     * @hideconstructor
+     * @param {Minecraft.World}
      */
-    constructor();
+    constructor(vanillaWorld: Minecraft.World);
     /**
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} options
@@ -25,8 +22,14 @@ declare class WorldClass {
      */
     getPlayers<Player>(option?: Minecraft.EntityQueryOptions): Generator<Player, void, unknown>;
     /**
-     * 获取一个包含了游戏中的所有玩家的对象的数组。
-     * @returns {Player[]}
+     * 获取与 `dimid` 对应的维度对象。
+     * @param {string|number} dimid
+     * @returns {Dimension}
+     */
+    getDimension(dimid: string | number): import("./dimension.js").YoniDimension;
+    /**
+     * 获取一个游戏中的所有玩家的对象。
+     * @returns {Player[]} 一个包含了游戏中所有玩家的对象的数组。
      */
     getAllPlayers(): Player[];
     /**
@@ -40,9 +43,8 @@ declare class WorldClass {
      */
     selectEntities<Entity>(option: Minecraft.EntityQueryOptions): Generator<Entity, void, unknown>;
     getAliveEntities(): Entity[];
-    get scoreboard(): typeof Scoreboard;
-    get getDimension(): typeof dim;
 }
-declare const world: WorldClass;
-export default world;
-export { world as World };
+declare type YoniWorld = World & Minecraft.World;
+declare const world: World;
+export { world as World, YoniWorld };
+export default World;

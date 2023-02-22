@@ -146,7 +146,7 @@ class Entity extends EntityBase implements Minecraft.Entity {
      * @param {number} [argRy]
      * @param {boolean} [keepVelocity]
      */
-    teleport(...args: [import("./Location.js").Location1Arg|Minecraft.Vector3, boolean]){
+    teleport(...args: [import("./Location.js").Location1Arg|Minecraft.Vector3]|[import("./Location.js").Location1Arg|Minecraft.Vector3, boolean]){
         let [ argLocation, argDimension, argRx, argRy, keepVelocity ] : [ import("./Location.js").Location1Arg|Minecraft.Vector3, number, number, number, boolean ] = args;
         
         args = args.filter(v => v !== undefined);
@@ -154,9 +154,9 @@ class Entity extends EntityBase implements Minecraft.Entity {
             let location = new Location(argLocation);
             let { rx, ry, dimension } = location;
             if (keepVelocity == null){
-                this.vanillaEntity.teleport(location, dimension, rx, ry);
+                this.vanillaEntity.teleport(location.getVanillaLocation(), dimension.vanillaDimension, rx, ry);
             } else {
-                this.vanillaEntity.teleport(location, dimension, rx, ry, keepVelocity);
+                this.vanillaEntity.teleport(location.getVanillaLocation(), dimension.vanillaDimension, rx, ry, keepVelocity);
             }
         } else {
             this.vanillaEntity.teleport(...args);

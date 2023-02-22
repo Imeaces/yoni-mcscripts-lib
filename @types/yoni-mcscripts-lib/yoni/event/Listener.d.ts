@@ -5,13 +5,13 @@ export default Listener;
  * 可能会在以后优化
  */
 export class Listener {
-    static "__#3@#callbacks": any[];
-    static "__#3@#index": number;
+    static "__#5@#callbacks": any[];
+    static "__#5@#index": number;
     static _getCallback(id: any): any;
-    static "__#3@#fireCallback"(id: any, ...args: any[]): any;
-    static "__#3@#delayRegister"(idx: any, eventType: any, callback: any, ...eventFilters: any[]): any;
-    static "__#3@#doDelayRegister"(options: any): void;
-    static "__#3@#doRegister"(idx: any, eventType: any, callback: any, ...eventFilters: any[]): void;
+    static "__#5@#fireCallback"(id: any, ...args: any[]): any;
+    static "__#5@#delayRegister"(idx: any, eventType: any, callback: any, ...eventFilters: any[]): any;
+    static "__#5@#doDelayRegister"(options: any): void;
+    static "__#5@#doRegister"(idx: any, eventType: any, callback: any, ...eventFilters: any[]): void;
     /**
      * add a new callback function for specific event
      * @param {EventIdentity} caller - the event identify
