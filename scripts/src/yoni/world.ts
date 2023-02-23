@@ -3,7 +3,6 @@ import { getAllDims } from "./dim.js";
 import { EntityBase } from "./entity.js";
 import Scoreboard from "./scoreboard.js";
 import { Dimension } from "./dimension.js";
-import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
 import { Entity, Player } from "./entity.js";
 

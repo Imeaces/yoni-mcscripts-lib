@@ -57,7 +57,7 @@ export interface EntryQueryOptions {
     /**
      * 实体
      */
-    entity?: EntityBase | Minecraft.Entity;
+    entity?: EntityType;
     /**
      * 类型
      */
@@ -81,7 +81,7 @@ class Entry {
         if (one instanceof Minecraft.ScoreboardIdentity)
             return Entry.findEntry({scbid: one});
         if (EntityBase.isEntity(one))
-            return Entry.findEntry({entity: one as EntityType});
+            return Entry.findEntry({entity: one});
         if (typeof one === "string")
             return Entry.findEntry({name: one, type: EntryType.FAKE_PLAYER});
         if (isFinite(one as number)){

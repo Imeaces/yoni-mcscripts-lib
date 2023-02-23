@@ -15,16 +15,13 @@ export const SystemEvents: Minecraft.SystemEvents = MinecraftSystem.events;
  * @param {(...args: any[]) => void} callback 
  * @param {...any} args
  */
-export const runTask = (callback, ...args) => {
-    if (MinecraftSystem.run){
-        MinecraftSystem.run(callback, ...args);
-    } else {
-        const runTask = ()=>{
-            VanillaEvents.tick.unsubscribe(runTask);
+export function runTask(callback: (...args: any[]) => void, ...args: any[]){
+    if (args.length === 0)
+        MinecraftSystem.run(callback);
+    else
+        MinecraftSystem.run(() => {
             callback(...args);
-        };
-        VanillaEvents.tick.subscribe(runTask);
-    }
+        });
 }
 
 /**
