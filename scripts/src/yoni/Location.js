@@ -13,6 +13,9 @@ function makeNumber(v){
  * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
  */
 class Location {
+    /**
+     * @param {Location} v
+     */
     static #checkReadOnly(v){
         if (v.#readOnly){
             throw new TypeError("Read-only Location Object");
@@ -62,6 +65,7 @@ class Location {
         Location.#checkReadOnly(this);
         v = makeNumber(v);
         this.#x = v;
+        return this;
     }
     
     #y = NaN;
@@ -82,6 +86,7 @@ class Location {
         Location.#checkReadOnly(this);
         v = makeNumber(v);
         this.#y = v;
+        return this;
     }
     
     #z = NaN;
@@ -102,6 +107,7 @@ class Location {
         Location.#checkReadOnly(this);
         v = makeNumber(v);
         this.#z = v;
+        return this;
     }
     
     /**
@@ -171,7 +177,7 @@ class Location {
     }
     /**
      * 设置此位置所在的维度
-     * @param {number|string|Minecraft.Dimension|YoniDimension|Dimension} v
+     * @param {DimensionLike} v
      */
     setDimension(v){
         Location.#checkReadOnly(this);
@@ -277,7 +283,7 @@ class Location {
         return location;
     }
     /**
-     * 将坐标设置为原点
+     * 复制一个Location对象，然后将坐标设置为原点。
      */
     zero(){
         let location = this.clone();
@@ -288,6 +294,7 @@ class Location {
     }
     
     /**
+     * 计算此坐标与指定位置的距离。
      * @param {Location1Arg} loc
      */
     distance(loc){
@@ -314,7 +321,7 @@ class Location {
     }
     
     toVector(){
-        throw new Error("not implemented yet");
+        return this.getVanillaVector();
     }
     getDirection(){
         throw new Error("not implemented yet");
@@ -324,7 +331,7 @@ class Location {
     }
     
     /**
-     * @returns {YoniBlock} 此位置上的方块
+     * @returns {YoniBlock} 此位置上的方块。
      */
     getBlock(){
         return this.dimension.getBlock(this);
@@ -387,7 +394,12 @@ class Location {
         return new Minecraft.Vector(x, y, z);
     }
     isLoaded(){
-        throw new Error("not implemented yet");
+        try {
+            this.getBlock();
+            return true;
+        } catch {
+            return false;
+        }
     }
     getChunk(){
         throw new Error("not implemented yet");
@@ -397,6 +409,7 @@ class Location {
         throw new Error("not implemented yet");
     }
     /**
+     * 判断传入的位置是否与此位置对象代表的位置相同。
      * @param {Location1Arg} loc
      */
     equals(loc){
@@ -414,6 +427,7 @@ class Location {
         }
     }
     /**
+     * 判断传入的位置的坐标是否与此位置对象代表的坐标相同。
      * @param {Location1Arg} loc
      */
     equalsPosition(loc){
@@ -458,6 +472,7 @@ class Location {
     }
     
     /**
+     * 创建一个只读的Location对象。
      * @param {LocationParams} values
      * @returns {Readonly<Location>}
      */
@@ -467,7 +482,8 @@ class Location {
         return v;
     }
     /**
-     * @param {Location}
+     * 使用Location创建创建一个只读的Location对象。
+     * @param {Location} v
      * @returns {Readonly<Location>}
      */
     static makeReadonly(v){
@@ -485,7 +501,7 @@ class Location {
  * @typedef {-1|'minecraft:nether'|'nether'} NetherDimensionLike
  * @typedef {0|'minecraft:overworld'|'overworld'} OverworldDimensionLike
  * @typedef {1|'minecraft:the_end'|'the_end'|'theEnd'|'the end'} TheEndDimensionLike
- * @typedef {NetherDimensionLike|OverworldDimensionLike|TheEndDimensionLike|Minecraft.Dimension|YoniDimension|Dimension} DimensionLike
+ * @typedef {NetherDimensionLike|OverworldDimensionLike|TheEndDimensionLike|Minecraft.Dimension|YoniDimension} DimensionLike
  */
 /**
  * @typedef {{x: number, y: number, z: number, rx?: number, ry?: number, dimension?: DimensionLike}} ILocation

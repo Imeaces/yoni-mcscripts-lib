@@ -1,8 +1,7 @@
-import YoniPlayer from "./Player.js";
-import YoniSimulatedPlayer from "./SimulatedPlayer.js";
-import YoniEntity from "./Entity.js";
+import { YoniPlayer, Player } from "./Player.js";
+import { YoniSimulatedPlayer, SimulatedPlayer } from "./SimulatedPlayer.js";
+import { YoniEntity, Entity } from "./Entity.js";
 import { Minecraft, Gametest } from "../basis.js";
-import { EntityBase } from "./EntityBase.js";
-export declare type YoniEntityType = YoniEntity | YoniPlayer | YoniSimulatedPlayer;
-export declare type MinecraftEntityType = Minecraft.Entity | Minecraft.Player | Gametest.SimulatedPlayer;
-export declare type EntityType = MinecraftEntityType | YoniEntityType | EntityBase;
+export declare type YoniEntityValue = YoniEntity | YoniPlayer | YoniSimulatedPlayer | Entity | Player | SimulatedPlayer;
+export declare type MinecraftEntityValue = Minecraft.Entity | Minecraft.Player | Gametest.SimulatedPlayer;
+export declare type EntityValue = MinecraftEntityValue | YoniEntityValue;

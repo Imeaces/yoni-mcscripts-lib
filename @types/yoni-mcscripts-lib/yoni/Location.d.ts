@@ -3,7 +3,7 @@ export type Vector3 = ILocationCoords;
 export type NetherDimensionLike = -1 | 'minecraft:nether' | 'nether';
 export type OverworldDimensionLike = 0 | 'minecraft:overworld' | 'overworld';
 export type TheEndDimensionLike = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
-export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension | YoniDimension | Dimension;
+export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension | YoniDimension;
 export type ILocation = {
     x: number;
     y: number;
@@ -58,7 +58,10 @@ export type LocationParams = [Location1Arg] | LocationArgs2Params | LocationArgs
  * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
  */
 export class Location {
-    static "__#2@#checkReadOnly"(v: any): void;
+    /**
+     * @param {Location} v
+     */
+    static "__#9@#checkReadOnly"(v: Location): void;
     /**
      * @param {number} v
      * @returns {number}
@@ -82,15 +85,17 @@ export class Location {
      */
     static deserialize(v: string): Location;
     /**
+     * 创建一个只读的Location对象。
      * @param {LocationParams} values
      * @returns {Readonly<Location>}
      */
     static createReadonly(...values: LocationParams): Readonly<Location>;
     /**
-     * @param {Location}
+     * 使用Location创建创建一个只读的Location对象。
+     * @param {Location} v
      * @returns {Readonly<Location>}
      */
-    static makeReadonly(v: any): Readonly<Location>;
+    static makeReadonly(v: Location): Readonly<Location>;
     /**
      * @desc 代表一个MC中的位置，其中包括维度，坐标，旋转角
      * @desc 您可以以多种形式传递参数来构造一个Location
@@ -146,7 +151,7 @@ export class Location {
      * 设置此位置对应的 z 轴坐标。
      * @param {number} v
      */
-    setX(v: number): void;
+    setX(v: number): Location;
     set y(arg: number);
     /**
      * @type {number}
@@ -156,7 +161,7 @@ export class Location {
      * 设置此位置对应的 z 轴坐标。
      * @param {number} v
      */
-    setY(v: number): void;
+    setY(v: number): Location;
     set z(arg: number);
     /**
      * @type {number}
@@ -166,7 +171,7 @@ export class Location {
      * 设置此位置对应的 z 轴坐标。
      * @param {number} v
      */
-    setZ(v: number): void;
+    setZ(v: number): Location;
     /**
      * 设置此位置对应的坐标。
      * @param {number} x
@@ -195,17 +200,17 @@ export class Location {
      * @param {number} v
      */
     setRy(v: number): Location;
-    set dimension(arg: YoniDimension);
+    set dimension(arg: Dimension);
     /**
      * 此位置所在的维度。
      * @type {YoniDimension}
      */
-    get dimension(): YoniDimension;
+    get dimension(): Dimension;
     /**
      * 设置此位置所在的维度
-     * @param {number|string|Minecraft.Dimension|YoniDimension|Dimension} v
+     * @param {DimensionLike} v
      */
-    setDimension(v: number | string | Minecraft.Dimension | YoniDimension | Dimension): Location;
+    setDimension(v: DimensionLike): Location;
     /**
      * @param {Location1Arg} value
      */
@@ -219,10 +224,11 @@ export class Location {
      */
     multiply(value: Location1Arg): Location;
     /**
-     * 将坐标设置为原点
+     * 复制一个Location对象，然后将坐标设置为原点。
      */
     zero(): Location;
     /**
+     * 计算此坐标与指定位置的距离。
      * @param {Location1Arg} loc
      */
     distance(loc: Location1Arg): number;
@@ -232,11 +238,11 @@ export class Location {
     distancrSquared(loc: Location1Arg): number;
     getLength(): void;
     getLengthSquared(): void;
-    toVector(): void;
+    toVector(): Minecraft.Vector;
     getDirection(): void;
     setDirection(): void;
     /**
-     * @returns {YoniBlock} 此位置上的方块
+     * @returns {YoniBlock} 此位置上的方块。
      */
     getBlock(): YoniBlock;
     getBlockX(): number;
@@ -262,14 +268,16 @@ export class Location {
      */
     getVanillaLocation(): Minecraft.Location;
     getVanillaVector(): Minecraft.Vector;
-    isLoaded(): void;
+    isLoaded(): boolean;
     getChunk(): void;
     checkFinite(): void;
     /**
+     * 判断传入的位置是否与此位置对象代表的位置相同。
      * @param {Location1Arg} loc
      */
     equals(loc: Location1Arg): boolean;
     /**
+     * 判断传入的位置的坐标是否与此位置对象代表的坐标相同。
      * @param {Location1Arg} loc
      */
     equalsPosition(loc: Location1Arg): boolean;

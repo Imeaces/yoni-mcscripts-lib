@@ -2,7 +2,7 @@ import { Minecraft } from "../basis.js";
 import { Entry } from "./Entry.js";
 import { EntryValueType, EntryType } from "./EntryType.js";
 import { ScoreInfo } from "./ScoreInfo.js";
-import { EntityBase } from "../entity.js";
+import { EntityValue } from "../entity/EntityTypeDefs.js";
 /**
  * 记分项记录了参与者以及他们的分数。
  */
@@ -116,22 +116,13 @@ declare class Objective {
      */
     postGetScore(entry: EntryValueType): Promise<number | undefined>;
     /**
-     * 为分数持有者在记分项上执行特定的操作。
-     * @param {string} option - 操作类型。
-     * @param {EntryValueType} one - 可能为分数持有者的值。
-     * @param {...any} args - 操作所需要的参数。
-     * @throws 未知的命令错误。
-     * @throws 若尝试为虚拟玩家设置分数，且世界中有相同名字的玩家时，抛出 `NameConflictError`。
-     */
-    __playerCommand(option: string, one: EntryValueType, ...args: any[]): void;
-    /**
      * 寻找用于在记分项上执行特定的操作的与分数持有者有关的信息。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      */
     static findCommandRequirement(one: EntryValueType): {
         name?: string;
         type: EntryType;
-        entity?: EntityBase | Minecraft.Entity;
+        entity?: EntityValue;
         scbid?: Minecraft.ScoreboardIdentity;
         entry?: Entry;
     };
@@ -161,17 +152,21 @@ declare class Objective {
     getScoreInfo(entry: EntryValueType, autoInit?: boolean): ScoreInfo;
     /**
      * 将分数持有者在记分项上的分数设置为指定的值。
-     * @deprecated 由于新版本移除了runCommand()，故原有的方法
-     * 不再可用，请改用 {@link Objective.postSetScore}。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要设置的分数。
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
-    setScore(one: EntryValueType, score: number): number;
+    setScore(one: EntryValueType, score: number): void;
+    /**
+     * 为分数持有者在记分项上增加分数。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @param score - 要增加的分数。
+     * @returns 执行成功后，此 `Promise` 将会敲定。
+     * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
+     */
+    addScore(one: EntryValueType, score: number): void;
     /**
      * 为分数持有者在记分项上减少分数。
-     * @deprecated 由于新版本移除了runCommand()，故原有的方法
-     * 不再可用，请改用 {@link Objective.postRemoveScore}。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要减少的分数。
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
@@ -198,7 +193,7 @@ declare class Objective {
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      * @throws 若 `useBuiltIn` 为 `false` ，且 `min > max` 。
      */
-    randomScore(one: EntryValueType, min?: number, max?: number, useBuiltIn?: boolean): void;
+    randomScore(one: EntryValueType, min?: number, max?: number, useBuiltIn?: boolean): Promise<number | void>;
     /**
      * 在记分项上重置指定分数持有者的分数。
      * @deprecated 由于新版本移除了runCommand()，故原有的方法
@@ -206,18 +201,7 @@ declare class Objective {
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
      */
-    resetScore(one: EntryValueType): void;
-    /**
-     * 为分数持有者在记分项上增加分数。
-     * @deprecated 由于新版本移除了runCommand()，故原有的方法
-     * 不再可用，请改用 {@link Objective.postAddScore}。
-     * @param {EntryValueType} one - 可能为分数持有者的值。
-     * @param score - 要增加的分数。
-     * @returns 执行成功后，此 `Promise` 将会敲定。
-     * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
-     */
-    addScore(one: EntryValueType, score: number): void;
-    __doPlayerCommand(option: string, one: EntryValueType, ...args: any[]): void;
+    resetScore(one: EntryValueType): Promise<void>;
 }
 export { Objective, ScoreInfo };
 export default Objective;

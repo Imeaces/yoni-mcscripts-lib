@@ -5,7 +5,8 @@ import Scoreboard from "./scoreboard.js";
 import { Dimension } from "./dimension.js";
 import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
-import { Entity, Player } from "./entity.js";
+import { YoniEntity } from "./entity/Entity.js";
+import { YoniPlayer } from "./entity/Player.js";
 
 class World {
     static isWorld(object: any){
@@ -31,21 +32,21 @@ class World {
     /**
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} options
-     * @yields {Player}
+     * @yields {YoniPlayer}
      */
-    * selectPlayers<Player>(options: Minecraft.EntityQueryOptions){
+    * selectPlayers<YoniPlayer>(options: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         for (let pl of VanillaWorld.getPlayers(options)){
-            yield EntityBase.from(pl) as unknown as Player;
+            yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
     }
     /**
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} [option]
-     * @yields {Player}
+     * @yields {YoniPlayer}
      */
-    * getPlayers<Player>(option?: Minecraft.EntityQueryOptions){
+    * getPlayers<YoniPlayer>(option?: Minecraft.EntityQueryOptions){
         for (let pl of VanillaWorld.getPlayers(option)){
-            yield EntityBase.from(pl) as unknown as Player;
+            yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
     }
     
@@ -55,35 +56,36 @@ class World {
      * @returns {Dimension}
      */
     getDimension(dimid: string|number){
+        //@ts-ignore
         return Dimension.dim(dimid);
     }
     
     /**
      * 获取一个游戏中的所有玩家的对象。
-     * @returns {Player[]} 一个包含了游戏中所有玩家的对象的数组。
+     * @returns {YoniPlayer[]} 一个包含了游戏中所有玩家的对象的数组。
      */
-    getAllPlayers(): Player[] {
+    getAllPlayers(): YoniPlayer[] {
         return Array.from(this.getPlayers());
     }
     
     /**
      * 获取一个包含了当前世界中已经加载的所有实体的对象的数组。
      */
-    getLoadedEntities(): Entity[] {
+    getLoadedEntities(): YoniEntity[] {
         return getAllDims()
             .map(dim => Array.from(dim.getEntities()))
             .flat()
-            .map(ent => EntityBase.from(ent) as unknown as Entity);
+            .map(ent => EntityBase.from(ent) as unknown as YoniEntity);
     }
     /**
      * 查找游戏中符合特定条件的实体。
      * @param {Minecraft.EntityQueryOptions} options
-     * @yields {Entity}
+     * @yields {YoniEntity}
      */
-    * selectEntities<Entity>(option: Minecraft.EntityQueryOptions) {
+    * selectEntities<YoniEntity>(option: Minecraft.EntityQueryOptions) {
         for (let d of getAllDims()){
             for (let entity of d.getEntities(option)){
-                yield EntityBase.from(entity) as unknown as Entity;
+                yield EntityBase.from(entity) as unknown as YoniEntity;
             }
         }
     }

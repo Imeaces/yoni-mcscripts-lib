@@ -1,4 +1,4 @@
-import { StatusCode } from "./basis.js";
+import { StatusCode, Minecraft } from "./basis.js";
 /**
  * 表示命令完成执行后返回的结果。
  * @interface
@@ -18,7 +18,7 @@ export interface CommandResult {
  * @typedef {{runCommandAsync: (command: string) => CommandResult}} CommandSender
  */
 export interface CommandSender {
-    runCommandAsync(command: string): CommandResult;
+    runCommandAsync(command: string): Promise<CommandResult> | Promise<Minecraft.CommandResult>;
 }
 /**
  * contains command queue infos

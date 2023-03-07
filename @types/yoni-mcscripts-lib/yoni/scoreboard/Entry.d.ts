@@ -1,5 +1,5 @@
 import { Minecraft } from "../basis.js";
-import { EntityBase } from "../entity/EntityBase.js";
+import { EntityValue } from "../entity/EntityTypeDefs.js";
 import Entity from "../entity/Entity.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 /**
@@ -31,7 +31,7 @@ export interface EntryQueryOptions {
     /**
      * 实体
      */
-    entity?: EntityBase | Minecraft.Entity;
+    entity?: EntityValue;
     /**
      * 类型
      */

@@ -23,7 +23,7 @@ export declare class ScoreInfo {
     /**
      * 重置此对象对应的分数持有者在对应的记分项上的分数。
      */
-    reset(): void;
+    reset(): Promise<void>;
     getEntry(): Entry;
     getObjective(): Objective;
     toString(): string;

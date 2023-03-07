@@ -15,6 +15,7 @@ export class PlayerJoinedEvent extends PlayerEvent {
 export class PlayerJoinedEventSignal extends EventSignal {
 }
 
+
 const joiningPlayers = new Set();
 /**
  * @type {number | null}
@@ -31,9 +32,12 @@ const schedule = new Schedule({
         return;
     }
     
-    [...VanillaWorld.getPlayers()].forEach((pl)=>{
-        if (joiningPlayers.has(pl)){
-            joiningPlayers.delete(pl);
+    let onlinePlayers = Array.from(VanillaWorld.getPlayers());
+    
+    joiningPlayers.forEach((plName)=>{
+        let pl = onlinePlayers.find(pl => pl.name === plName);
+        if (pl != null){
+            joiningPlayers.delete(plName);
             trigger.triggerEvent(pl);
         }
     });
@@ -46,16 +50,12 @@ const trigger = new EventTriggerBuilder()
     .whenFirstSubscribe(()=>{
         YoniScheduler.addSchedule(schedule);
         eventId = EventListener.register("minecraft:playerJoin", (event)=>{
-            joiningPlayers.add(event.player);
+            joiningPlayers.add(event.playerName);
         });
     })
     .whenLastUnsubscribe(()=>{
         YoniScheduler.removeSchedule(schedule);
         EventListener.unregister(eventId);
     })
-    .build();
-
-if ("player" in Minecraft.PlayerJoinEvent.prototype)
-    trigger.registerEvent();
-else
-    import("./PlayerJoinedEvent.v1.19.60.js");
+    .build()
+    .registerEvent();

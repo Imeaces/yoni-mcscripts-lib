@@ -11,7 +11,7 @@ export declare const SystemEvents: Minecraft.SystemEvents;
  * @param {(...args: any[]) => void} callback
  * @param {...any} args
  */
-export declare const runTask: (callback: any, ...args: any[]) => void;
+export declare function runTask(callback: (...args: any[]) => void, ...args: any[]): void;
 /**
  * overworld dimension
  * @type {Minecraft.Dimension}

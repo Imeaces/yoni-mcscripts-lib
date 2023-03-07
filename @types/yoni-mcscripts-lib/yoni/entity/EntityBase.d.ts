@@ -1,146 +1,147 @@
 import { Minecraft } from "../basis.js";
-import { EntityType, YoniEntityType, MinecraftEntityType } from "./EntityTypeDefs.js";
-import Player from "./Player.js";
+import { DimensionLike } from "../Location.js";
+import { EntityValue } from "./EntityTypeDefs.js";
+import YoniEntity from "./Entity.js";
+import YoniPlayer from "./Player.js";
 /**
  * 代表一个实体
  */
 declare class EntityBase {
-    #private;
     /**
-     * @type {MinecraftEntityType}
+     * @type {Minecraft.Entity}
      */
-    readonly vanillaEntity: MinecraftEntityType;
+    readonly vanillaEntity: Minecraft.Entity;
     /**
      * @hideconstructor
-     * @param {MinecraftEntityType} entity
+     * @param {Minecraft.Entity} entity
      */
-    constructor(entity: any);
+    constructor(entity: Minecraft.Entity);
     /**
      * 检查一个东西是否为实体
-     * @param {any} obj - 任意
+     * @param {any} object - 任意
      * @throws 当不是实体的时候抛出错误
      */
-    static checkIsEntity(obj: any): void;
+    static checkIsEntity(object: any): void;
     /**
      * 由实体对象创建对应的 YoniEntity 实体对象，这个方法确保了实体对象的唯一。
      *
      * 如果要确保一定能获取到 YoniEntity 对象，请使用 {@link EntityBase.getYoniEntity}
      * @param {any} entity - 可以被认为是实体的东西，出于代码便利，允许传入任何值。实际上只有实体类型的对象才有效果。
-     * @return {YoniEntityType} 如果 `entity` 不为实体类型，则返回 `null`。
+     * @return {YoniEntity} 如果 `entity` 不为实体类型，则返回 `null`。
      */
-    static from(entity: any): YoniEntityType | null;
+    static from(entity: any): YoniEntity | null;
     /**
      * 检测某个实体是否为玩家
-     * @param {EntityType} entity 要检测的实体
+     * @param {EntityValue} entity 要检测的实体
      * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity: EntityType): entity is Player;
+    static entityIsPlayer(entity: EntityValue): entity is (Minecraft.Player | YoniPlayer);
     /**
      * 获取所有存活的实体
      * @param {Minecraft.EntityQueryOptions} option
-     * @return {YoniEntityType[]}
+     * @return {YoniEntity[]}
      */
-    static getAliveEntities(option: any): any;
+    static getAliveEntities(option: Minecraft.EntityQueryOptions): YoniEntity[];
     /**
      * 获取实体的minecraft:health组件
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {Minecraft.EntityHealthComponent}
      */
-    static getHealthComponent(entity: any): any;
+    static getHealthComponent(entity: EntityValue): Minecraft.EntityHealthComponent;
     /**
      * 获取实体的物品栏
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {Minecraft.InventoryComponentContainer}
      */
-    static getInventory(entity: EntityType): Minecraft.InventoryComponentContainer;
+    static getInventory(entity: EntityValue): Minecraft.InventoryComponentContainer;
     /**
      * 获取实体的血量
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {number}
      */
-    static getCurrentHealth(entity: EntityType): number;
+    static getCurrentHealth(entity: EntityValue): number;
     /**
      * @param {import('../Location.js').DimensionLike} dimension
      * @param {Minecraft.EntityQueryOptions} [options]
      */
-    static getDimensionEntities(dimension: import('../Location.js').DimensionLike, options: Minecraft.EntityQueryOptions, optionClass?: any): Minecraft.EntityIterator | Generator<Minecraft.Entity, void, undefined>;
+    static getDimensionEntities(dimension?: DimensionLike, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity>;
     /**
      * @param {import('.../Location.js').DimensionLike}
      * @param {Minecraft.EntityQueryOptions} [options]
      */
-    static getWorldPlayers(options: any, optionClass?: any): Minecraft.PlayerIterator | Minecraft.EntityIterator;
+    static getWorldPlayers(options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Player>;
     /**
      * 获取所有存在的实体（包括死亡的玩家）
-     * @returns {EntityType[]}
+     * @returns {EntityValue[]}
      */
-    static getLoadedEntities(): any;
+    static getLoadedEntities(): Minecraft.Entity[];
     /**
      * 获取实体最大血量
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {number}
      */
-    static getMaxHealth(entity: any): any;
+    static getMaxHealth(entity: EntityValue): number;
     /**
      * 得到一个Minecraft.Entity
-     * @param {EntityType} entity
-     * @returns {MinecraftEntityType|null}
+     * @param {EntityValue} entity
+     * @returns {MinecraftEntityType}
      */
-    static getMinecraftEntity(entity: any): any;
+    static getMinecraftEntity(entity: EntityValue): Minecraft.Entity;
     /**
      * 得到一个Entity
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {YoniEntityType}
      * @throws 如果参数不是实体将会抛出错误
      */
-    static getYoniEntity(entity: EntityType): YoniEntityType;
+    static getYoniEntity(entity: EntityValue): YoniEntity;
     /**
      * 检测一个实体是否有指定的所有种族
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @param {...string} families
      * @returns {boolean}
      */
-    static hasFamilies(entity: any, ...families: any[]): boolean;
+    static hasFamilies(entity: EntityValue, ...families: string[]): boolean;
     /**
      * 检测一个实体是否任一指定的种族
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @param {...string} families
      * @returns {boolean}
      */
-    static hasAnyFamily(entity: any, ...families: any[]): boolean;
+    static hasAnyFamily(entity: EntityValue, ...families: string[]): boolean;
     /**
      * 检测一个实体是否有某个种族
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @param {string} family
      * @returns {boolean}
      */
-    static hasFamily(entity: any, family: any): boolean;
+    static hasFamily(entity: EntityValue, family: string): boolean;
     /**
      * 检测一个实体是否存在于世界上
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {boolean}
      */
-    static isAliveEntity(entity: any): any;
+    static isAliveEntity(entity: EntityValue): boolean;
     /**
      * 检测一个实体是否活着
      * 物品、箭、烟花等不是活的
      * 死了的实体也不是活的
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @returns {boolean}
      */
-    static isAlive(entity: any): boolean;
+    static isAlive(entity: EntityValue): boolean;
     /**
      * 检测参数是否为实体
      * @param {any} obj
      * @returns {boolean}
      */
-    static isEntity(obj: any): obj is (EntityBase | Minecraft.Entity);
+    static isEntity(obj: any): obj is (YoniEntity | Minecraft.Entity);
     /**
      * 检测参数是否为原版实体
      * @param {any} object
      * @returns {boolean}
      */
-    static isMinecraftEntity(object: any): boolean;
+    static isMinecraftEntity(object: any): object is Minecraft.Entity;
     /**
      * 检测两个参数是否为同一实体
      * @param {any} ent1
@@ -152,12 +153,12 @@ declare class EntityBase {
      * @param {any} object
      * @returns {boolean}
      */
-    static isYoniEntity(object: any): boolean;
+    static isYoniEntity(object: any): object is YoniEntity;
     /**
      * 设置实体的血量
-     * @param {EntityType} entity
+     * @param {EntityValue} entity
      * @param {number} val
      */
-    static setCurrentHealth(entity: any, val: any): void;
+    static setCurrentHealth(entity: EntityValue, val: number): void;
 }
 export { EntityBase };
