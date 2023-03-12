@@ -1,6 +1,7 @@
 import { EventTypes, Event, EventSignal } from "../../event.js";
 import { EntityBase } from "../../entity.js";
 import { Location } from "../../Location.js";
+import { Minecraft } from "../../basis.js";
 
 class BeforeItemUseOnEvent extends Event {
     get blockLocation(){
@@ -10,11 +11,11 @@ class BeforeItemUseOnEvent extends Event {
         return this.blockLocation.clone();
     }
     #blockLocation;
-    set cancel(v){
+    set cancel(v: boolean){
         this.#event.cancel = !!v;
     }
     #event;
-    constructor(event){
+    constructor(event: Minecraft.BeforeItemUseOnEvent){
         let { blockFace, faceLocationX, faceLocationY, item, source } = event;
         super({ blockFace, faceLocationX, faceLocationY, item, source: EntityBase.from(source) });
         this.#event = event;
@@ -26,8 +27,8 @@ class BeforeItemUseOnEvent extends Event {
 
 class BeforeItemUseOnEventSignal {
     #callbacks = new WeakMap();
-    subscribe(callback){
-        let func = (event) => {
+    subscribe(callback: (arg: BeforeItemUseOnEvent) => void): (arg: BeforeItemUseOnEvent) => void {
+        let func = (event: any) => {
             if (!this.#callbacks.has(callback))
                 return;
             event = new BeforeItemUseOnEvent(event);
@@ -35,8 +36,9 @@ class BeforeItemUseOnEventSignal {
         }
         EventTypes.get("minecraft:beforeItemUseOn").subscribe(func);
         this.#callbacks.set(callback, func);
+        return callback;
     }
-    unsubscribe(callback){
+    unsubscribe(callback: (arg: BeforeItemUseOnEvent) => void){
         let cab = this.#callbacks.get(callback);
         
         if (cab){

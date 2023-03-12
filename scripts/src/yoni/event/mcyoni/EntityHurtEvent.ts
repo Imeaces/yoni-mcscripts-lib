@@ -1,6 +1,8 @@
+// @ts-nocheck
 import { EventTypes, Event, EventSignal } from "../../event.js";
 import { EntityBase } from "../../entity.js";
 import { getKeys } from "../../lib/ObjectUtils.js";
+import { Minecraft } from "../../basis.js";
 
 class EntityHurtEvent extends Event {
     /*damage;
@@ -10,7 +12,7 @@ class EntityHurtEvent extends Event {
     damagingProjectile;
     damagingSource;
     */
-    constructor(event){
+    constructor(event: Minecraft.EntityHurtEvent){
         let { damage, hurtEntity, damageSource } = event;
         
         let { cause, damagingEntity, damagingProjectile } = damageSource;
@@ -27,8 +29,8 @@ class EntityHurtEvent extends Event {
 
 class EntityHurtEventSignal {
     #callbacks = new WeakMap();
-    subscribe(callback, options){
-        let func = (event) => {
+    subscribe(callback: (arg: EntityHurtEvent) => void, options: Minecraft.EntityEventOptions): (arg: EntityHurtEvent) => void {
+        let func = (event: any) => {
             if (!this.#callbacks.has(callback))
                 return;
             event = new EntityHurtEvent(event);
@@ -40,8 +42,9 @@ class EntityHurtEventSignal {
         else
             vanillaSignal.subscribe(func);
         this.#callbacks.set(callback, func);
+        return callback;
     }
-    unsubscribe(callback){
+    unsubscribe(callback: (arg: EntityHurtEvent) => void){
         let cab = this.#callbacks.get(callback);
         
         if (cab){
