@@ -83,6 +83,9 @@ function getNamespaceEventTypesMap(namespace){
     return registeredEventTypes.get(namespace);
 }
 
+/**
+ * @deprecated 官方可能正在对事件系统进行大幅度修改，此接口可能会出现错误。
+ */
 class Types {
     static register(identifier, eventType){
         let idInfo = getIdentifierInfo(identifier);

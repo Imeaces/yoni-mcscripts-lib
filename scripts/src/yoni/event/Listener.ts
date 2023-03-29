@@ -40,10 +40,9 @@ class Listener {
     */
     static #fireCallback(id, ...args){
         //this.#checkIsFireInterrupted(this.#fireingCallbackId);
-        let func = this.#callbacks[id];
-        if (func === null){
+        if (!(id in this.#callbacks))
             return;
-        }
+        let func = this.#callbacks[id];
         //this.#fireingCallbackId = id;
         if (Object.prototype.toString.call(func) === "[object AsyncFunction]"){
             func(...args)

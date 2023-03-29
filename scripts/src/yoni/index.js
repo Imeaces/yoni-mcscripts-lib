@@ -42,6 +42,7 @@ import { ChatCommand } from "./util/ChatCommand.js";
 import { Location } from "./Location.js";
 import { assignAllPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 import { Dimension, YoniDimension } from "./dimension.js";
+import { system } from "./system.js";
 
 const Utils = (()=>{
     let obj = {};
@@ -83,6 +84,7 @@ export {
     
     World,
     Dimension,
+    system,
     
     dim,
     Minecraft,
@@ -139,4 +141,5 @@ if (injectGlobal){
     
     globalThis.Location = Location;
     globalThis.YoniUtils = Utils;
+    globalThis.system = system;
 }

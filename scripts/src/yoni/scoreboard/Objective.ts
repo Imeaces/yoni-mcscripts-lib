@@ -476,8 +476,8 @@ class Objective {
         
         if (entry.vanillaScbid)
             this.vanillaObjective.setScore(entry.vanillaScbid, score);
-        
-        throw new Error("scbid doesn't initialize");
+        else
+            throw new Error("scbid doesn't initialize");
     }
     /**
      * 为分数持有者在记分项上增加分数。
@@ -495,14 +495,14 @@ class Objective {
         else
             entry = Entry.guessEntry(one);
         
-        score = this.getScore(entry) ?? 0 + score;
+        score = (this.getScore(entry) ?? 0) + score;
         //取32位整数
         score = score >> 0;
         
         if (entry.vanillaScbid)
             this.vanillaObjective.setScore(entry.vanillaScbid, score);
-        
-        throw new Error("scbid doesn't initialize");
+        else
+            throw new Error("scbid doesn't initialize");
     }
     /**
      * 为分数持有者在记分项上减少分数。
@@ -520,14 +520,14 @@ class Objective {
         else
             entry = Entry.guessEntry(one);
         
-        score = this.getScore(entry) ?? 0 - score;
+        score = (this.getScore(entry) ?? 0) - score;
         //取32位整数
         score = score >> 0;
         
         if (entry.vanillaScbid)
             this.vanillaObjective.setScore(entry.vanillaScbid, score);
-        
-        throw new Error("scbid doesn't initialize");
+        else
+            throw new Error("scbid doesn't initialize");
     }
     
     /**

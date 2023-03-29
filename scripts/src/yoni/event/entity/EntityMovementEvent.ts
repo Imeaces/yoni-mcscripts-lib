@@ -1,15 +1,19 @@
 import { EventSignal, EventTriggerBuilder } from "../../event.js";
 import { EntityEvent } from "./EntityEvent.js";
+import { EntityValue } from "../../entity/EntityTypeDefs.js";
 import { EntityBase } from "../../entity.js";
+import { YoniEntity } from "../../entity.js";
 import { Location } from "../../Location.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
+import { World } from "../../world.js";
 
 export class EntityMovementEventSignal extends EventSignal {
-    subscribe(callback, options){
+    subscribe(callback: (arg: EntityMovementEvent) => void, options?: EntityMovementEventOption){
         super.subscribe(callback, options);
         if (options != null){
             filtersList.push(options);
         }
+        return callback;
     }
 }
 
@@ -32,29 +36,45 @@ export class EntityMovementEvent extends EntityEvent {
     }
     
     get from(){
-        return super.from.clone();
+        return this.#from.clone();
     }
     get to(){
-        return super.to.clone();
+        return this.#to.clone();
     }
-    constructor(entity, from, to, movementKeys){
-        super(entity, {from, to, movementKeys});
+    get movementKeys(){
+        return this.#movementKeys.slice(0);
     }
+    constructor(entity: YoniEntity, from: Location, to: Location, movementKeys: MovementKey[]){
+        super(entity);
+        this.#from = from;
+        this.#to = to;
+        this.#movementKeys = movementKeys;
+    }
+    #movementKeys;
+    #to;
+    #from;
 }
 
-let entityLocationRecords = new WeakMap();
+let entityLocationRecords = new WeakMap<YoniEntity, Location>();
 
-const filtersList = [];
+const filtersList: EntityMovementEventOption[] = [];
 
-function getTargetEntities(){
+type MovementKey = "dimension" | "x" | "y" | "z" | "location" | "rx" | "ry" | "rotation";
+interface EntityMovementEventOption {
+    entities?: EntityValue[];
+    entityTypes?: string[];
+    movementKeys?: MovementKey[];
+}
+
+function getTargetEntities(): YoniEntity[] {
     if (filtersList.length === 0){
-        return EntityBase.getLoadedEntities();
+        return World.getLoadedEntities();
     }
-    const selectedEntities = [];
-    const allEntities = EntityBase.getLoadedEntities();
+    const selectedEntities: YoniEntity[] = [];
+    const allEntities = World.getLoadedEntities();
     filtersList.forEach(filter => {
         if (filter.entities){
-            filter.entities.map(entity => EntityBase.from(entity))
+            filter.entities.map(entity => EntityBase.getYoniEntity(entity))
                 .forEach(entity => {
                     selectedEntities.push(entity);
                 });
@@ -62,7 +82,7 @@ function getTargetEntities(){
         if (filter.entityTypes){
             allEntities
                 .filter(oneEntity => {
-                    return filter.entityTypes.includes(oneEntity.typeId);
+                    return (filter.entityTypes as Array<string>).includes(oneEntity.typeId);
                 })
                 .forEach(oneEntity => {
                     selectedEntities.push(oneEntity);
@@ -72,7 +92,7 @@ function getTargetEntities(){
     return Array.from(
         new Set(
             selectedEntities.map(e =>
-                EntityBase.from(e)
+                EntityBase.getYoniEntity(e)
             )
         )
     );
@@ -94,7 +114,7 @@ const schedule = new Schedule ({
         if (newLoc.equals(oldLoc)){
             continue;
         }
-        let movementKeys = [];
+        let movementKeys: MovementKey[] = [];
         if (newLoc.x !== oldLoc.x){
             movementKeys.push("x", "location");
         }
@@ -114,8 +134,7 @@ const schedule = new Schedule ({
             movementKeys.push("x", "y", "z", "rx", "ry", "dimension", "location", "rotation");
         }
         
-        movementKeys = new Set(movementKeys);
-        movementKeys = Array.from(movementKeys);
+        movementKeys = Array.from(new Set(movementKeys));
         
         trigger.triggerEvent(entity, oldLoc, newLoc, movementKeys);
     }
@@ -125,12 +144,10 @@ const trigger = new EventTriggerBuilder()
     .id("yoni:entityMovement")
     .eventSignalClass(EntityMovementEventSignal)
     .eventClass(EntityMovementEvent)
-    .filterResolver((values, filterValues)=>{
+    .filterResolver((values: [YoniEntity, Location, Location, MovementKey[]],
+        filterValues: EntityMovementEventOption)=>{
         
         const [entity, from, to, movementKeys] = values;
-        
-        const filterEntityTypes = filterValues.entityTypes;
-        const filterEntitys = filterValues.entities;
         
         if (filterValues.movementKeys != null){
             for (const key of filterValues.movementKeys){

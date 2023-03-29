@@ -510,6 +510,53 @@ class Location {
         v.#readOnly = true;
         return v;
     }
+    /**
+     * @param {Location1Arg} start
+     * @param {Location1Arg} end
+     * @returns {Location[]}
+     */
+    static blocksBetween(start, end){
+        let startPoint = new Location(start).toBlockLocation();
+        let endPoint = new Location(end).toBlockLocation();
+        
+        let { x0, x1, y0, y1, z0, z1 } = (function (){
+            let { x: x2, y: y2, z: z2 } = startPoint;
+            let { x: x3, y: y3, z: z3 } = endPoint;
+            
+            let x0, x1, y0, y1, z0, z1;
+            
+            x0 = Math.min(x2, x3);
+            y0 = Math.min(y2, y3);
+            z0 = Math.min(z2, z3);
+
+            x1 = Math.max(x2, x3);
+            y1 = Math.max(y2, y3);
+            z1 = Math.max(z2, z3);
+            
+            return { x0, x1, y0, y1, z0, z1 };
+        })();
+        
+        let offset = Location.zero;
+        
+        startPoint = startPoint.zero()
+            .add([x0, y0, z0]);
+        endPoint = endPoint.zero()
+            .add([x1, y1, z1]);
+        
+        let areaSize = endPoint.subtract(startPoint)
+            .add([1, 1, 1]);
+        
+        let blocks = [];
+        for (let x = 0; x < areaSize.x; x++){
+            for (let y = 0; y < areaSize.y; y++){
+                for (let z = 0; z < areaSize.z; z++){
+                    blocks.push(startPoint.add([x, y, z]));
+                }
+            }
+        }
+        
+        return blocks;
+    }
 }
 
 /**

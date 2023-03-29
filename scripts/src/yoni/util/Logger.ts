@@ -49,6 +49,26 @@ function getTimeString(){
     return str;
 }
 
+/*
+function getTimeString(){
+    let now = new Date();
+    let H = now.getHours();
+    let M = now.getMinutes();
+    let S = now.getSeconds();
+    let MS = now.getMilliseconds();
+    let Y = now.getFullYear();
+    let Mo = now.getMonth() + 1;
+    let D = now.getDate();
+    
+    let str = "";
+    for (let s of [H, M, S]){
+        if (str!=="") str+=":";
+        str += ("00"+s).substring((""+s).length);
+    }
+    str += "." + String(MS+"00").slice(0, 3);
+    return String(Y) + "-" + ("0"+String(Mo)).slice(0,2) + "-" + ("0"+String(D)).slice(0,2) + " " + str;
+}
+*/
 const levels = {
     0: "FATAL",
     1: "ERROR",

@@ -7,7 +7,8 @@ export class TickEvent extends Event {
     currentTick;
     deltaTime;
     constructor(currentTick, deltaTime){
-        super({deltaTime, currentTick});
+        super();
+        Object.assign(this, {deltaTime, currentTick});
         Object.freeze(this);
     }
 }
