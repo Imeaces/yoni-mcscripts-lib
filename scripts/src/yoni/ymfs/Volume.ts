@@ -37,15 +37,10 @@ export class Volume {
         this.getChunk(0);
         this.getChunk(this.size - 1);
     }
-    #chunks = new Map<string, Chunk>();
     getChunk(position: number): Chunk{
         let location = Volume.position2Location(position, this.volumeArea);
-        let locationStr = location.toString();
-        if (this.#chunks.has(locationStr))
-            return this.#chunks.get(locationStr) as Chunk;
         
-        let chunk = new Chunk(location);
-        this.#chunks.set(locationStr, chunk);
+        let chunk = new Chunk(this, position, location);
         
         return chunk;
     }
