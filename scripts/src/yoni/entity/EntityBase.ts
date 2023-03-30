@@ -98,7 +98,7 @@ class EntityBase {
      * @param {EntityValue} entity 
      * @returns {Minecraft.InventoryComponentContainer}
      */
-    static getInventory(entity: EntityValue): Minecraft.InventoryComponentContainer {
+    static getInventory(entity: EntityValue): Minecraft.Container {
         EntityBase.checkIsEntity(entity);
         return (<Minecraft.EntityInventoryComponent>entity.getComponent("minecraft:inventory")).container;
     }

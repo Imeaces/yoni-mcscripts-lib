@@ -117,7 +117,9 @@ class Player extends Entity {
     }
 }
 
-type PlayerGameModeValue = Minecraft.GameMode | 0|1|2|"c"|"a"|"s"|"d"|"creative"|"survival"|"adventure"|"spectator"|"default";
+type PlayerGameModeValue = Minecraft.GameMode | PlayerGameModeCode | PlayerGameModeId | "default";
+type PlayerGameModeCode = 0 | 1 | 2
+type PlayerGameModeId = "creative"|"survival"|"adventure"|"spectator";
 
 /* 修补 */
 copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity");

@@ -200,6 +200,18 @@ class Entity extends EntityBase {
     }
     /**
      * @beta
+     * Whether the entity is sneaking - that is, moving more slowly
+     * and more quietly.
+     */
+    get isSneaking(): boolean {
+        return this.vanillaEntity.isSneaking;
+    }
+    set isSneaking(isSneaking: boolean){
+        this.vanillaEntity.isSneaking = isSneaking;
+    }
+    
+    /**
+     * @beta
      * Retrieves or sets an entity that is used as the target of
      * AI-related behaviors, like attacking.
      * @throws This property can throw when used.
@@ -311,7 +323,7 @@ class Entity extends EntityBase {
      * 'minecraft:' is assumed. If the component is not present on
      * the entity, undefined is returned.
      */
-    getComponent(componentId: string): Minecraft.IEntityComponent {
+    getComponent(componentId: string): Minecraft.EntityComponent {
         //@ts-ignore
         return this.vanillaEntity.getComponent.apply(this.vanillaEntity, arguments);
     }
@@ -321,7 +333,7 @@ class Entity extends EntityBase {
      * Returns all components that are both present on this entity
      * and supported by the API.
      */
-    getComponents(): Minecraft.IEntityComponent[] {
+    getComponents(): Minecraft.EntityComponent[] {
         //@ts-ignore
         return this.vanillaEntity.getComponents.apply(this.vanillaEntity, arguments);
     }
@@ -458,6 +470,10 @@ class Entity extends EntityBase {
     removeTag(tag: string): boolean {
         //@ts-ignore
         return this.vanillaEntity.removeTag.apply(this.vanillaEntity, arguments);
+    }
+    runCommand(commandString: string): Minecraft.CommandResult {
+        //@ts-ignore
+        return this.vanillaEntity.runCommand.apply(this.vanillaEntity, arguments);
     }
     /**
      * @remarks

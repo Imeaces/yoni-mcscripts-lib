@@ -2,7 +2,7 @@ function copyPropertiesWithoutOverride(target: {}, src: {}, accessKey: string | 
     if ((typeof accessKey !== "string" && typeof accessKey !== "symbol") || accessKey === ""){
         throw new TypeError("accessKey not valid");
     }
-    for (let key of getProperties(src)){
+    for (let key of getOwnProperties(src)){
         if (key in target || key === accessKey){
             continue;
         }
@@ -166,7 +166,15 @@ function getOwnKeys(object: {}): (string | symbol)[] {
     return getKeys(object, Object.getPrototypeOf(object));
 }
 
-const debug = false;
+function listNotExistingKeys(base: {}, compare: {}){
+    let o1keys = getKeys(base);
+    let o2keys = getKeys(compare);
+    return o1keys.filter((k: string) => {
+        return o2keys.includes(k) === false;
+    });
+}
+
+const debug = true;
 
 const ObjectUtils = {
     copyPropertiesWithoutOverride,
@@ -175,6 +183,7 @@ const ObjectUtils = {
     getProperties,
     getOwnKeys,
     getOwnProperties,
+    listNotExistingKeys,
 };
 
 export {
@@ -184,5 +193,6 @@ export {
     getProperties,
     getOwnKeys,
     getOwnProperties,
+    listNotExistingKeys,
     ObjectUtils,
 };
