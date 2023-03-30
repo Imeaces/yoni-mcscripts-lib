@@ -13,7 +13,7 @@
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "0.8.0",
+  "version": "0.8.0-beta",
   "directories": {
     "doc": "docs"
   },
