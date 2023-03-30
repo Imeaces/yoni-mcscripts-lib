@@ -111,7 +111,7 @@
 /* Disable emitting files if any type checking errors are reported. */
     // "preserveConstEnums": true,
 /* Disable erasing 'const enum' declarations in generated code. */
-    "declarationDir": "./@types/yoni-mcscripts-lib",
+    // "declarationDir": "./@types/yoni-mcscripts-lib",
 /* Specify the output directory for generated declaration files. */
     // "preserveValueImports": true,
 /* Preserve unused imported values in the JavaScript output that would otherwise be removed. */
