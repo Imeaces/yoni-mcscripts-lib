@@ -99,7 +99,7 @@ copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanil
 
 type YoniWorld = World & Minecraft.World;
 
-const world = new World(VanillaWorld);
+const world = new World(VanillaWorld) as unknown as YoniWorld;
 
 export { world as World, YoniWorld };
 export default World;

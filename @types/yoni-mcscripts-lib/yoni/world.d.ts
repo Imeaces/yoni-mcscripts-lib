@@ -47,6 +47,6 @@ declare class World {
     getAliveEntities(): YoniEntity[];
 }
 declare type YoniWorld = World & Minecraft.World;
-declare const world: World;
+declare const world: YoniWorld;
 export { world as World, YoniWorld };
 export default World;

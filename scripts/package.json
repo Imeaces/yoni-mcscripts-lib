@@ -5,21 +5,18 @@
     "@minecraft/server-ui": "^1.0.0-beta.1.19.80-preview.21"
   },
   "devDependencies": {
-    "@minecraft/server-admin": "^1.0.0-beta.1.19.80-preview.21",
-    "@minecraft/server-net": "^1.0.0-beta.1.19.80-preview.21",
     "@types/lokijs": "^1.5.7",
     "lokijs": "^1.5.12",
     "typescript": "^4.9.3"
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "0.8.1-dev.1",
-  "directories": {
-    "doc": "docs"
-  },
+  "version": "0.8.1-dev.2",
+  "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json"
+    "build": "tsc -p tsconfig.json",
+    "install": "echo [NOTICE]: To use \\'yoni-mcscripts-lib\\' as runtime, you must copy compiled files manually. No require to copy @types/ because \\'tsc\\' can determine it automatically."
   },
   "repository": {
     "type": "git",
