@@ -11,12 +11,11 @@
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "0.8.1-dev.2",
-  "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
+  "version": "0.8.1-dev.6",
+  "types": "src/yoni-mcscripts-lib.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p tsconfig.json",
-    "install": "echo [NOTICE]: To use \\'yoni-mcscripts-lib\\' as runtime, you must copy compiled files manually. No require to copy @types/ because \\'tsc\\' can determine it automatically."
+    "build": "tsc -p tsconfig.json"
   },
   "repository": {
     "type": "git",
