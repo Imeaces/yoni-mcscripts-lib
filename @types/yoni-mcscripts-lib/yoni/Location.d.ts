@@ -59,6 +59,10 @@ export type LocationParams = [Location1Arg] | LocationArgs2Params | LocationArgs
  */
 export class Location {
     /**
+     * 处于零点的Location对象。
+     */
+    static get zero(): Location;
+    /**
      * @param {Location} v
      */
     static "__#9@#checkReadOnly"(v: Location): void;
@@ -96,6 +100,12 @@ export class Location {
      * @returns {Readonly<Location>}
      */
     static makeReadonly(v: Location): Readonly<Location>;
+    /**
+     * @param {Location1Arg} start
+     * @param {Location1Arg} end
+     * @returns {Location[]}
+     */
+    static blocksBetween(start: Location1Arg, end: Location1Arg): Location[];
     /**
      * @desc 代表一个MC中的位置，其中包括维度，坐标，旋转角
      * @desc 您可以以多种形式传递参数来构造一个Location
@@ -235,9 +245,13 @@ export class Location {
     /**
      * @param {Location1Arg} loc
      */
-    distancrSquared(loc: Location1Arg): number;
-    getLength(): void;
-    getLengthSquared(): void;
+    distanceSquared(loc: Location1Arg): number;
+    getLength(): number;
+    getLengthSquared(): number;
+    /**
+     * @param {number} v
+     */
+    toFixed(v: number): Location;
     toVector(): Minecraft.Vector;
     getDirection(): void;
     setDirection(): void;

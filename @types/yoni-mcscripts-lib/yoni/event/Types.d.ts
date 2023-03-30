@@ -5,6 +5,9 @@ export function getIdentifierInfo(identifier: any): {
 };
 export const events: {};
 export default Types;
+/**
+ * @deprecated 官方可能正在对事件系统进行大幅度修改，此接口可能会出现错误。
+ */
 export class Types {
     static register(identifier: any, eventType: any): void;
     static registerNamespace(namespace: any, namespaceEventTypes: any): void;

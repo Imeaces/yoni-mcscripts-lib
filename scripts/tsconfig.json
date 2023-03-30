@@ -39,11 +39,11 @@
 /* Control what method is used to detect module-format JS files. */
     /* Modules */
     "module": "es2022", /* Specify what module code is generated. */
-    "rootDir": "scripts/src/",
+    "rootDir": "src/",
 /* Specify the root folder within your source files. */
     "moduleResolution": "node",
 /* Specify how TypeScript looks up a file from a given module specifier. */
-    "baseUrl": "scripts/src/",
+    "baseUrl": "src/",
 /* Specify the base directory to resolve non-relative module names. */
     // "paths": {},
 /* Specify a set of entries that re-map imports to additional lookup locations. */
@@ -81,7 +81,7 @@
 /* Create source map files for emitted JavaScript files. */
     // "outFile": "./",
 /* Specify a file that bundles all outputs into one JavaScript file. If 'declaration' is true, also designates a file that bundles all .d.ts output. */
-    "outDir": "scripts/", /* Specify an output folder for all emitted files. */
+    "outDir": "./", /* Specify an output folder for all emitted files. */
     "removeComments": false, /* Disable emitting comments. */
     // "noEmit": true,
 /* Disable emitting files from a compilation. */
@@ -111,7 +111,7 @@
 /* Disable emitting files if any type checking errors are reported. */
     // "preserveConstEnums": true,
 /* Disable erasing 'const enum' declarations in generated code. */
-    "declarationDir": "@types/yoni-mcscripts-lib",
+    "declarationDir": "../@types/yoni-mcscripts-lib",
 /* Specify the output directory for generated declaration files. */
     // "preserveValueImports": true,
 /* Preserve unused imported values in the JavaScript output that would otherwise be removed. */
@@ -168,8 +168,8 @@
     "paths": {}
   },
   "include": [
-    "scripts/src/**/*.ts",
-    "scripts/src/**/*.js"
+    "src/**/*.ts",
+    "src/**/*.js"
   ],
   "exclude": [
     "node_modules"

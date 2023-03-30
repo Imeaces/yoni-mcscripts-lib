@@ -31,7 +31,7 @@ declare class Entity extends EntityBase {
     /**
      * 获取实体的物品栏容器。
      */
-    getInventory(): Minecraft.InventoryComponentContainer;
+    getInventory(): Minecraft.Container;
     /**
      * 获取实体的最大血量。
      */
@@ -87,6 +87,13 @@ declare class Entity extends EntityBase {
      */
     get nameTag(): string;
     set nameTag(name: string);
+    /**
+     * @beta
+     * Whether the entity is sneaking - that is, moving more slowly
+     * and more quietly.
+     */
+    get isSneaking(): boolean;
+    set isSneaking(isSneaking: boolean);
     /**
      * @beta
      * Retrieves or sets an entity that is used as the target of
@@ -174,14 +181,14 @@ declare class Entity extends EntityBase {
      * 'minecraft:' is assumed. If the component is not present on
      * the entity, undefined is returned.
      */
-    getComponent(componentId: string): Minecraft.IEntityComponent;
+    getComponent(componentId: string): Minecraft.EntityComponent;
     /**
      * @beta
      * @remarks
      * Returns all components that are both present on this entity
      * and supported by the API.
      */
-    getComponents(): Minecraft.IEntityComponent[];
+    getComponents(): Minecraft.EntityComponent[];
     /**
      * @beta
      * @remarks
@@ -271,6 +278,7 @@ declare class Entity extends EntityBase {
      * @throws This function can throw errors.
      */
     removeTag(tag: string): boolean;
+    runCommand(commandString: string): Minecraft.CommandResult;
     /**
      * @remarks
      * Runs a particular command asynchronously from the context of

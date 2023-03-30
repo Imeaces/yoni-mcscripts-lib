@@ -14,6 +14,7 @@ declare function getKeys(object: any, endPrototype?: {} | null): string[];
 declare function getProperties(object: {}, endPrototype?: {} | null): (string | symbol)[];
 declare function getOwnProperties(object: {}): (string | symbol)[];
 declare function getOwnKeys(object: {}): (string | symbol)[];
+declare function listNotExistingKeys(base: {}, compare: {}): string[];
 declare const ObjectUtils: {
     copyPropertiesWithoutOverride: typeof copyPropertiesWithoutOverride;
     assignAllPropertiesWithoutOverride: typeof assignAllPropertiesWithoutOverride;
@@ -21,5 +22,6 @@ declare const ObjectUtils: {
     getProperties: typeof getProperties;
     getOwnKeys: typeof getOwnKeys;
     getOwnProperties: typeof getOwnProperties;
+    listNotExistingKeys: typeof listNotExistingKeys;
 };
-export { copyPropertiesWithoutOverride, assignAllPropertiesWithoutOverride, getKeys, getProperties, getOwnKeys, getOwnProperties, ObjectUtils, };
+export { copyPropertiesWithoutOverride, assignAllPropertiesWithoutOverride, getKeys, getProperties, getOwnKeys, getOwnProperties, listNotExistingKeys, ObjectUtils, };

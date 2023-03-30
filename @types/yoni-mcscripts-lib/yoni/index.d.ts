@@ -11,6 +11,7 @@ import { Objective } from "./scoreboard/Objective.js";
 import { Entry } from "./scoreboard/Entry.js";
 import { World } from "./world.js";
 import { Dimension } from "./dimension.js";
+import { system } from "./system.js";
 import { dim } from "./basis.js";
 import { Minecraft } from "./basis.js";
 import { MinecraftGui } from "./basis.js";
@@ -47,4 +48,4 @@ export namespace Vanilla {
 }
 import { injectGlobal } from "./config.js";
 import { debug } from "./config.js";
-export { YoniPlayer, YoniEntity, YoniSimulatedPlayer, YoniDimension, EventTypes, EventListener, EventSignal, events, Scoreboard, Objective, Entry, World, Dimension, dim, Minecraft, MinecraftGui, Gametest, VanillaWorld, VanillaEvents, VanillaScoreboard, runTask, Logger, log, console, Location, YoniScheduler, Schedule, Command, ChatCommand, EntityBase, Player, Entity, SimulatedPlayer };
+export { YoniPlayer, YoniEntity, YoniSimulatedPlayer, YoniDimension, EventTypes, EventListener, EventSignal, events, Scoreboard, Objective, Entry, World, Dimension, system, dim, Minecraft, MinecraftGui, Gametest, VanillaWorld, VanillaEvents, VanillaScoreboard, runTask, Logger, log, console, Location, YoniScheduler, Schedule, Command, ChatCommand, EntityBase, Player, Entity, SimulatedPlayer };

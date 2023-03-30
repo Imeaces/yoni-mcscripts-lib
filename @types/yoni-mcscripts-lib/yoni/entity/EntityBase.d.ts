@@ -54,7 +54,7 @@ declare class EntityBase {
      * @param {EntityValue} entity
      * @returns {Minecraft.InventoryComponentContainer}
      */
-    static getInventory(entity: EntityValue): Minecraft.InventoryComponentContainer;
+    static getInventory(entity: EntityValue): Minecraft.Container;
     /**
      * 获取实体的血量
      * @param {EntityValue} entity

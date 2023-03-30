@@ -3,7 +3,7 @@ import { Entity } from "./Entity.js";
 declare class Player extends Entity {
     get vanillaPlayer(): Minecraft.Player;
     get entityType(): Minecraft.EntityType;
-    get inventory(): Minecraft.InventoryComponentContainer;
+    get inventory(): Minecraft.Container;
     get [Symbol.toStringTag](): string;
     /**
      * 玩家的经验等级。
@@ -24,8 +24,11 @@ declare class Player extends Entity {
     get gamemode(): Minecraft.GameMode;
     setGamemode(v: PlayerGameModeValue): void;
     removeXp(xpCount: number): void;
+    applyImpulse(vector: Minecraft.Vector3): void;
 }
-declare type PlayerGameModeValue = Minecraft.GameMode | 0 | 1 | 2 | "c" | "a" | "s" | "d" | "creative" | "survival" | "adventure" | "spectator" | "default";
+declare type PlayerGameModeValue = Minecraft.GameMode | PlayerGameModeCode | PlayerGameModeId | "default";
+declare type PlayerGameModeCode = 0 | 1 | 2;
+declare type PlayerGameModeId = "creative" | "survival" | "adventure" | "spectator";
 declare type YoniPlayer = Player & Minecraft.Player;
 export default YoniPlayer;
 export { YoniPlayer, Player };
