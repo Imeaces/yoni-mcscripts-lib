@@ -1,226 +1,121 @@
-export default Location;
-export type Vector3 = ILocationCoords;
-export type NetherDimensionLike = -1 | 'minecraft:nether' | 'nether';
-export type OverworldDimensionLike = 0 | 'minecraft:overworld' | 'overworld';
-export type TheEndDimensionLike = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
-export type DimensionLike = NetherDimensionLike | OverworldDimensionLike | TheEndDimensionLike | Minecraft.Dimension | YoniDimension;
-export type ILocation = {
-    x: number;
-    y: number;
-    z: number;
-    rx?: number;
-    ry?: number;
-    dimension?: DimensionLike;
-};
-export type ILocationArray = [number, number, number] | [number, number, number, number, number] | [DimensionLike, number, number, number] | [DimensionLike, number, number, number, number, number];
-export type ILocationCoords = {
-    x: number;
-    y: number;
-    z: number;
-};
-export type ILocationCoordsWithDimension = {
-    x: number;
-    y: number;
-    z: number;
-    dimension: DimensionLike;
-};
-export type ILocationCoordsWithRotation = {
-    x: number;
-    y: number;
-    z: number;
-    rx: number;
-    ry: number;
-};
-export type ILocationCoordsArray = [number, number, number];
-export type ILocationCoordsArrayWithDimension = [DimensionLike, number, number, number];
-export type ILocationCoordsArrayWithRotation = [number, number, number, number, number];
-export type ILocationRotation = {
-    rx: number;
-    ry: number;
-};
-export type ILocationRotationValue = {
-    x: number;
-    y: number;
-};
-export type ILocationRotationArray = [number, number];
-export type ILocationOfObject = {
-    location: ILocationCoords;
-    rotation?: ILocationRotationValue;
-    dimension?: DimensionLike;
-};
-export type Location1Arg = ILocationOfObject | ILocation | ILocationArray;
-export type LocationArgs1Params = [Location1Arg];
-export type LocationArgs2Params = [DimensionLike, ILocationCoords | ILocationCoordsWithRotation | [number, number, number] | [number, number, number, number, number]] | [ILocationCoords | [number, number, number] | ILocationCoordsWithDimension | [DimensionLike, number, number, number], ILocationRotation | [number, number]];
-export type LocationArgs3Params = [DimensionLike, ILocationCoords | [number, number, number], ILocationRotation | [number, number]] | ILocationCoords;
-export type LocationArgsMoreParams = ILocationArray;
-export type LocationParams = [Location1Arg] | LocationArgs2Params | LocationArgs3Params | LocationArgsMoreParams;
+import { Minecraft } from "./basis.js";
+import { YoniDimension } from "./dimension.js";
+import { YoniBlock } from "./block.js";
 /**
  * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
  */
-export class Location {
+declare class Location implements ILocation {
+    #private;
     /**
      * 处于零点的Location对象。
      */
     static get zero(): Location;
     /**
-     * @param {Location} v
-     */
-    static "__#9@#checkReadOnly"(v: Location): void;
-    /**
-     * @param {number} v
+     * @param {number} num
      * @returns {number}
      */
-    static normalizePitch(v: number): number;
+    static normalizePitch(num: number): number;
     /**
-     * @param {number} v
+     * @param {number} num
      * @returns {number}
      */
-    static normalizeYaw(v: number): number;
-    /**
-     * 将一个Location对象转换为一段字符串
-     * @param {Location} v
-     * @returns {string}
-     */
-    static serialize(v: Location): string;
-    /**
-     * 将一段由Location对象转换后的字符串转换为Location对象
-     * @param {string} v
-     * @returns {Location}
-     */
-    static deserialize(v: string): Location;
-    /**
-     * 创建一个只读的Location对象。
-     * @param {LocationParams} values
-     * @returns {Readonly<Location>}
-     */
-    static createReadonly(...values: LocationParams): Readonly<Location>;
-    /**
-     * 使用Location创建创建一个只读的Location对象。
-     * @param {Location} v
-     * @returns {Readonly<Location>}
-     */
-    static makeReadonly(v: Location): Readonly<Location>;
-    /**
-     * @param {Location1Arg} start
-     * @param {Location1Arg} end
-     * @returns {Location[]}
-     */
-    static blocksBetween(start: Location1Arg, end: Location1Arg): Location[];
-    /**
-     * @desc 代表一个MC中的位置，其中包括维度，坐标，旋转角
-     * @desc 您可以以多种形式传递参数来构造一个Location
-     * @desc 比如，你可以将大部分原版中表示一个位置的变量作为参数传入
-     * @desc 其中包括Block, Entity, 原版中符合Vector3接口的其他类型
-     * @desc 同时额外支持更多形式的参数
-     * @desc 参数顺序一般遵循以下规则
-     * @desc 先维度，后坐标，最后旋转角
-     * @desc 坐标先x，之后是y，最后是z
-     * @desc 旋转角先是rx，后是ry
-     * @desc 以下列出了所有的可能的参数形式，参数中不存在的内容将会以默认值补全
-     * @desc dimension, x, y, z, rx, ry
-     * @desc x, y, z, rx, ry
-     * @desc dimension, x, y, z
-     * @desc x, y, z
-     * @desc dimension, {x, y, z}, {rx, ry}
-     * @desc dimension, [x, y, z], {rx, ry}
-     * @desc dimension, {x, y, z}, [rx, ry]
-     * @desc dimension, [x, y, z], [rx, ry]
-     * @desc {dimension, x, y, z}, {rx, ry}
-     * @desc [dimension, x, y, z], {rx, ry}
-     * @desc {dimension, x, y, z}, [rx, ry]
-     * @desc [dimension, x, y, z], [rx, ry]
-     * @desc {x, y, z}, {rx, ry}
-     * @desc [x, y, z], {rx, ry}
-     * @desc {x, y, z}, [rx, ry]
-     * @desc [x, y, z], [rx, ry]
-     * @desc dimension, {x, y, z, rx, ry}
-     * @desc dimension, {x, y, z}
-     * @desc dimension, [x, y, z, rx, ry]
-     * @desc dimension, [x, y, z]
-     * @desc {location: {x, y, z}, dimension, rotation: {x, y}}
-     * @desc {location: {x, y, z}, dimension}
-     * @desc {location: {x, y, z}, rotation: {x, y}}
-     * @desc {location: {x, y, z}}
-     * @desc {x, y, z, rx, ry, dimension}
-     * @desc {x, y, z, rx, ry}
-     * @desc {x, y, z, dimension}
-     * @desc {x, y, z}
-     * @desc [dimension, x, y, z, rx, ry]
-     * @desc [x, y, z, rx, ry]
-     * @desc [dimension, x, y, z]
-     * @desc [x, y, z]
-     * @param {LocationParams} values
-     */
-    constructor(...values: LocationParams);
-    set x(arg: number);
+    static normalizeYaw(num: number): number;
     /**
      * @type {number}
      */
     get x(): number;
+    set x(x: number);
     /**
      * 设置此位置对应的 z 轴坐标。
-     * @param {number} v
+     * @param {number} x
      */
-    setX(v: number): Location;
-    set y(arg: number);
+    setX(x: any): this;
     /**
      * @type {number}
      */
     get y(): number;
+    set y(y: number);
     /**
      * 设置此位置对应的 z 轴坐标。
-     * @param {number} v
+     * @param {number} y
      */
-    setY(v: number): Location;
-    set z(arg: number);
+    setY(y: any): this;
     /**
      * @type {number}
      */
     get z(): number;
+    set z(z: number);
     /**
      * 设置此位置对应的 z 轴坐标。
-     * @param {number} v
+     * @param {number} z
      */
-    setZ(v: number): Location;
+    setZ(z: any): this;
     /**
      * 设置此位置对应的坐标。
      * @param {number} x
      * @param {number} y
      * @param {number} z
      */
-    setPosition(x: number, y: number, z: number): Location;
-    set rx(arg: number);
+    setPosition(x: number, y: number, z: number): this;
     /**
      * @type {number}
      */
     get rx(): number;
+    set rx(rx: number);
     /**
      * 设置此位置对应的 pitch 角。
      * @param {number} v
      */
-    setRx(v: number): Location;
-    set ry(arg: number);
+    setRx(rx: any): this;
     /**
      * 此位置对应的 yaw 角。
      * @type {number}
      */
     get ry(): number;
+    set ry(ry: number);
     /**
      * 设置此位置对应的 yaw 角。
      * @param {number} v
      */
-    setRy(v: number): Location;
-    set dimension(arg: Dimension);
+    setRy(ry: any): this;
     /**
      * 此位置所在的维度。
      * @type {YoniDimension}
      */
-    get dimension(): Dimension;
+    get dimension(): YoniDimension;
+    set dimension(dim: YoniDimension);
     /**
      * 设置此位置所在的维度
-     * @param {DimensionLike} v
+     * @param {DimensionLikeValue} dim
      */
-    setDimension(v: DimensionLike): Location;
+    setDimension(dim: DimensionLikeValue): this;
+    /**
+     * 创建一个代表MC中特定位置的对象。其中包括维度，坐标，旋转角。
+     
+     * 可以以多种形式传递参数来构造一个Location。
+     * 例如，大部分原版中需要一个位置的值。（Block, Entity）
+     * 符合${link Vector3}的对象也可以传入。
+     *
+     * 参数传递顺序一般遵循以下规则。
+     *
+     * 先维度，后坐标，最后旋转角。
+     *
+     * 坐标先x，之后是y，最后是z
+     *
+     * 旋转角先是rx，后是ry
+     *
+     * 如果传入的参数中并不能读取到特定的值，则使用默认值补充。
+     *
+     * 注意，现在允许的参数类型中，包含尚未支持的类型 {@link Rotation}，这是因为我想支持这种，但是还没支持，先写了上去。
+     */
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rx: number, ry: number);
+    constructor(x: number, y: number, z: number, rx: number, ry: number);
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number);
+    constructor(x: number, y: number, z: number);
+    constructor(dimension: DimensionLikeValue, coords: Coords | CoordsArray, rotation: LocationRotation | Rotation | RotationArray);
+    constructor(info1: CoordsDimensionInfo | DimensionCoordsArray | LocationCoords | CoordsArray, info2: LocationRotation | RotationArray);
+    constructor(dimension: DimensionLikeValue, locationInfo: LocationCoords | CoordsRotationInfo | CoordsArray | CoordsRotationArray);
+    constructor(locationInfo: LocationInfoObject | LocationInfo | LocationArray | DimensionCoordsArray | CoordsRotationArray | CoordsArray);
     /**
      * @param {Location1Arg} value
      */
@@ -276,11 +171,19 @@ export class Location {
     /**
      * @returns {Minecraft.BlockLocation} 根据此位置创建一个原版的Minecraft.BlockLocation
      */
-    getVanillaBlockLocation(): Minecraft.BlockLocation;
+    getVanillaBlockLocation(): {
+        x: number;
+        y: number;
+        z: number;
+    };
     /**
      * @returns {Minecraft.Location} 根据此位置创建一个原版的Minecraft.Location
      */
-    getVanillaLocation(): Minecraft.Location;
+    getVanillaLocation(): {
+        x: number;
+        y: number;
+        z: number;
+    };
     getVanillaVector(): Minecraft.Vector;
     isLoaded(): boolean;
     getChunk(): void;
@@ -305,9 +208,128 @@ export class Location {
         ry: number;
         dimension: string;
     };
-    #private;
+    /**
+     * 将一个Location对象转换为一段字符串
+     * @param {Location} v
+     * @returns {string}
+     */
+    static serialize(v: Location): string;
+    /**
+     * 将一段由Location对象转换后的字符串转换为Location对象
+     * @param {string} v
+     * @returns {Location}
+     */
+    static deserialize(v: string): Location;
+    /**
+     * 创建一个只读的Location对象。
+     * @returns {Readonly<Location>}
+     */
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rx: number, ry: number): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number, rx: number, ry: number): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords | CoordsArray, rotation: LocationRotation | Rotation | RotationArray): Readonly<Location>;
+    static createReadonly(info1: CoordsDimensionInfo | DimensionCoordsArray | LocationCoords | CoordsArray, info2: LocationRotation | RotationArray): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, locationInfo: LocationCoords | CoordsRotationInfo | CoordsArray | CoordsRotationArray): Readonly<Location>;
+    static createReadonly(locationInfo: LocationInfoObject | LocationInfo | LocationArray | DimensionCoordsArray | CoordsRotationArray | CoordsArray): Readonly<Location>;
+    /**
+     * 使用Location创建创建一个只读的Location对象。
+     * @param {Location} location
+     * @returns {Readonly<Location>}
+     */
+    static makeReadonly(location: Location): Readonly<Location>;
+    /**
+     * @param {Location1Arg} start
+     * @param {Location1Arg} end
+     * @returns {Location[]}
+     */
+    static blocksBetween(start: Location1Arg, end: Location1Arg): Location[];
 }
-import { Minecraft } from "./basis.js";
-import { Dimension } from "./dimension.js";
-import { YoniDimension } from "./dimension.js";
-import { YoniBlock } from "./block.js";
+export default Location;
+export { Location };
+export declare type NetherDimensionLikeValue = -1 | 'minecraft:nether' | 'nether';
+export declare type OverworldDimensionLikeValue = 0 | 'minecraft:overworld' | 'overworld';
+export declare type TheEndDimensionLikeValue = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
+export declare type DimensionLikeValue = NetherDimensionLikeValue | OverworldDimensionLikeValue | TheEndDimensionLikeValue | Minecraft.Dimension | YoniDimension;
+export interface ILocation extends LocationCoords, LocationRotation {
+    dimension: YoniDimension;
+}
+export interface LocationCoords {
+    x: number;
+    y: number;
+    z: number;
+}
+export interface LocationRotation {
+    rx: number;
+    ry: number;
+}
+export interface Coords {
+    x: number;
+    y: number;
+    z: number;
+}
+export interface Rotation {
+    x: number;
+    y: number;
+}
+export declare type CoordsGetter = {
+    getLocation(): Coords;
+};
+export declare type RotationGetter = {
+    getRotation(): Rotation;
+};
+export declare type DimensionGetter = {
+    getDimension(): DimensionLikeValue;
+};
+export declare type CoordsAccessor = {
+    location: Coords;
+};
+export declare type RotationAccessor = {
+    rotation: Rotation;
+};
+export declare type DimensionAccessor = {
+    dimension: DimensionLikeValue;
+};
+export declare type LocationCoordsAccessor = {
+    location: LocationCoords;
+};
+export declare type LocationRotationAccessor = {
+    rotation: LocationRotation;
+};
+export declare type LocationDimensionAccessor = {
+    dimension: DimensionLikeValue;
+};
+export declare type LocationInfoObject = (CoordsAccessor & DimensionAccessor & RotationAccessor) | (CoordsAccessor & DimensionAccessor) | (CoordsAccessor & RotationAccessor) | CoordsAccessor;
+export declare type CoordsRotationInfo = LocationCoordsAccessor & LocationRotationAccessor;
+export declare type CoordsDimensionInfo = LocationCoordsAccessor & LocationDimensionAccessor;
+export declare type CoordsArray = [number, number, number];
+export declare type RotationArray = [number, number];
+export declare type DimensionCoordsArray = [DimensionLikeValue, number, number, number];
+export declare type CoordsRotationArray = [number, number, number, number, number];
+export declare type LocationArray = [DimensionLikeValue, number, number, number, number, number];
+export declare type LocationInfo = {
+    x: number;
+    y: number;
+    z: number;
+    dimension?: DimensionLikeValue;
+    rx?: number;
+    ry?: number;
+};
+export interface Vector3 {
+    x: number;
+    y: number;
+    z: number;
+}
+export declare type Location1Arg = LocationInfoObject | LocationInfo | LocationArray | DimensionCoordsArray | CoordsRotationArray | CoordsArray;
+export declare type LocationArgs1Params = [Location1Arg];
+export declare type LocationArgs2Params = [
+    CoordsDimensionInfo | DimensionCoordsArray | LocationCoords | CoordsArray,
+    LocationRotation | RotationArray
+] | [
+    DimensionLikeValue,
+    LocationCoords | CoordsRotationInfo | CoordsArray | CoordsRotationArray
+];
+export declare type LocationArgs3Params = [DimensionLikeValue, LocationCoords | CoordsArray, LocationRotation | Rotation | RotationArray] | CoordsArray;
+export declare type LocationArgsMoreParams = LocationArray | CoordsRotationArray | DimensionCoordsArray;
+export declare type LocationParams = LocationArgs1Params | LocationArgs2Params | LocationArgs3Params | LocationArgsMoreParams;
+export { DimensionLikeValue as DimensionLike };

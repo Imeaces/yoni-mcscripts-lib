@@ -11,7 +11,7 @@ declare class Entity extends EntityBase {
     get [Symbol.toStringTag](): string;
     get id(): string;
     get typeId(): string;
-    get velocity(): import("../Location.js").ILocationCoords;
+    get velocity(): Vector3;
     get rotation(): Minecraft.XYRotation;
     get entityType(): Minecraft.EntityType;
     get dimension(): Dimension;

@@ -1,13 +1,22 @@
-export function getErrorMsg(msg?: string, err?: string): {
-    msg: string;
+export function printError(...args: any[]): void;
+/** 我也不知道它怎么运行的，反正你传参就对了
+传重复参数可能会出现一些问题，忍着 */
+export function visualizeValue(value: any, maxDepth?: number, applyOption?: {}, option?: {
+    depth: number;
+    circularRecord: Map<any, any>;
+    showEnumerableOnly: boolean;
+    objectChain: never[];
+    maxItemPerObject: number;
+    recursiveQuery: boolean;
+}): string;
+/**
+ * @param {any} msg
+ * @param {any} err
+ */
+export function getErrorMsg(msg?: any, err?: any): {
+    msg: any;
     errMsg: string;
 };
-export function printError(...args: any[]): void;
-export function visualizeFunction(func: any): void;
-export function visualizeValue(any: any): void;
-export function visualizeObject(object: any): void;
-export function visualizeError(): void;
-export function visualizeArray(): void;
 export namespace formatStr {
     const black: string;
     const dark_blue: string;

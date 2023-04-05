@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { VanillaWorld } from "../basis.js";
-import { getErrorMsg } from "./console.js";
+import { visualizeValue } from "./console.js";
 import { Command } from "../command.js";
 import { dealWithCmd } from "../lib/utils.js";
 
@@ -12,9 +12,19 @@ import {
 } from "../config.js";
 
 async function send(receiver, message){
-    if (receiver.tell){ return receiver.tell(dealWithCmd(message, message)); };
+    //if (receiver.tell){ return receiver.tell(dealWithCmd(message, message)); }; //不走sendMessage因为怕输出太多
     let rawtext = JSON.stringify({rawtext:[{text: message}]}, dealWithCmd);
     await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
+}
+
+function formatAnyValue(v: any){
+    return visualizeValue(v, 1, {
+      showEnumerableOnly: true,
+      maxItemPerObject: 4,
+      recursiveQuery: false,
+      // recursiveQuery: true, //不开，因为会出奇怪的问题。
+      // recursiveQueryDepth: 1, //未实现
+    });
 }
 
 let isNoticeLoggerUsage = false;
@@ -121,9 +131,18 @@ function getLevelCode(level="debug"){
 }
 
 function transferHolder(msg, ...replacer){
-    replacer.forEach((r)=>{
-        msg = msg.replace(/\{\}/, getErrorMsg(r).errMsg);
+    msg = msg.replace(/\{\}/g, (match, offset, string) => {
+        if (replacer.length > 0)
+            match = formatAnyValue(replacer.shift());
+        
+        return match;
     });
+    if (replacer.length > 0){
+        replacer.forEach(v => {
+            msg += " " + formatAnyValue(v);
+        });
+    }
+    
     return msg;
 }
 

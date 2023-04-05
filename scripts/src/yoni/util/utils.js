@@ -28,7 +28,7 @@ export async function say(msg = "", displayNameOrSender="commands.origin.script"
 }
 
 export async function send(receiver, message){
-    if (receiver.tell){ return receiver.tell(dealWithCmd(message, message)); };
+    if (receiver.sendMessage){ return receiver.sendMessage(dealWithCmd(message, message)); };
     let rawtext = JSON.stringify({rawtext:[{text: message}]}, dealWithCmd);
     await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
 }

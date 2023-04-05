@@ -21,6 +21,7 @@ declare class Player extends Entity {
      * @throws 若未能成功将玩家踢出游戏，抛出错误。
      */
     kick(msg?: string): Promise<void>;
+    sendChatMessage(msg: string): void;
     get gamemode(): Minecraft.GameMode;
     setGamemode(v: PlayerGameModeValue): void;
     removeXp(xpCount: number): void;

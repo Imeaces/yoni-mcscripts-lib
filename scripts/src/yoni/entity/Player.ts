@@ -70,6 +70,11 @@ class Player extends Entity {
         }
     }
     
+    sendChatMessage(msg: string){
+        let rawtext = JSON.stringify({rawtext:[{text: msg}]}, dealWithCmd);
+        Command.addExecute(Command.PRIORITY_HIGH, this.vanillaPlayer, `tellraw @s ${rawtext}`);
+    }
+    
     get gamemode(): Minecraft.GameMode {
         let player = <YoniPlayer><unknown>this;
         // @ts-ignore
