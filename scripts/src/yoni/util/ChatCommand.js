@@ -11,7 +11,7 @@ const prefixMap = new Map();
 
 let defaultPrefix = "!";
 
-export default class ChatCommand {
+class ChatCommand {
     static get defaultPrefix(){
         return defaultPrefix;
     }
@@ -262,6 +262,8 @@ export default class ChatCommand {
 }
 
 export { ChatCommand };
+export { ChatCommand as default };
+
 EventListener.register(VanillaEvents.beforeChat, (event) => {
     if (event.cancel) return;
     ChatCommand.receiveBeforeChatEvent(event);

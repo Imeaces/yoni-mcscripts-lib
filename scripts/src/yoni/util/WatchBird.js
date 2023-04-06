@@ -1,14 +1,25 @@
 import { SystemEvents } from "../basis.js";
 
-let interruptCount = 0;
-let lastTimeMS = 0;
+(function (){
+
+let interruptRecord = [];
+    
 SystemEvents.beforeWatchdogTerminate.subscribe((event) => {
-    let currentDateMS = Date.now();
-    interruptCount += 1;
-    if (currentDateMS - lastTimeMS > 5000){
-        console.warn("interruptCount: "+ interruptCount);
-        lastTimeMS = currentDateMS;
+    interruptRecord.unshift(Date.now());
+    
+    if (interruptRecord.length >= 5){
+        interruptRecord.length = 5;
+        
+        let firstInterruptTime = interruptRecord[4];
+        let lastInterruptTime = interruptRecord[0];
+        
+        if (lastInterruptTime - firstInterruptTime < 60 * 1000)
+            return;
     }
+    
     event.cancel = true;
 });
+
+})();
+
 //这个比狗要温和点

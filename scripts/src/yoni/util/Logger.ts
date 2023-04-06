@@ -18,7 +18,7 @@ async function send(receiver, message){
 }
 
 function formatAnyValue(v: any){
-    return visualizeValue(v, 1, {
+    return typeof v === "string" ? v : visualizeValue(v, 1, {
       showEnumerableOnly: true,
       maxItemPerObject: 4,
       recursiveQuery: false,

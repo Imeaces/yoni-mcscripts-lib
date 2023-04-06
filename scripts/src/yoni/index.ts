@@ -36,15 +36,20 @@ import {
     Schedule,
     YoniScheduler
 } from "./schedule.js";
-import { debug, injectGlobal, debug } from "./config.js";
+import { debug, injectGlobal } from "./config.js";
 import * as YoniUtils from "./util/utils.js";
 import { ChatCommand } from "./util/ChatCommand.js";
-import { Location } from "./Location.js";
+import { Location, ILocation, Vector3, DimensionLikeValue } from "./Location.js";
 import { assignAllPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 import { Dimension, YoniDimension } from "./dimension.js";
 import { system } from "./system.js";
+import { ObjectUtils } from "./lib/ObjectUtils.js";
+import { ScoreboardAccessor } from "./scoreboard/ScoreboardAccessor.js";
+import { EntityValue } from "./entity/EntityTypeDefs.js";
+import { EntryValueType, EntryType } from "./scoreboard/EntryType.js";
 
-const Utils = (()=>{
+//@ts-ignore
+const Utils: (typeof YoniUtils) = (()=>{
     let obj = {};
     assignAllPropertiesWithoutOverride(obj, YoniUtils);
     return obj;
@@ -70,6 +75,8 @@ export {
     YoniEntity,
     YoniSimulatedPlayer,
     YoniDimension,
+    EntryValueType,
+    EntityValue,
 }
 
 export {
@@ -81,6 +88,8 @@ export {
     Scoreboard,
     Objective,
     Entry,
+    ScoreboardAccessor,
+    EntryType,
     
     World,
     Dimension,
@@ -99,6 +108,9 @@ export {
     log,
     console,
     Location,
+    DimensionLikeValue,
+    Vector3,
+    ILocation,
     
     YoniScheduler,
     Schedule,
@@ -113,33 +125,57 @@ export {
     
     Utils,
     Yoni,
+    ObjectUtils,
     Vanilla,
 }
 
 if (injectGlobal){
+    // @ts-ignore
     globalThis.Yoni = Yoni;
+    // @ts-ignore
     globalThis.dim = dim;
+    // @ts-ignore
     globalThis.runTask = runTask;
+    // @ts-ignore
     globalThis.Logger = Logger;
+    // @ts-ignore
     globalThis.world = World;
+    // @ts-ignore
     globalThis.EntityBase = EntityBase;
+    // @ts-ignore
     globalThis.Entity = Entity;
+    // @ts-ignore
     globalThis.Player = Player;
+    // @ts-ignore
     globalThis.SimulatedEntity = SimulatedPlayer;
+    // @ts-ignore
     globalThis.EventTypes = EventTypes;
+    // @ts-ignore
     globalThis.EventListener = EventListener;
+    // @ts-ignore
     globalThis.Command = Command;
+    // @ts-ignore
     globalThis.Scoreboard = Scoreboard;
+    // @ts-ignore
     globalThis.ScoreboardEntry = Entry;
+    // @ts-ignore
     globalThis.ScoreboardObjective = Objective;
+    // @ts-ignore
     globalThis.YoniScheduler = YoniScheduler;
+    // @ts-ignore
     globalThis.Schedule = Schedule;
+    // @ts-ignore
     globalThis.ChatCommand = ChatCommand;
+    // @ts-ignore
     globalThis.Minecraft = Minecraft;
     
+    // @ts-ignore
     globalThis.Vanilla = Vanilla;
     
+    // @ts-ignore
     globalThis.Location = Location;
+    // @ts-ignore
     globalThis.YoniUtils = Utils;
+    // @ts-ignore
     globalThis.system = system;
 }
