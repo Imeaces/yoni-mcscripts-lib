@@ -1,0 +1,13 @@
+import { Volume } from "../disk/Volume.js";
+import { initializeInfoOfVolume } from "./initializeInfoOfVolume.js";
+import { YmFS_FileNode_Directory } from "../fileNode/directory.js";
+
+export function formatYmFS(volume: Volume){
+    
+    let chunk_spblock = volume.getChunk(0);
+    let chunk_rootdir = volume.getChunk(1);
+    
+    initializeInfoOfVolume(chunk_spblock, volume);
+    YmFS_FileNode_Directory.initializeFileNode_Directory(chunk_spblock, chunk_spblock);
+
+}

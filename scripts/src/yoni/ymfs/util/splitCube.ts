@@ -1,7 +1,7 @@
 type Cube = { begin: Vec3 } & Vec3;
 type Vec3 = { x: number, y: number, z: number };
 
-export function divideCube(cube: Cube, maxVolume: number) {
+export function splitCube(cube: Cube, maxVolume: number) {
   let cubeFactory: Cube[] = [cube];
   let cubes: Cube[] = [];
 
@@ -18,11 +18,11 @@ export function divideCube(cube: Cube, maxVolume: number) {
     let outputCubes: Cube[];
     
     if (x >= y && x >= z) {
-      outputCubes = divideHalfByX(cube);
+      outputCubes = splitHalfByX(cube);
     } else if (z >= x && z >= y) {
-      outputCubes = divideHalfByZ(cube);
+      outputCubes = splitHalfByZ(cube);
     } else if (y >= x && y >= z) {
-      outputCubes = divideHalfByY(cube);
+      outputCubes = splitHalfByY(cube);
     } else {
       throw new Error("strange cube");
     }
@@ -33,7 +33,7 @@ export function divideCube(cube: Cube, maxVolume: number) {
   return cubes;
 }
 
-function divideHalfByX(cube: Cube): Cube[] {
+function splitHalfByX(cube: Cube): Cube[] {
   let { begin, x, y, z } = cube;
   let { x: bX, y: bY, z: bZ } = begin;
   let x1 = Math.floor(x / 2);
@@ -49,7 +49,7 @@ function divideHalfByX(cube: Cube): Cube[] {
     },
   ];
 }
-function divideHalfByY(cube: Cube): Cube[] {
+function splitHalfByY(cube: Cube): Cube[] {
   let { begin, x, y, z } = cube;
   let { x: bX, y: bY, z: bZ } = begin;
   let y1 = Math.floor(y / 2);
@@ -65,7 +65,7 @@ function divideHalfByY(cube: Cube): Cube[] {
     },
   ];
 }
-function divideHalfByZ(cube: Cube): Cube[] {
+function splitHalfByZ(cube: Cube): Cube[] {
   let { begin, x, y, z } = cube;
   let { x: bX, y: bY, z: bZ } = begin;
   let z1 = Math.floor(z / 2);

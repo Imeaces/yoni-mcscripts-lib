@@ -1,5 +1,5 @@
-import { YoniDimension } from "../dimension.js";
-import { Location } from "../Location.js";
+import { YoniDimension } from "../../dimension.js";
+import { Location } from "../../Location.js";
 
 export interface VolumeArea {
     dimension: YoniDimension;

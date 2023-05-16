@@ -1,4 +1,4 @@
-enum O_X {
+export enum O_X {
     /** 只读 */
     O_RDONLY = 1,
     /** 只写 */
@@ -16,7 +16,7 @@ enum O_X {
     /** Windows specific */
     O_TEXT = 8,
 }
-enum S_X = {
+export enum S_X {
     /** 从文件开头 */
     SEEK_SET = 0,
     /** 从当前指针位置 */
@@ -25,50 +25,41 @@ enum S_X = {
     SEEK_END = 2,
 }
 
-type filehandler = number;
+export type filehandler = number;
 
 /**
  * 操作文件系统的各类方法
  */
-class fs {
+export interface fs {
     /**
      * @param {string} filename
      * @param {O_X} flags
      * @param {number} mode
      * @returns {filehandler}
      */
-    static open(filename: string, flags: O_X, mode: number = 0o666): filehandler {
-    }
+    open(filename: string, flags: O_X, mode: number): filehandler;
     /**
      * @param {filehandler} fd
      */
-    static close(fd: filehandler){
-    }
+    close(fd: filehandler): boolean;
     /**
      * @param {filehandler} fd
      * @param {number} offset
      * @param {S_X} whence
      * @returns {number} current location
      */
-    seek(fd: filehandler, offset: number, whence: S_X): number {
-    }
+    seek(fd: filehandler, offset: number, whence: S_X): number;
     /**
      * @param {filehandler} fd
      * @param {number} offset
      * @param {S_X} whence
      * @returns {number} read bytes or < 0 if error
      */
-    read(){}
-    write(){}
-    isatty(){
-        return false;
-    }
-    ttyGetWinSize(){
-        return null;
-    }
-    ttySetRaw(){
-        return 255;
-    }
-    remove(){}
+    read(pos: number, len: number, buffer?: ArrayBuffer): ArrayBuffer;
+    write(data: ArrayBuffer, pos: number, len: number): void;
+    isatty(fd: filehandler): boolean;
+    ttyGetWinSize(): number | null;
+    ttySetRaw(): number;
+    remove(): boolean;
     
 }

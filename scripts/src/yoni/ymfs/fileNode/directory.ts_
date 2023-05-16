@@ -1,0 +1,63 @@
+import { YmFS_FileNode } from "./FileNode.js";
+import { Chunk } from "../disk/Chunk.js";
+import { checkFileName } from "../util/checkFileName.js";
+type YmFS = {
+    getFileNode(idx: number): YmFS_FileNode
+}
+const fs: YmFS;
+/**
+ * #CurrentBlock#\u0000#FileType#\u0000#FileSize#\u0000#CreateTime#\u0000#ModifyTime#\u0000#AccessTime#\u0000
+ * 
+ * FileType: Directory
+ * 目录文件
+ * \u0001
+ * FileSize: 目录下含有的子文件数量
+ * CreateTime: 目录的创建时间戳，精确到毫秒
+ * ModifyTime: 目录下子文件列表被更新的时间戳，精确到毫秒
+ * AccessTime: 目录最后一次被访问（读取与该文件有关的任何块）的时间戳，毫秒）
+ * CurrentBlock: 此filenode所在的块
+ * ParentDirectory: 父级目录所在filenode
+ */
+export class YmFS_FileNode_Directory extends YmFS_FileNode {
+    static initializeFileNode_Directory(chunk: Chunk, parent: Chunk){
+        YmFS_FileNode.initializeFileNode(chunk);
+        
+        let parentNode = parent.index;
+        
+        let fno = new YmFS_FileNode_Directory(fs, chunk);
+        
+        fno.addChild(".", chunk.index);
+        fno.addChild("..", parentNode);
+
+        /*
+        YmFS_FileNode.writeStringArray(chunk.getBlock(1), [
+            ".", chunk.index,
+            "..", parentNode,
+        ]);*/
+    }
+    "type" = "directory";
+    parentNode: number;
+    get nodeCount(){
+        return this.fileSize;
+    }
+    
+    listNodes(): ({name: string, node: number})[];
+    entries(): Generator<({name: string, node: number})[]>;
+    
+    getNode(name: string): number;
+    hasNode(name: string): boolean;
+    
+    addChild(name: string, index: number): boolean;
+    removeChild(name: string): boolean;
+    
+    constructor(fs: any, chunk: Chunk){
+        
+        super(fs, chunk);
+        
+        if (this.fileType !== "d")
+            throw new Error("not a directory node");
+        
+    }
+    delete(): boolean;
+    isDeleted(): boolean;
+}
