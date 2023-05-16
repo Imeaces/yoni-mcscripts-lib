@@ -70,6 +70,8 @@ const Vanilla = {
     Scoreboard: VanillaScoreboard
 }
 
+const global: any = globalThis;
+
 export {
     YoniPlayer,
     YoniEntity,
@@ -127,6 +129,9 @@ export {
     Yoni,
     ObjectUtils,
     Vanilla,
+    
+    //@ts-ignore
+    global as globalThis,
 }
 
 if (injectGlobal){

@@ -39,6 +39,9 @@
     }
     /* Gametest需要的依赖项 end */
   ],
+  "capabilities": [
+      "script_eval"
+  ],
   "metadata": {
     "authors": [
       "Silvigarabis"

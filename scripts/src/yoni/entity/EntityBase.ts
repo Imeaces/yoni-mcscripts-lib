@@ -15,7 +15,7 @@ import YoniPlayer from "./Player.js";
 /**
  * 代表一个实体
  */
-class EntityBase {
+abstract class EntityBase {
     
     /**
      * @type {Minecraft.Entity}
@@ -39,6 +39,9 @@ class EntityBase {
             value: entity
         });
     }
+    
+    abstract isAliveEntity(): boolean;
+    abstract isAlive(): boolean;
     
     /**
      * 检查一个东西是否为实体
@@ -255,7 +258,7 @@ class EntityBase {
     }
     
     /**
-     * 检测一个实体是否存在于世界上
+     * 检测一个实体是否存在于世界上。
      * @param {EntityValue} entity
      * @returns {boolean}
      */

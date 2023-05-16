@@ -11,6 +11,13 @@ import { EntityClassRegistry } from "./EntityClassRegistry.js";
 
 const { EntityTypes } = Minecraft;
 
+export interface EntityTeleportOptions {
+    rx?: number;
+    ry?: number;
+    dimension?: DimensionLike;
+    keepVelocity?: boolean;
+}
+
 /**
  * 代表一个实体
  */
@@ -140,48 +147,63 @@ class Entity extends EntityBase {
     }
     
     /**
-     * 传入位置，将实体传送到指定位置
-     * 允许两种长度的参数，由于此特性，补全提示可能会出现一些错误，已在补全中尝试修复。
-     * 当传入了1个参数，被认为是yoni的方法  
-     * 当传入了2个参数，被认为是yoni的方法  
-     * 当传入了4个参数，被认为是原版的方法   
-     * 当传入了5个参数，被认为是原版的方法  
-     * yoni方法中，第一个参数认为是位置，第二个参数认为是keepVelocity
-     * 原版方法中参数顺序为[location, dimension, rx, ry, keepVelocity?=null]
-     * 所以你可以直接传入实体对象、方块对象、或者普通位置对象，或者接口
-     * @param {import("./Location.js").Location1Arg|Minecraft.Vector3} argLocation
-     * @param {Minecraft.Dimension} [argDimension]
-     * @param {number} [argRx]
-     * @param {number} [argRy]
-     * @param {boolean} [keepVelocity]
+     * 传送实体到指定的位置。
+     * @param {Vector3} whereLocation - 坐标。
+     * @param {Minecraft.Dimension} [dimension] - 维度。
+     * @param {number} [rx] - pitch角。
+     * @param {number} [ry] - yaw角。
+     * @param {boolean} [keepVelocity] - 是否保持实体当前的速度。
      */
-    //@ts-ignore
-    teleport(...args:
-        [Location1Arg]
-        | [Location1Arg, boolean]
-        | [Vector3, DimensionLike, number, number]
-        | [Vector3, DimensionLike, number, number, boolean]
-    ){
+    teleport(whereLocation: Vector3, dimension?: DimensionLike, rx?: number, ry?: number, keepVelocity?: boolean): void;
+    /**
+     * @param {import("./Location.js").Location1Arg} location - 位置。
+     * @param {boolean} [keepVelocity] - 是否保持实体当前的速度。
+     */
+    teleport(location: Location1Arg, keepVelocity?: boolean): void;
+    /**
+     * @param {import("./Location.js").Location1Arg} location - 坐标。
+     * @param {EntityTeleportOptions} teleportOption - 与传送实体有关的其他选项。
+     */
+    teleport(whereLocation: Vector3, teleportOption: EntityTeleportOptions): void;
+    teleport(){
         
-        let destinateLocation;
-        let keepVelocity: any;
-        if (args.length > 2){
-            //@ts-ignore
-            destinateLocation = new Location(args[1], args[0], args[2], args[3]);
-            keepVelocity = args[4];
-        } else {
-            destinateLocation = new Location(args[0]);
+        let destinateLocation: Location | undefined = undefined;
+        let whereLocation;
+        let rx: number | undefined = undefined;
+        let ry: number | undefined = undefined;
+        let dimension: DimensionLike | undefined = undefined;
+        let keepVelocity: boolean | undefined = undefined;
+        
             
-            keepVelocity = args[1];
+        if (arguments.length === 0){
+            throw new TypeError("arguments is invalid");
+        } else if (arguments.length === 1){
+            destinateLocation = new Location(arguments[0]);
+        } else if (arguments.length === 2){
+            if (typeof arguments[1] === "boolean"){
+                destinateLocation = new Location(arguments[0]);
+                keepVelocity = arguments[1];
+            } else {
+               ; ({ keepVelocity, rx, ry, dimension } = arguments[1]);
+            }
+        } else {
+            ; ([whereLocation, dimension, rx, ry, keepVelocity] = Array.from(arguments));
         }
         
-        let { rx, ry } = destinateLocation;
-        let dimension = destinateLocation.dimension.vanillaDimension;
+        if (destinateLocation == null){
+            destinateLocation = new Location(dimension ?? this.dimension, whereLocation, [rx ?? this.rotation.x, ry ?? this.rotation.y]); 
+        }
+        
+        if (keepVelocity == null){
+            keepVelocity = false;
+        }
+        
+        let { rx: destRx, ry: destRy, dimension: destDim } = destinateLocation;
+        
         this.vanillaEntity.teleport(
             destinateLocation.getVanillaLocation(),
-            //@ts-ignore
-            dimension,
-            rx, ry, !!keepVelocity);
+            destDim.vanillaDimension,
+            destRx, destRy, keepVelocity);
         
     }
     

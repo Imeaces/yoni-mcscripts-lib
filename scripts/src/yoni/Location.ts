@@ -211,6 +211,7 @@ class Location implements ILocation {
     constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rx: number, ry: number);
     constructor(x: number, y: number, z: number, rx: number, ry: number);
     constructor(dimension: DimensionLikeValue, x: number, y: number, z: number);
+    // 暂未实现 constructor(dimension: DimensionLikeValue, coords: Coords | CoordsArray, rx: number, ry: number);
     constructor(x: number, y: number, z: number);
     constructor(dimension: DimensionLikeValue, coords: Coords | CoordsArray, rotation: LocationRotation | Rotation | RotationArray);
     constructor(info1: CoordsDimensionInfo
@@ -367,7 +368,7 @@ class Location implements ILocation {
         return new Location(dimension, [Math.floor(x), Math.floor(y), Math.floor(z)]);
     }
     /**
-     * 返回一个在此坐标上偏移指定坐标的Location
+     * 返回一个在此坐标上进行指定偏移后的Location
      * @param {number} x
      * @param {number} y
      * @param {number} z
