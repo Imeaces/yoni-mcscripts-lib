@@ -5,7 +5,7 @@ import { World } from "../world.js";
 import { Location } from "../Location.js";
 import { YmFSInitialProcessor } from "./initializing/YmFSInitialProcessor.js";
 
-export class YmFS {
+class YmFS {
     /**
      * 指定是否使用异步写入。
      */
@@ -45,6 +45,7 @@ export class YmFS {
     getFileNode(chunkIndex: number){
     }
 }
+
 
 const fs = (function (){
     const beginLocation = new Location("overworld", 1048576, -64, 1048576);
