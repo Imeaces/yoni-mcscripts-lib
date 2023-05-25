@@ -255,7 +255,7 @@ function visualizeBaseValue(value){
            valueStr = value.toString() + "n";
            break;
        case "string":
-           valueStr = "\""+value.replace(/"/g, "\\\"")+"\"";
+           valueStr = "\""+value.replace(/("|\\)/g, "\\$1")+"\"";
            break;
        case "symbol":
            valueStr = `[${value.toString()}]`
