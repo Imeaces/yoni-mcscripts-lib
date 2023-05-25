@@ -1,77 +1,9 @@
-// @ts-nocheck
 import { StatusCode, overworld, runTask, Minecraft } from "./basis.js";
 import { debug } from "./config.js";
 import { getKeys } from "./lib/ObjectUtils.js";
 
-let log = ()=>{};
-/**
- * generates a command by a set of params, and try to make sure that every arg is standalone
- * @param {string} cmd 
- * @param  {string[]|...string} args 
- * @returns {string} command
- */
-function getCommand(cmd, ...args){
-    if (args?.length === 1 && Array.isArray(args[0])){
-        args = args[0];
-    }
-    if (args.length !== 0){
-        //遍历每个参数，对满足某一条件的参数进行处理
-        args.forEach((arg) => {
-            let shouldQuote = false; //标记是否应当在两侧添加引号
-            arg = String(arg);
-            if (arg.trim().length === 0){ //空参数
-                shouldQuote = true;
-            }/* else if (getCommand.startsWithNumberRegex.test(arg)){ //以数字开头的参数
-                shouldQuote = true;
-            }*/ else if (getCommand.spaceCharRegex.test(arg)){ //含有空格，需要引号括起
-                shouldQuote = true;
-            }
-            if (getCommand.specificCharRegex.test(arg)){ //将特殊符号转义
-                arg = arg.replaceAll(getCommand.specificCharGlobalRegex, "\\$1");
-            }
-            if (shouldQuote){ //如果需要引号，则添加引号
-                arg = `"${arg}"`;
-            }
-            cmd += ` ${arg}`; //将参数字符串拼接到命令
-        });
-    }
-    return cmd;
-}
-function getCommandMoreStrict(cmd, ...args){
-    if (args?.length === 1 && Array.isArray(args[0])){
-        args = args[0];
-    }
-    if (args.length !== 0){
-        //遍历每个参数，对满足某一条件的参数进行处理
-        args.forEach((arg) => {
-            let shouldQuote = false; //标记是否应当在两侧添加引号
-            arg = String(arg);
-            if (arg.trim().length === 0){ //空参数
-                shouldQuote = true;
-            } else if (getCommand.startsWithNumberRegex.test(arg)){ //以数字开头的参数
-                shouldQuote = true;
-            } else if (getCommand.spaceCharRegex.test(arg)){ //含有空格，需要引号括起
-                shouldQuote = true;
-            }
-            if (getCommand.specificCharRegex.test(arg)){ //将特殊符号转义
-                arg = arg.replaceAll(getCommand.specificCharGlobalRegex, "\\$1");
-                shouldQuote = true;
-            }
-            if (shouldQuote){ //如果需要引号，则添加引号
-                arg = `"${arg}"`;
-            }
-            cmd += ` ${arg}`; //将参数字符串拼接到命令
-        });
-    }
-    return cmd;
-}
-//因为不globle没法replaceAll
-getCommand.specificCharGlobalRegex = /(["'\\])/g;
-getCommand.specificCharRegex = /(["'\\])/;
-getCommand.spaceCharRegex = /(\s)/;
-getCommand.startsWithNumberRegex = /^[0-9]/;
-
-let commandQueues = [[], [], [], [], []];
+let log: any = ()=>{};
+let commandQueues: CommandQueue[][] = [[], [], [], [], []];
 
 //空间换时间（滑稽）
 /** @returns {boolean} */
@@ -127,14 +59,14 @@ function removeNextQueue(){
 }
 
 /** @type {CommandQueue} */
-let lastFailedCommand = null;
+let lastFailedCommand: CommandQueue | null | undefined = null;
 
 function executeCommandQueues(){
     runTask(executeCommandQueues);
     let executeQueueCount = 0;
     while (hasNextQueue()){
         //从队列plus中取得一个排队中的命令
-        let commandQueue = fetchNextQueue();
+        let commandQueue = fetchNextQueue() as CommandQueue;
         //然后将命令送入minecraft 的命令队列
         try {
             let p = commandQueue.sender.runCommandAsync(commandQueue.command);
@@ -176,7 +108,7 @@ export interface CommandResult {
  * @typedef {{runCommandAsync: (command: string) => CommandResult}} CommandSender 
  */
 export interface CommandSender {
-    runCommandAsync(command: string): Promise<CommandResult> | Promise<|Minecraft.CommandResult>;
+    runCommandAsync(command: string): Promise<CommandResult> | Promise<Minecraft.CommandResult>;
 }
 
 /**
@@ -186,24 +118,21 @@ export class CommandQueue {
     /**
      * @type {CommandSender}
      */
-    sender;
+    sender: CommandSender;
     /**
      * @type {string}
      */
-    command;
-    /**
-     * @type {Function}
-     */
-    resolve;
-    reject;
+    command: string;
+    resolve: (result: CommandResult) => void;
+    reject: (err: unknown) => void;
     /**
      * @param {Promise<CommandResult>} commandPromise 
      */
-    async resolveResult(commandPromise){
+    async resolveResult(commandPromise: Promise<CommandResult> | Promise<Minecraft.CommandResult>){
         
         //然后是获取命令结果(但是现在已经没有结果了)
         //所以只好生成一个
-        let commandResult = { statusCode: StatusCode.success };
+        let commandResult: CommandResult = { statusCode: StatusCode.success };
         let rt = null;
         try {
             rt = await commandPromise;
@@ -217,6 +146,7 @@ export class CommandQueue {
                     if (key in commandResult){
                         continue;
                     }
+                    //@ts-ignore
                     commandResult[key] = rt[key];
                 }
             }
@@ -232,7 +162,7 @@ export class CommandQueue {
      * @param {Function} resolve 
      * @param {Function} reject 
      */
-    constructor(sender, command, resolve, reject){
+    constructor(sender: CommandSender, command: string, resolve: (result: CommandResult) => void, reject: (err: unknown) => void){
         if (typeof sender?.runCommandAsync !== "function"){
             throw new TypeError("sender cannot runCommandAsync()");
         }
@@ -245,46 +175,47 @@ export class CommandQueue {
 
 /**
  * 命令运行的优先级。
+ *
  * Indicates the execution priority of this command
- * @typedef {5 | 4 | 3 | 2 | 1} CommandPriority
  */
-export type CommandPriority = 5 | 4 | 3 | 2 | 1;
+export enum CommandPriority {
+    highest = 5,
+    high = 4,
+    medium = 3,
+    low = 2,
+    lowest = 1
+}
 
-export default class Command {
+export class Command {
     
-    /** @type {CommandPriority} */
-    static PRIORITY_HIGHEST: CommandPriority = 5;
-    /** @type {CommandPriority} */
-    static PRIORITY_HIGH: CommandPriority = 4;
-    /** @type {CommandPriority} */
-    static PRIORITY_NORMAL: CommandPriority = 3;
-    /** @type {CommandPriority} */
-    static PRIORITY_LOW: CommandPriority = 2;
-    /** @type {CommandPriority} */
-    static PRIORITY_LOWEST: CommandPriority = 1;
+    static PRIORITY_HIGHEST = CommandPriority.highest;
+    static PRIORITY_HIGH = CommandPriority.high;
+    static PRIORITY_NORMAL = CommandPriority.medium;
+    static PRIORITY_LOW = CommandPriority.low;
+    static PRIORITY_LOWEST = CommandPriority.lowest;
     
     /**
      * 返回队列中未执行的命令的数量
      * @returns {number}
      */
-    static countQueues(){
+    static countQueues(): number {
         return countNextQueues();
     }
     
     /**
-     * execute a command
+     * Execute a command asynchronously
      * @param {string} command
      */
-    static fetch(command){
+    static fetch(command: string){
         return Command.addExecute(Command.PRIORITY_NORMAL, overworld, command);
     }
     /**
-     * execute a command with params
+     * execute a command asynchronously with params
      * @param {...string} params - Command params
      * @returns {Promise<CommandResult>}
      */
-    static fetchParams(...params){
-        return Command.addExecute(Command.PRIORITY_NORMAL, overworld, getCommand(...params));
+    static fetchParams(command: string, ...params: string[]){
+        return Command.addExecute(Command.PRIORITY_NORMAL, overworld, Command.getCommand(command, params));
     }
     /**
      * execute a command with params by specific sender
@@ -292,15 +223,15 @@ export default class Command {
      * @param {...string} params - command params
      * @returns {Promise<CommandResult>}
      */
-    static fetchExecuteParams(sender, ...params){
-        return Command.addExecute(Command.PRIORITY_NORMAL, sender, getCommand(...params));
+    static fetchExecuteParams(sender: CommandSender, command: string, ...params: string[]){
+        return Command.addExecute(Command.PRIORITY_NORMAL, sender, Command.getCommand(command, params));
     }
     /**
      * execute a command by specific sender
      * @param {CommandSender} sender - Command's sender
      * @returns {Promise<CommandResult>}
      */
-    static fetchExecute(sender, command){
+    static fetchExecute(sender: CommandSender, command: string){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, command);
     }
     
@@ -319,8 +250,8 @@ export default class Command {
      * @param {...string} params
      * @returns {Promise<CommandResult>}
      */
-    static addParams(priority: CommandPriority, ...params: string[]){
-        return Command.addExecute(priority, overworld, getCommand(...params));
+    static addParams(priority: CommandPriority, command: string, ...params: string[]){
+        return Command.addExecute(priority, overworld, Command.getCommand(command, params));
     }
     
     /**
@@ -330,8 +261,8 @@ export default class Command {
      * @param {...string} params
      * @returns {Promise<CommandResult>}
      */
-    static addExecuteParams(priority: CommandPriority, sender, ...params){
-        return Command.addExecute(priority, sender, getCommand(...params));
+    static addExecuteParams(priority: CommandPriority, sender: CommandSender, command: string, ...params: string[]){
+        return Command.addExecute(priority, sender, Command.getCommand(command, params));
     }
     
     //某些命令需要以尽可能快的速度执行，故添加此函数，可设置命令权重
@@ -343,13 +274,13 @@ export default class Command {
      * @param {string} command 
      * @returns {Promise<CommandResult>}
      */
-    static addExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult>{
-        let resolve, reject;
+    static addExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
+        let resolve: any, reject: any;
         let promise = new Promise((re, rj)=>{
             resolve = re;
             reject = rj;
-        });
-        if (priority-1 in commandQueues){
+        }) as Promise<CommandResult>;
+        if (Array.isArray(commandQueues[priority-1])){
             commandQueues[priority-1].push(new CommandQueue(sender, command, resolve, reject));
             return promise;
         } else {
@@ -358,26 +289,104 @@ export default class Command {
     }
     
     /**
-     * get command by params
-     * @param {string} command 
-     * @param  {...string} args - command params
+     * generates a command by a set of params, and try to make sure that every arg is standalone
+     * @param {string} cmd 
+     * @param  {string[]|...string} args 
      * @returns {string} command
      */
-    static getCommand(command, ...args){
-        return getCommand(command, ...args);
+    static getCommand(command: string, ...args: string[]): string;
+    static getCommand(command: string, args: string[]): string;
+    static getCommand(cmd: string, ...args: string[] | [string[]] ): string {
+        const specificCharGlobalRegex = /(["'\\])/g;
+        const specificCharRegex = /(["'\\])/;
+        const spaceCharRegex = /(\s)/g;
+        
+        if (args?.length === 1 && Array.isArray(args[0])){
+            args = args[0];
+        }
+        const params = [cmd];
+        //遍历每个参数，对满足某一条件的参数进行处理
+        for (let arg of args.map(String)){
+            let shouldQuote = false;
+            
+            //空参数
+            if (arg.trim().length === 0){ 
+                shouldQuote = true;
+            }
+            
+            //空格
+            if (spaceCharRegex.test(arg)){
+                shouldQuote = true;
+            }
+            
+            //转义特殊符号
+            if (specificCharGlobalRegex.test(arg)){ 
+                arg = arg.replaceAll(specificCharGlobalRegex, "\\$1");
+            }
+            
+            //如果需要引号，则添加引号
+            if (shouldQuote){ 
+                arg = `"${arg}"`;
+            }
+            params.push(arg);
+        }
+        return params.join(" ");
     }
-    static getCommandMoreStrict(...args){
-        return getCommandMoreStrict(...args);
+    
+    static getCommandMoreStrict(command: string, ...args: string[]): string;
+    static getCommandMoreStrict(command: string, args: string[]): string;
+    static getCommandMoreStrict(cmd: string, ...args: string[] | [string[]] ): string {
+        const specificCharGlobalRegex = /(["'\\])/g;
+        const specificCharRegex = /(["'\\])/;
+        const spaceCharRegex = /(\s)/g;
+        const startsWithNumberRegex = /^[0-9]/;
+        
+        if (args?.length === 1 && Array.isArray(args[0])){
+            args = args[0];
+        }
+        const params = [cmd];
+        //遍历每个参数，对满足某一条件的参数进行处理
+        for (let arg of args.map(String)){
+            let shouldQuote = false;
+            
+            //空参数
+            if (arg.trim().length === 0){ 
+                shouldQuote = true;
+            }
+            
+            //空格
+            if (spaceCharRegex.test(arg)){
+                shouldQuote = true;
+            }
+            
+            //以数字开头的参数
+            if (startsWithNumberRegex.test(arg)){ 
+                shouldQuote = true;
+            }
+            
+            //转义特殊符号
+            if (specificCharGlobalRegex.test(arg)){ 
+                arg = arg.replaceAll(specificCharGlobalRegex, "\\$1");
+            }
+            
+            //如果需要引号，则添加引号
+            if (shouldQuote){ 
+                arg = `"${arg}"`;
+            }
+            params.push(arg);
+        }
+        return params.join(" ");
     }
+
     /**
      * execute a set of commands by sender
      * @param {CommandSender} sender 
      * @param {string[]} commands - command
      * @returns {Promise<CommandResult[]>}
      */
-    static async postExecute(sender, commands){
+    static async postExecute(sender: CommandSender, commands: string[]): Promise<CommandResult[]> {
         commands = Array.from(commands);
-        let promises = commands.map((cmd)=>Command.fetchExecute(sender, cmd));
+        let promises = commands.map((cmd) => Command.fetchExecute(sender, cmd));
         let results = [];
         for (let pro of promises){
             results.push(await pro);
@@ -385,53 +394,34 @@ export default class Command {
         return Promise.all(results);
     }
     
-    static run(command){
-        if (overworld.runCommand){
+    static run(command: string): any {
+        if ((overworld as any).runCommand){
             try {
-                return Object.assign({}, overworld.runCommand(command));
+                return Object.assign({}, (overworld as any).runCommand(command));
             } catch (e){
-                return JSON.parse(e);
+                try {
+                    return JSON.parse(String(e));
+                } catch {
+                }
             }
         }
         throw new Error("current version doesn't support 'Command.run' method, try 'Command.fetch' instead");
     }
-    static execute(sender, command){
-        if (sender.runCommand){
+    static execute(sender: {}, command: string): any {
+        if ((sender as any).runCommand){
             try {
-                return Object.assign({}, sender.runCommand(command));
+                return Object.assign({}, (sender as any).runCommand(command));
             } catch (e){
-                return JSON.parse(e);
+                try {
+                    return JSON.parse(String(e));
+                } catch {
+                }
             }
         }
         throw new Error("current version doesn't support 'Command.execute' method, try 'Command.fetchExecute' instead");
     }
 }
 
-export { Command };
+export default Command;
 
 runTask(executeCommandQueues);
-
-if (debug){
-    import("./util/Logger.js")
-    .then(m=>{
-        let logger = new m.Logger("Command");
-        log = logger.debug;
-    });
-    
-    import("./util/ChatCommand.js")
-    .then(m=>{
-        m.ChatCommand.registerCustomPrefixCommand("$", "cmdm", (_sender, _, __, args)=>{
-            if (args[0] === "clearandprint"){
-                let str = ""; //JSON.stringify(commandQueues[3]);
-                for (let s of commandQueues[2]){
-                    str += s.command + "\n";
-                }
-                commandQueues = [[], [], [], [], []];
-                log(str);
-                log("done");
-            } else if (args[0] === "count"){
-                log(commandQueues.flat().length);
-            }
-        });
-    });
-}

@@ -1,4 +1,4 @@
-export default class ChatCommand {
+export class ChatCommand {
     static set defaultPrefix(arg: string);
     static get defaultPrefix(): string;
     static receiveBeforeChatEvent(event: any): void;
@@ -18,3 +18,4 @@ export default class ChatCommand {
     static getParameters(commandContent: any): string[];
 }
 import { YoniPlayer } from "../entity.js";
+export { ChatCommand as default };

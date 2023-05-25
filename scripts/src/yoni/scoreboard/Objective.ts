@@ -302,7 +302,7 @@ class Objective {
                
         if (type === EntryType.PLAYER || type === EntryType.ENTITY){
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", this.#id);
-            return Command.addExecuteParams(Command.PRIORITY_HIGHEST, entity, cmd, ...args)
+            return Command.addExecuteParams(Command.PRIORITY_HIGHEST, entity as EntityValue, cmd, ...args)
                 .then((rt) => {
                     if (rt.statusCode === StatusCode.success){
                         return true;
@@ -315,7 +315,7 @@ class Objective {
                         + "\n  cause by: "
                         + rt.statusMessage);
                 });
-        } else {
+        } else if (name){
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, this.#id);
             return Command.addParams(Command.PRIORITY_HIGHEST, cmd, ...args)
                 .then((rt) => {
@@ -333,7 +333,9 @@ class Objective {
                         + "\n  cause by: "
                         + rt.statusMessage);
                 });
-        } 
+        } else {
+            throw new Error("unknown error");
+        }
     }
     
     /**
