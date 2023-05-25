@@ -5,6 +5,7 @@
 ## Index of /yoni-mcscripts-lib/yoni
 
 [../](./../)  
+[entity/](./entity/)  
 [**basis**](./basis)  
 [**entity**](./entity)  
 [**readme**](./readme)  
