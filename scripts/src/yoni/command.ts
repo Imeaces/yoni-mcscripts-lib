@@ -105,10 +105,14 @@ export interface CommandResult {
 /**
  * 某些拥有 `runCommandAsync` 方法的对象。
  * @interface
- * @typedef {{runCommandAsync: (command: string) => CommandResult}} CommandSender 
+ * @typedef {{runCommandAsync: (command: string) => CommandResult}} AsyncCommandSender 
  */
-export interface CommandSender {
+export interface AsyncCommandSender {
     runCommandAsync(command: string): Promise<CommandResult> | Promise<Minecraft.CommandResult>;
+}
+
+export interface CommandSender {
+    runCommand(command: string): CommandResult | Minecraft.CommandResult;
 }
 
 /**
@@ -116,9 +120,9 @@ export interface CommandSender {
  */
 export class CommandQueue {
     /**
-     * @type {CommandSender}
+     * @type {AsyncCommandSender}
      */
-    sender: CommandSender;
+    sender: AsyncCommandSender;
     /**
      * @type {string}
      */
@@ -128,41 +132,56 @@ export class CommandQueue {
     /**
      * @param {Promise<CommandResult>} commandPromise 
      */
-    async resolveResult(commandPromise: Promise<CommandResult> | Promise<Minecraft.CommandResult>){
+    async resolveResult(commandPromise: Promise<CommandResult> | Promise<Minecraft.CommandResult> | Promise<CommandResult|Minecraft.CommandResult>){
         
-        //然后是获取命令结果(但是现在已经没有结果了)
-        //所以只好生成一个
-        let commandResult: CommandResult = { statusCode: StatusCode.success };
-        let rt = null;
+        let originalCommandResult: any;
+        let statusCode = StatusCode.success;
+        let successCount = 0;
+        let statusMessage = "command error";
         try {
-            rt = await commandPromise;
-        } catch (commmandExecuteErrorMessage){
-            commandResult.statusCode = StatusCode.error;
-            commandResult.statusMessage = String(commmandExecuteErrorMessage);
-        }
-        try {
-            if (rt != null){
-                for (let key in rt){
-                    if (key in commandResult){
-                        continue;
-                    }
-                    //@ts-ignore
-                    commandResult[key] = rt[key];
+            originalCommandResult = await commandPromise;
+            
+        } catch(cmderr) {
+            if (typeof cmderr === "string"){
+                try {
+                    originalCommandResult = JSON.parse(cmderr);
+                } catch {
+                    originalCommandResult = { statusMessage: cmderr };
                 }
+            } else {
+                originalCommandResult = cmderr;
             }
-        } catch(e){ //在commandResult出现问题的时候大概会触发这段代码
-            log("在复制属性的时候出现错误: {}", e);
+            statusCode = StatusCode.fail;
         }
+        
+        if (originalCommandResult?.statusCode !== undefined){
+            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
+        }
+        
+        if (typeof originalCommandResult?.statusMessage === "string"){
+            statusMessage = originalCommandResult.statusMessage;
+        }
+        
+        if (typeof originalCommandResult?.successCount === "number"){
+            successCount = originalCommandResult.successCount;
+        }
+        
+        const commandResult = Object.assign({
+            successCount,
+            statusCode,
+            statusMessage,
+        }, originalCommandResult);
+        
         this.resolve(commandResult);
     }
     /**
      * 
-     * @param {CommandSender} sender 
+     * @param {AsyncCommandSender} sender 
      * @param {string} command 
      * @param {Function} resolve 
      * @param {Function} reject 
      */
-    constructor(sender: CommandSender, command: string, resolve: (result: CommandResult) => void, reject: (err: unknown) => void){
+    constructor(sender: AsyncCommandSender, command: string, resolve: (result: CommandResult) => void, reject: (err: unknown) => void){
         if (typeof sender?.runCommandAsync !== "function"){
             throw new TypeError("sender cannot runCommandAsync()");
         }
@@ -219,19 +238,19 @@ export class Command {
     }
     /**
      * execute a command with params by specific sender
-     * @param {CommandSender} sender - Command's sender
+     * @param {AsyncCommandSender} sender - Command's sender
      * @param {...string} params - command params
      * @returns {Promise<CommandResult>}
      */
-    static fetchExecuteParams(sender: CommandSender, command: string, ...params: string[]){
+    static fetchExecuteParams(sender: AsyncCommandSender, command: string, ...params: string[]){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, Command.getCommand(command, params));
     }
     /**
      * execute a command by specific sender
-     * @param {CommandSender} sender - Command's sender
+     * @param {AsyncCommandSender} sender - Command's sender
      * @returns {Promise<CommandResult>}
      */
-    static fetchExecute(sender: CommandSender, command: string){
+    static fetchExecute(sender: AsyncCommandSender, command: string){
         return Command.addExecute(Command.PRIORITY_NORMAL, sender, command);
     }
     
@@ -257,11 +276,11 @@ export class Command {
     /**
      * add a command with params to specific priority to execute by sender
      * @param {CommandPriority} priority 
-     * @param {CommandSender} sender
+     * @param {AsyncCommandSender} sender
      * @param {...string} params
      * @returns {Promise<CommandResult>}
      */
-    static addExecuteParams(priority: CommandPriority, sender: CommandSender, command: string, ...params: string[]){
+    static addExecuteParams(priority: CommandPriority, sender: AsyncCommandSender, command: string, ...params: string[]){
         return Command.addExecute(priority, sender, Command.getCommand(command, params));
     }
     
@@ -270,11 +289,11 @@ export class Command {
     /**
      * 在对象上调用 `runCommandAsync` 执行命令。
      * @param {CommandPriority} priority 
-     * @param {CommandSender} sender 
+     * @param {AsyncCommandSender} sender 
      * @param {string} command 
      * @returns {Promise<CommandResult>}
      */
-    static addExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
+    static addExecute(priority: CommandPriority, sender: AsyncCommandSender, command: string): Promise<CommandResult> {
         let resolve: any, reject: any;
         let promise = new Promise((re, rj)=>{
             resolve = re;
@@ -380,11 +399,11 @@ export class Command {
 
     /**
      * execute a set of commands by sender
-     * @param {CommandSender} sender 
+     * @param {AsyncCommandSender} sender 
      * @param {string[]} commands - command
      * @returns {Promise<CommandResult[]>}
      */
-    static async postExecute(sender: CommandSender, commands: string[]): Promise<CommandResult[]> {
+    static async postExecute(sender: AsyncCommandSender, commands: string[]): Promise<CommandResult[]> {
         commands = Array.from(commands);
         let promises = commands.map((cmd) => Command.fetchExecute(sender, cmd));
         let results = [];
@@ -394,31 +413,91 @@ export class Command {
         return Promise.all(results);
     }
     
-    static run(command: string): any {
-        if ((overworld as any).runCommand){
-            try {
-                return Object.assign({}, (overworld as any).runCommand(command));
-            } catch (e){
-                try {
-                    return JSON.parse(String(e));
-                } catch {
-                }
-            }
+    static run(command: string): CommandResult {
+        if (!overworld.runCommand){
+            throw new Error("current version doesn't support 'Command.run' method, try 'Command.fetch' instead");
         }
-        throw new Error("current version doesn't support 'Command.run' method, try 'Command.fetch' instead");
+        let originalCommandResult: any;
+        let statusCode = StatusCode.success;
+        let successCount = 0;
+        let statusMessage = "command error";
+        try {
+            originalCommandResult = overworld.runCommand(command);
+            
+        } catch(cmderr) {
+            if (typeof cmderr === "string"){
+                try {
+                    originalCommandResult = JSON.parse(cmderr);
+                } catch {
+                    originalCommandResult = { statusMessage: cmderr };
+                }
+            } else {
+                originalCommandResult = cmderr;
+            }
+            statusCode = StatusCode.fail;
+        }
+        
+        if (originalCommandResult?.statusCode !== undefined){
+            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
+        }
+        
+        if (typeof originalCommandResult?.statusMessage === "string"){
+            statusMessage = originalCommandResult.statusMessage;
+        }
+        
+        if (typeof originalCommandResult?.successCount === "number"){
+            successCount = originalCommandResult.successCount;
+        }
+        
+        return Object.assign({
+            successCount,
+            statusCode,
+            statusMessage,
+        }, originalCommandResult);
+        
     }
-    static execute(sender: {}, command: string): any {
-        if ((sender as any).runCommand){
-            try {
-                return Object.assign({}, (sender as any).runCommand(command));
-            } catch (e){
-                try {
-                    return JSON.parse(String(e));
-                } catch {
-                }
-            }
+    static execute(sender: CommandSender, command: string): CommandResult {
+        if (!sender.runCommand){
+            throw new Error("not a command sender or current version doesn't support 'Command.execute' method, try 'Command.fetchExecute' instead");
         }
-        throw new Error("current version doesn't support 'Command.execute' method, try 'Command.fetchExecute' instead");
+        let originalCommandResult: any;
+        let statusCode = StatusCode.success;
+        let successCount = 0;
+        let statusMessage = "command error";
+        try {
+            originalCommandResult = sender.runCommand(command);
+            
+        } catch(cmderr) {
+            if (typeof cmderr === "string"){
+                try {
+                    originalCommandResult = JSON.parse(cmderr);
+                } catch {
+                    originalCommandResult = { statusMessage: cmderr };
+                }
+            } else {
+                originalCommandResult = cmderr;
+            }
+            statusCode = StatusCode.fail;
+        }
+        
+        if (originalCommandResult?.statusCode !== undefined){
+            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
+        }
+        
+        if (typeof originalCommandResult?.statusMessage === "string"){
+            statusMessage = originalCommandResult.statusMessage;
+        }
+        
+        if (typeof originalCommandResult?.successCount === "number"){
+            successCount = originalCommandResult.successCount;
+        }
+        
+        return Object.assign({
+            successCount,
+            statusCode,
+            statusMessage,
+        }, originalCommandResult);
+        
     }
 }
 
