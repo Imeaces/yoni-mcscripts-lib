@@ -31,5 +31,12 @@
   "bugs": {
     "url": "https://github.com/Silvigarabis/yoni-mcscripts-lib/issues"
   },
-  "homepage": "https://github.com/Silvigarabis/yoni-mcscripts-lib#readme"
+  "homepage": "https://github.com/Silvigarabis/yoni-mcscripts-lib#readme",
+  "files": [
+    "@types/",
+    "yoni-mcscripts-lib.js",
+    "src/",
+    "yoni/",
+    "tsconfig.json"
+  ]
 }
