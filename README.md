@@ -25,7 +25,7 @@
 ```js
 // 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
 //import { Scoreboard, Utils, YoniScheduler } from "yoni/index.js";
-import { Scoreboard, Utils } from "yoni-mcscripts-lib";
+import { Scoreboard, Utils, YoniScheduler } from "yoni-mcscripts-lib";
 
 // 部分函数为异步函数，故需要在异步函数内用 await 调用
 // 简单示范了 Scoreboard 的用法，这个类是对原版的记分板
