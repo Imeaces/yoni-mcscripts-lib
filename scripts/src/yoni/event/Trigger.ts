@@ -10,7 +10,7 @@ async function callAsyncFunction(func, ...args){
 
 class Trigger implements IEventTrigger {
     
-    constructor(identifier, signal = null){
+    constructor(identifier: string, signal = null){
         this.#identifier = getIdentifierInfo(identifier).id;
         this.signal = signal;
     }

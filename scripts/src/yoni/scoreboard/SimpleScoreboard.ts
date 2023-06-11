@@ -92,7 +92,7 @@ export interface DisplayOptionsDefinition {
 /**
  * 记分板包括了记分项，分数持有者以及他们的分数。
  */
-export default class SimpleScoreboard {
+export class SimpleScoreboard {
     /**
      * 存储记分项对象。
      * @type {Map<string, Objective>}
@@ -383,4 +383,4 @@ export default class SimpleScoreboard {
     }
 }
 
-export { SimpleScoreboard }
+export default SimpleScoreboard;

@@ -304,7 +304,7 @@ function doTimeCycleSchedule(){
 /**
  * 你可以使用它创建任务
  */
-export default class YoniScheduler {
+export class YoniScheduler {
     /**
      * @param {Schedule} schedule
      * @returns {number} taskId
@@ -436,7 +436,7 @@ export default class YoniScheduler {
     }
 }
 
-export { YoniScheduler };
+export default YoniScheduler;
 
 //对于异常挂断的特殊处理，但是不知道有没有用
 SystemEvents.beforeWatchdogTerminate.subscribe((event)=>{

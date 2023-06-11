@@ -1,7 +1,8 @@
 import { Minecraft } from "./basis.js";
 
-export default class ItemStack {
+export class ItemStack {
     constructor(item){
         return new Proxy(item);
     }
 }
+export default ItemStack;

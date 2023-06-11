@@ -13,7 +13,7 @@ function log(){
   return
 }
 
-export default class Chat {
+export class Chat {
   static say(msg = "",obj){
     let rawtext = [
       {
@@ -85,3 +85,4 @@ export default class Chat {
   }
 
 }
+export default Chat;

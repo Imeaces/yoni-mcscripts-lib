@@ -1,4 +1,3 @@
-// @ts-nocheck
 import { Minecraft } from "./modules/Minecraft.js";
 export { Minecraft }
 
@@ -63,7 +62,7 @@ function dim(dimid: string|Minecraft.Dimension|number = 0): Minecraft.Dimension{
             return VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.theEnd);
         default:
             try {
-                return VanillaWorld.getDimension(dimid);
+                return VanillaWorld.getDimension(dimid as any);
             } catch {
                 return dim(0);
             }
