@@ -35,7 +35,9 @@ export let originalConsole = console;
 
 globalThis.originalConsole = originalConsole;
 
-let outputToConsole = (()=>{
+let outputToConsole = (function make(){
+    const originalConsole = globalThis.console ?? console;
+    const warnFunc = originalConsole.warn;
     return function (...args){
         originalConsole.warn(...args);
     };
@@ -243,7 +245,7 @@ export { defaultLogger as console };
 
 if (overrideDefaultConsole){
     //修改原本的console
-    globalThis.console = defaultLogger;
+    Object.assign(globalThis.console, defaultLogger);
     globalThis.print = log;
 }
 
