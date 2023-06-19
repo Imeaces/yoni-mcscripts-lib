@@ -233,6 +233,10 @@ class Location implements ILocation {
         | CoordsArray);
     constructor(...values: LocationParams){
         
+        
+        if (values.length === 1 && values[0] instanceof Location)
+            return values[0].clone();
+        
         let { x, y, z, rx, ry, dimension } = makeLocation(values);
         
         this.x = x;
@@ -424,16 +428,13 @@ class Location implements ILocation {
     equals(loc: Location1Arg){
         let fromLocation = new Location(loc);
         let { x, y, z, rx, ry, dimension } = this;
-        if (fromLocation.x === x
+        
+        return fromLocation.x === x
         && fromLocation.y === y
         && fromLocation.z === z
         && fromLocation.rx === rx
         && fromLocation.ry === ry
-        && fromLocation.dimension === dimension){
-            return true;
-        } else {
-            return false;
-        }
+        && fromLocation.dimension === dimension;
     }
     /**
      * 判断传入的位置的坐标是否与此位置对象代表的坐标相同。
@@ -442,13 +443,10 @@ class Location implements ILocation {
     equalsPosition(loc: Location1Arg){
         let fromLocation = new Location(loc);
         let { x, y, z } = this;
-        if (fromLocation.x === x
+        
+        return fromLocation.x === x
         && fromLocation.y === y
-        && fromLocation.z === z){
-            return true;
-        } else {
-            return false;
-        }
+        && fromLocation.z === z;
     }
     clone(){
         return new Location(this);
