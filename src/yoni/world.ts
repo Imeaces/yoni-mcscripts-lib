@@ -34,7 +34,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniPlayer}
      */
-    * selectPlayers<YoniPlayer>(options: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
+    * selectPlayers(options: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         for (let pl of VanillaWorld.getPlayers(options)){
             yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
@@ -44,7 +44,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} [option]
      * @yields {YoniPlayer}
      */
-    * getPlayers<YoniPlayer>(option?: Minecraft.EntityQueryOptions){
+    * getPlayers(option?: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         for (let pl of VanillaWorld.getPlayers(option)){
             yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
@@ -82,7 +82,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniEntity}
      */
-    * selectEntities<YoniEntity>(option: Minecraft.EntityQueryOptions) {
+    * selectEntities(option: Minecraft.EntityQueryOptions): Generator<YoniEntity> {
         for (let d of getAllDims()){
             for (let entity of d.getEntities(option)){
                 yield EntityBase.from(entity) as unknown as YoniEntity;
