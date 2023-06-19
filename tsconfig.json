@@ -22,7 +22,8 @@
 
         "allowUnusedLabels": true,
         "allowUnreachableCode": true,
-
+        "experimentalDecorators": true,
+        
         "strict": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
