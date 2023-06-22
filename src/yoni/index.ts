@@ -47,6 +47,7 @@ import { ObjectUtils } from "./lib/ObjectUtils.js";
 import { ScoreboardAccessor } from "./scoreboard/ScoreboardAccessor.js";
 import { EntityValue } from "./entity/EntityTypeDefs.js";
 import { EntryValueType, EntryType } from "./scoreboard/EntryType.js";
+export { TPSCounter } from "./util/TPSCounter.js";
 
 //@ts-ignore
 const Utils: (typeof YoniUtils) = (()=>{

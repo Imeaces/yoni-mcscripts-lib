@@ -1,10 +1,21 @@
 import { SystemEvents } from "../basis.js";
 
-(function (){
-
-let interruptRecord = [];
+export function WatchBird(){
+    if (hasInitiated)
+        return;
     
-SystemEvents.beforeWatchdogTerminate.subscribe((event) => {
+    startWatchBird();
+    hasInitiated = true;
+}
+
+let hasInitiated = false;
+const interruptRecord = [];
+
+function startWatchBird(){
+    SystemEvents.beforeWatchdogTerminate.subscribe(listenEvent);
+}
+
+function listenEvent(event){
     interruptRecord.unshift(Date.now());
     
     if (interruptRecord.length >= 5){
@@ -18,8 +29,7 @@ SystemEvents.beforeWatchdogTerminate.subscribe((event) => {
     }
     
     event.cancel = true;
-});
+}
 
-})();
-
-//这个比狗要温和点
+//兼容
+WatchBird();
