@@ -4,12 +4,18 @@
 //请勿在正式投入使用时启用
 export const debug = true;
 
+class LoggingConfig {
+    playerConsoleSpecificTag = "yoni:console";
+    overrideDefaultConsole = true;
+    showTimeString = false;
+    showTimeStringOnConsoleOutput = true;
 //日志输出等级
 //0: none, 1: fatal, 2: error, 3: warn, 4: debug, 5: trace
-export const logLevel = 4;
-
+    logLevel = 3;
+    uniqueFontSize = true;
 //是否将日志输出到ContentLog
-export const outputContentLog = true;
+    outputToConsole = true;
+}
 
 //如果为true，启用一些可能可以加快运行速度的代码
 //（可能不够稳定）
@@ -38,3 +44,41 @@ export function isDebug(){
 //导入debug用函数
 if (debug)
     import("./debug.js");
+
+import { Config } from "./util/Config.js";
+
+export const config = new Config();
+
+export function getConfig(key: string){
+    return config.get(key);
+}
+export function setConfig(key: string, value: any){
+    return config.set(key, value);
+}
+
+(function initialConf(){
+const logging = new LoggingConfig();
+oo(LoggingConfig.prototype);
+
+config
+.addBoolean("debug", debug)
+.addBoolean("yoni-mcscripts-lib.injectGlobal", injectGlobal)
+.addConfig("logging", new Config(JSON.stringify(logging)));
+
+})();
+
+
+
+function oo(obj: any){
+  Object.entries(Object.getOwnPropertyDescriptors(obj))
+  .forEach((e) => {
+      const prop = e[0];
+      const desc = e[1];
+      
+      if (!desc.configurable)
+          return;
+      desc.enumerable = true;
+      Object.defineProperty(obj, prop, desc);
+  });
+  return obj;
+}
