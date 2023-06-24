@@ -6,11 +6,11 @@
     "@minecraft/vanilla-data": "1.19.80"
   },
   "devDependencies": {
-    "typescript": "^4.9.3"
+    "typescript": "4.9.3"
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "0.9.1",
+  "version": "0.10.0",
   "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
