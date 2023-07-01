@@ -73,3 +73,4 @@ YoniScheduler.runTask(async function (){
 我也不知道加这个是干嘛
 
 [![Page Views Count](https://badges.toozhao.com/badges/01H306S1JD8VWVQ03QW1EYPR0E/orange.svg)](https://badges.toozhao.com/stats/01H306S1JD8VWVQ03QW1EYPR0E "Get your own page views count badge on badges.toozhao.com")
+[![npm version](https://badge.fury.io/js/yoni-mcscripts-lib.svg)](https://badge.fury.io/js/yoni-mcscripts-lib)
