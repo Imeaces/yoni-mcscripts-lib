@@ -13,6 +13,7 @@ export {
   dim,
   VanillaWorld,
   VanillaScoreboard,
+  MinecraftSystem,
 } from "./basis.js";
 export { 
   log,
@@ -29,6 +30,8 @@ export { EntityBase } from "./entity/EntityBase.js";
 export { YoniScheduler } from "./schedule.js";
 export { TPSCounter } from "./util/TPSCounter.js";
 export { ObjectUtils } from "./lib/ObjectUtils.js";
+export { Dimension } from "./dimension.js";
+export { Block } from "./block.js";
 
 // class exports
 export { Schedule } from "./schedule.js";
@@ -52,6 +55,7 @@ export {
   Objective,
 } from "./scoreboard.js";
 export { YoniWorld } from "./world.js";
+export { YoniDimension } from "./dimension.js";
 
 // enum
 export { EntryType } from "./scoreboard.js";
@@ -69,3 +73,15 @@ export {
     EventListener,
     events
 } from "./event.js";
+
+// entity class
+import {
+    Entity,
+    Player,
+    SimulatedPlayer,
+} from "./entity.js";
+export const EntityClass = {
+    Entity, 
+    Player,
+    SimulatedPlayer
+};
