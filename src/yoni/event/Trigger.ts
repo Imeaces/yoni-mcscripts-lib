@@ -8,6 +8,9 @@ async function callAsyncFunction(func, ...args){
     return func(...args);
 }
 
+/**
+ * @deprecated 废弃，等待重写
+ */
 class Trigger implements IEventTrigger {
     
     constructor(identifier: string, signal = null){

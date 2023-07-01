@@ -1,4 +1,4 @@
-import { VanillaEvents as MinecraftEvents, SystemEvents } from "../basis.js";
+import { MinecraftSystem, VanillaWorld } from "../basis.js";
 import { debug } from "../config.js";
 import { Logger } from "../util/Logger.js";
 
@@ -37,6 +37,9 @@ const registeredEventTypes = new Map();
 
 //用于记录 已延迟的 事件的监听 的注册 的地图
 const waitingEventRegisterMap = new Map();
+/**
+ * @deprecated 废弃，等待重写
+ */
 class EventRegisterListener {
     static add(eventTypeIdentifier, callback){
         let idInfo = getIdentifierInfo(eventTypeIdentifier);
@@ -84,7 +87,7 @@ function getNamespaceEventTypesMap(namespace){
 }
 
 /**
- * @deprecated 官方可能正在对事件系统进行大幅度修改，此接口可能会出现错误。
+ * @deprecated 废弃，等待重写
  */
 class Types {
     static register(identifier, eventType){
@@ -185,27 +188,23 @@ class Types {
     }
 }
 
-// Minecraft事件注册
-(()=>{
+function registerBeforeAndAfterEvents(namespace, object){
     let map = new Map();
-    for (let s in MinecraftEvents){
-        map.set(s, MinecraftEvents[s]);
-        logger.trace("注册了事件minecraft:{}", s);
+    for (let s in object.beforeEvents){
+        map.set("beforeEvents."+s, object.beforeEvents[s]);
+    }
+    for (let s in object.afterEvents){
+        map.set("afterEvents."+s, object.afterEvents[s]);
     }
     Object.freeze(map);
-    registeredEventTypes.set("minecraft", map);
-})();
-// Minecraft System事件注册
-(()=>{
-    let map = new Map();
-    for (let s in SystemEvents){
-        map.set(s, SystemEvents[s]);
-        logger.trace("注册了事件system:{}", s);
-    }
-    Object.freeze(map);
-    registeredEventTypes.set("system", map);
-})();
+    registeredEventTypes.set(namespace, map);
+}
+registerBeforeAndAfterEvents("minecraft", VanillaWorld);
+registerBeforeAndAfterEvents("system", MinecraftSystem);
 
+/**
+ * @deprecated 废弃，等待重写
+ */
 export const events = new Proxy({}, {
     get(t, k){
         if (k === Symbol.iterator)
@@ -246,7 +245,7 @@ export const events = new Proxy({}, {
                 continue;
             typeKeys.push(k);
         }
-        return defaultKeys.concat(typeKeys);
+        return Array.from(new Set(defaultKeys.concat(typeKeys)));
     }
 });
 export default Types;

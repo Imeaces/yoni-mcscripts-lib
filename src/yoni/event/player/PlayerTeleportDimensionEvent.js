@@ -1,7 +1,7 @@
 import { EventSignal, EventTriggerBuilder } from "../../event.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
-import { World } from "../../world.js";
+import { world as World } from "../../world.js";
 
 export class PlayerTeleportDimensionEvent extends PlayerEvent {
     fromDimension;

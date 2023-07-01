@@ -11,12 +11,13 @@ class SimulatedPlayer extends Player {
     }
 }
 
-/* 修补 */
+/* 修补，或者说mixin？ */
 copyPropertiesWithoutOverride(SimulatedPlayer.prototype, Gametest.SimulatedPlayer.prototype, "vanillaEntity");
-/*修复结束*/
+/* 修复结束，除了没有类型 */
 
 EntityClassRegistry.register(SimulatedPlayer, Gametest.SimulatedPlayer);
 
+// 导出类型
 type YoniSimulatedPlayer = SimulatedPlayer & Gametest.SimulatedPlayer;
 
 export default YoniSimulatedPlayer;

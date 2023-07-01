@@ -1,1 +1,1 @@
-export * from "./yoni/index";
+export * from "./yoni/index.js";

@@ -8,7 +8,7 @@ import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 import { YoniEntity } from "./entity/Entity.js";
 import { YoniPlayer } from "./entity/Player.js";
 
-class World {
+export class World {
     static isWorld(object: any){
         return object instanceof Minecraft.World || object instanceof World;
     }
@@ -97,9 +97,6 @@ class World {
 
 copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanillaWorld");
 
-type YoniWorld = World & Minecraft.World;
+export type YoniWorld = World & Minecraft.World;
 
-const world = new World(VanillaWorld) as unknown as YoniWorld;
-
-export { world as World, YoniWorld };
-export default World;
+export const world = new World(VanillaWorld) as unknown as YoniWorld;

@@ -1,211 +1,31 @@
-import { StatusCode, overworld, runTask, Minecraft } from "./basis.js";
-import { debug } from "./config.js";
-import { getKeys } from "./lib/ObjectUtils.js";
+import { StatusCode, overworld } from "./basis.js";
+import { config } from "./config.js";
+import { CommandPriority } from "./command/CommandPriority.js";
+import { AsyncCommandSender } from "./command/AsyncCommandSender.js";
+import { CommandSender } from "./command/CommandSender.js";
+import { CommandResult } from "./command/CommandResult.js";
+import { CommandExecutor } from "./command/CommandExecutor.js";
+import { CommandQueue } from "./command/CommandQueue.js";
+import { AsyncCommandQueue } from "./command/AsyncCommandQueue.js";
+import { AsyncCommandExecutor } from "./command/AsyncCommandExecutor.js";
 
-let log: any = ()=>{};
-let commandQueues: CommandQueue[][] = [[], [], [], [], []];
-
-//空间换时间（滑稽）
-/** @returns {boolean} */
-function hasNextQueue(){
-    if (commandQueues[4].length !== 0
-    || commandQueues[3].length !== 0
-    || commandQueues[2].length !== 0
-    || commandQueues[1].length !== 0
-    || commandQueues[0].length !== 0){
-        return true;
-    }
-    return false;
-}
-/** @returns {number} */
-function countNextQueues(){
-    return commandQueues[4].length
-    + commandQueues[3].length
-    + commandQueues[2].length
-    + commandQueues[1].length
-    + commandQueues[0].length;
-}
-/** @returns {CommandQueue} */
-function fetchNextQueue(){
-    if (commandQueues[4].length !== 0){
-        return commandQueues[4][0];
-    }
-    if (commandQueues[3].length !== 0){
-        return commandQueues[3][0];
-    }
-    if (commandQueues[2].length !== 0){
-        return commandQueues[2][0];
-    }
-    if (commandQueues[1].length !== 0){
-        return commandQueues[1][0];
-    }
-    if (commandQueues[0].length !== 0){
-        return commandQueues[0][0];
-    }
-}
-/** remove next queue */
-function removeNextQueue(){
-    if (commandQueues[4].length !== 0){
-        commandQueues[4].shift();
-    } else if (commandQueues[3].length !== 0){
-        commandQueues[3].shift();
-    } else if (commandQueues[2].length !== 0){
-        commandQueues[2].shift();
-    } else if (commandQueues[1].length !== 0){
-        commandQueues[1].shift();
-    } else if (commandQueues[0].length !== 0){
-        commandQueues[0].shift();
-    }
-}
-
-/** @type {CommandQueue} */
-let lastFailedCommand: CommandQueue | null | undefined = null;
-
-function executeCommandQueues(){
-    runTask(executeCommandQueues);
-    let executeQueueCount = 0;
-    while (hasNextQueue()){
-        //从队列plus中取得一个排队中的命令
-        let commandQueue = fetchNextQueue() as CommandQueue;
-        //然后将命令送入minecraft 的命令队列
-        try {
-            let p = commandQueue.sender.runCommandAsync(commandQueue.command);
-            commandQueue.resolveResult(p);
-        } catch(error) { //如果没送入成功，说明minecraft 命令队列已满(也可能你故意传了个用不了的sender)，结束等待下次开始
-            if (commandQueue === lastFailedCommand){
-                lastFailedCommand.reject(error);
-                removeNextQueue();
-                log("队列中的命令执行失败 /{}\n{}", lastFailedCommand.command, error);
-            } else {
-                log("队列已满或出现其他错误，如果下次该命令仍然推入错误，将会不执行此命令，已成功推入 {} 条命令，还有 {} 条正在等待\n{}", executeQueueCount, countNextQueues(), error);
-                lastFailedCommand = commandQueue;
-            }
-            break;
-        }
-        executeQueueCount += 1;
-        //送入之后将队列中的命令移除
-        removeNextQueue();
-    }
-}
-
-/**
- * 表示命令完成执行后返回的结果。
- * @interface 
- * @typedef CommandResult
- * @prop {number} statusCode
- * @prop {number} [successCount]
- * @prop {string} [statusMessage]
- */
-export interface CommandResult {
-    statusCode: StatusCode;
-    successCount?: number;
-    statusMessage?: string;
-}
-
-/**
- * 某些拥有 `runCommandAsync` 方法的对象。
- * @interface
- * @typedef {{runCommandAsync: (command: string) => CommandResult}} AsyncCommandSender 
- */
-export interface AsyncCommandSender {
-    runCommandAsync(command: string): Promise<CommandResult> | Promise<Minecraft.CommandResult>;
-}
-
-export interface CommandSender {
-    runCommand(command: string): CommandResult | Minecraft.CommandResult;
-}
-
-/**
- * contains command queue infos
- */
-export class CommandQueue {
-    /**
-     * @type {AsyncCommandSender}
-     */
-    sender: AsyncCommandSender;
-    /**
-     * @type {string}
-     */
-    command: string;
-    resolve: (result: CommandResult) => void;
-    reject: (err: unknown) => void;
-    /**
-     * @param {Promise<CommandResult>} commandPromise 
-     */
-    async resolveResult(commandPromise: Promise<CommandResult> | Promise<Minecraft.CommandResult> | Promise<CommandResult|Minecraft.CommandResult>){
-        
-        let originalCommandResult: any;
-        let statusCode = StatusCode.success;
-        let successCount = 0;
-        let statusMessage = "command error";
-        try {
-            originalCommandResult = await commandPromise;
-            
-        } catch(cmderr) {
-            if (typeof cmderr === "string"){
-                try {
-                    originalCommandResult = JSON.parse(cmderr);
-                } catch {
-                    originalCommandResult = { statusMessage: cmderr };
-                }
-            } else {
-                originalCommandResult = cmderr;
-            }
-            statusCode = StatusCode.fail;
-        }
-        
-        if (originalCommandResult?.statusCode !== undefined){
-            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
-        }
-        
-        if (typeof originalCommandResult?.statusMessage === "string"){
-            statusMessage = originalCommandResult.statusMessage;
-        }
-        
-        if (typeof originalCommandResult?.successCount === "number"){
-            successCount = originalCommandResult.successCount;
-        }
-        
-        const commandResult = Object.assign({
-            successCount,
-            statusCode,
-            statusMessage,
-        }, originalCommandResult);
-        
-        this.resolve(commandResult);
-    }
-    /**
-     * 
-     * @param {AsyncCommandSender} sender 
-     * @param {string} command 
-     * @param {Function} resolve 
-     * @param {Function} reject 
-     */
-    constructor(sender: AsyncCommandSender, command: string, resolve: (result: CommandResult) => void, reject: (err: unknown) => void){
-        if (typeof sender?.runCommandAsync !== "function"){
-            throw new TypeError("sender cannot runCommandAsync()");
-        }
-        this.sender = sender;
-        this.command = command;
-        this.resolve = resolve;
-        this.reject = reject;
-    }
-}
-
-/**
- * 命令运行的优先级。
- *
- * Indicates the execution priority of this command
- */
-export enum CommandPriority {
-    highest = 5,
-    high = 4,
-    medium = 3,
-    low = 2,
-    lowest = 1
+export { CommandPriority,
+ AsyncCommandSender,
+ CommandSender,
+ CommandResult,
+ CommandExecutor,
+ AsyncCommandExecutor,
 }
 
 export class Command {
+    static #asyncCommandExecutor = new AsyncCommandExecutor(true);
+    static #syncCommandExecutor = new CommandExecutor(true);
+    static config = (function getCommandConfig(){
+        let commandConfig = config.getConfig("command");
+        if (!commandConfig)
+            commandConfig = config.createConfig("command");
+        return commandConfig;
+    })();
     
     static PRIORITY_HIGHEST = CommandPriority.highest;
     static PRIORITY_HIGH = CommandPriority.high;
@@ -218,7 +38,7 @@ export class Command {
      * @returns {number}
      */
     static countQueues(): number {
-        return countNextQueues();
+        return Command.#asyncCommandExecutor.commandList.count();
     }
     
     /**
@@ -294,17 +114,51 @@ export class Command {
      * @returns {Promise<CommandResult>}
      */
     static addExecute(priority: CommandPriority, sender: AsyncCommandSender, command: string): Promise<CommandResult> {
+        if (Command.config.getBoolean("useSyncExecutorOnAsyncExecute")){
+            // @ts-ignore 特性，出问题别怪我
+            return Command.#addSyncExecute(priority, sender, command);
+        }
+        
         let resolve: any, reject: any;
         let promise = new Promise((re, rj)=>{
             resolve = re;
             reject = rj;
         }) as Promise<CommandResult>;
-        if (Array.isArray(commandQueues[priority-1])){
-            commandQueues[priority-1].push(new CommandQueue(sender, command, resolve, reject));
-            return promise;
-        } else {
-            throw new Error("Unknown command priority " + String(priority));
-        }
+        
+        const queue = new AsyncCommandQueue(sender, command,
+            (result: any) => {
+                const commandResult = Command.generateCommandResult(true, result);
+                resolve(commandResult);
+            },
+            (result: any) => {
+                const commandResult = Command.generateCommandResult(false, result);
+                reject(commandResult);
+            }
+        );
+        Command.#asyncCommandExecutor.commandList.add(priority, queue);
+        
+        return promise;
+        throw new Error("Unknown command priority " + String(priority));
+    }
+    static #addSyncExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
+        let resolve: any, reject: any;
+        let promise = new Promise((re, rj)=>{
+            resolve = re;
+            reject = rj;
+        }) as Promise<CommandResult>;
+        
+        const queue = new CommandQueue(sender, command);
+        Command.#syncCommandExecutor.commandList.add(priority, queue);
+        queue.onresolve((result: any) => {
+            const commandResult = Command.generateCommandResult(true, result);
+            resolve(commandResult);
+        });
+        queue.onreject((result: any) => {
+            const commandResult = Command.generateCommandResult(false, result);
+            reject(commandResult);
+        });
+        
+        return promise;
     }
     
     /**
@@ -499,8 +353,57 @@ export class Command {
         }, originalCommandResult);
         
     }
+    static generateCommandResult(isSuccess: boolean, value: any): CommandResult {
+        // 反正最后返回的是 CommandResult
+        
+        let statusCode = isSuccess ? StatusCode.success: StatusCode.fail;
+        let successCount = 0;
+        let statusMessage = "";
+        
+        if (typeof value === "string"){
+            try {
+                value = JSON.parse(value);
+            } catch {
+            }
+        }
+        
+        if (value?.statusCode !== undefined){
+            statusCode = value.statusCode as unknown as StatusCode;
+        }
+        
+        if (typeof value?.statusMessage === "string"){
+            statusMessage = value.statusMessage;
+        }
+        
+        if (typeof value?.successCount === "number"){
+            successCount = value.successCount;
+        }
+        
+        if (value instanceof Error){
+            statusCode = StatusCode.fail;
+            statusMessage = value.toString();
+        } else if (typeof value === "string"){
+            statusMessage = value;
+        } else if (typeof value === "number"){
+            statusCode = value;
+        }
+        
+        try {
+            return Object.assign(({} as any), 
+                value,
+                {
+                    successCount,
+                    statusCode,
+                    statusMessage,
+                }
+            );
+        } catch {
+            return {
+                successCount,
+                statusCode,
+                statusMessage,
+            };
+        }
+    }
 }
 
-export default Command;
-
-runTask(executeCommandQueues);

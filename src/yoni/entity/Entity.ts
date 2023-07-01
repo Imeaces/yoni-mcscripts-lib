@@ -8,14 +8,16 @@ import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 
 import { EntityBase } from "./EntityBase.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
+import { Vector2 } from "../lib/math/Vector2";
 
 const { EntityTypes } = Minecraft;
 
 export interface EntityTeleportOptions {
-    rx?: number;
-    ry?: number;
+    rotation?: Vector2;
+    faceLocation?: Vector3;
     dimension?: DimensionLike;
     keepVelocity?: boolean;
+    checkForBlocks?: boolean;
 }
 
 /**
@@ -54,7 +56,7 @@ class Entity extends EntityBase {
     }
 
     get location() : Location {
-        let rotation: Minecraft.XYRotation = this.vanillaEntity.getRotation();
+        let rotation: Vector2 = this.vanillaEntity.getRotation();
         let { dimension, location } = this.vanillaEntity;
         return new Location({dimension, location, rotation});
     }
@@ -146,65 +148,12 @@ class Entity extends EntityBase {
         return EntityBase.setCurrentHealth(this, v);
     }
     
-    /**
-     * 传送实体到指定的位置。
-     * @param {Vector3} whereLocation - 坐标。
-     * @param {Minecraft.Dimension} [dimension] - 维度。
-     * @param {number} [rx] - pitch角。
-     * @param {number} [ry] - yaw角。
-     * @param {boolean} [keepVelocity] - 是否保持实体当前的速度。
-     */
-    teleport(whereLocation: Vector3, dimension?: DimensionLike, rx?: number, ry?: number, keepVelocity?: boolean): void;
-    /**
-     * @param {import("./Location.js").Location1Arg} location - 位置。
-     * @param {boolean} [keepVelocity] - 是否保持实体当前的速度。
-     */
-    teleport(location: Location1Arg, keepVelocity?: boolean): void;
-    /**
-     * @param {import("./Location.js").Location1Arg} location - 坐标。
-     * @param {EntityTeleportOptions} teleportOption - 与传送实体有关的其他选项。
-     */
+    teleport(whereLocation: Location): void;
+    teleport(whereLocation: Location1Arg): void;
     teleport(whereLocation: Vector3, teleportOption: EntityTeleportOptions): void;
     teleport(){
-        
-        let destinateLocation: Location | undefined = undefined;
-        let whereLocation;
-        let rx: number | undefined = undefined;
-        let ry: number | undefined = undefined;
-        let dimension: DimensionLike | undefined = undefined;
-        let keepVelocity: boolean | undefined = undefined;
-        
-            
-        if (arguments.length === 0){
-            throw new TypeError("arguments is invalid");
-        } else if (arguments.length === 1){
-            destinateLocation = new Location(arguments[0]);
-        } else if (arguments.length === 2){
-            if (typeof arguments[1] === "boolean"){
-                destinateLocation = new Location(arguments[0]);
-                keepVelocity = arguments[1];
-            } else {
-               ; ({ keepVelocity, rx, ry, dimension } = arguments[1]);
-            }
-        } else {
-            ; ([whereLocation, dimension, rx, ry, keepVelocity] = Array.from(arguments));
-        }
-        
-        if (destinateLocation == null){
-            destinateLocation = new Location(dimension ?? this.dimension, whereLocation, [rx ?? this.rotation.x, ry ?? this.rotation.y]); 
-        }
-        
-        if (keepVelocity == null){
-            keepVelocity = false;
-        }
-        
-        let { rx: destRx, ry: destRy, dimension: destDim } = destinateLocation;
-        
-        this.vanillaEntity.teleport(
-            destinateLocation.getVanillaLocation(),
-            destDim.vanillaDimension,
-            destRx, destRy, keepVelocity);
-        
+        //@ts-ignore
+        return this.vanillaEntity.teleport.apply(this.vanillaEntity, arguments);
     }
     
     /*
@@ -408,7 +357,7 @@ class Entity extends EntityBase {
         //@ts-ignore
         return this.vanillaEntity.getHeadLocation.apply(this.vanillaEntity, arguments);
     }
-    getRotation(): Minecraft.XYRotation {
+    getRotation(): Minecraft.Vector2 {
         //@ts-ignore
         return this.vanillaEntity.getRotation.apply(this.vanillaEntity, arguments);
     }

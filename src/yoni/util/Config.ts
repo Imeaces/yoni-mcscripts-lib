@@ -16,6 +16,10 @@ export class Config {
         else
             throw new TypeError("the value that key linked doesn't a config map");
     }
+    createConfig(key: string): Config {
+        this.setConfig(key, Config.createFromConfigMap(Object.create(null)));
+        return this.getConfig(key) as Config;
+    }
     /**
      * 根据指定的键获取布尔值。
      * @param key - 配置键。

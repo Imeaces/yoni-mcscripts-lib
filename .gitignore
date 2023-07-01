@@ -1,10 +1,6 @@
-.txt
-*.diff
-
 /@types
 /yoni/
 /yoni-mcscripts-lib.js
-/wd/
 
 # Logs
 logs

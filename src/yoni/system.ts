@@ -38,7 +38,4 @@ class System {
     }
 }
 
-const system = new System();
-
-export { system };
-export default system;
+export const system = new System();

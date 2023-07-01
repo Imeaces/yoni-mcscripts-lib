@@ -10,7 +10,7 @@ import { EntityBase } from "./entity.js";
 import { send, say } from "./util/utils.js";
 import { Logger, log } from "./util/Logger.js";
 
-import { World } from "./world.js";
+import { world as World } from "./world.js";
 import Scoreboard from "./scoreboard.js";
 
 import { EventListener, EventTypes, events } from "./event.js";

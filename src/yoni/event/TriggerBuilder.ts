@@ -4,6 +4,9 @@ import { Event } from "./Event.js";
 import { EventTrigger } from "./Trigger.js";
 import { EventSignal } from "./Signal.js";
 
+/**
+ * @deprecated 废弃，等待重写
+ */
 class TriggerBuilder {
     
     #idInfo = null;

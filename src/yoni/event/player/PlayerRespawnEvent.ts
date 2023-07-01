@@ -4,7 +4,7 @@ import { PlayerEvent } from "./PlayerEvent";
 import { YoniScheduler, Schedule } from "../../schedule.js";
 import { Location } from "../../Location.js";
 import { PlayerDeadEvent } from "./PlayerDeadEvent.js";
-import { World } from "../../world.js";
+import { world as World } from "../../world.js";
 
 export class PlayerRespawnEventSignal extends EventSignal {}
 export class PlayerRespawnEvent extends PlayerEvent {

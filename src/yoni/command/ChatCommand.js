@@ -1,5 +1,4 @@
-import { VanillaEvents }  from "../basis.js";
-import { EventListener } from "../event.js";
+import { VanillaWorld }  from "../basis.js";
 import { EntityBase, YoniPlayer } from "../entity.js";
 import { Logger } from "../util/Logger.js";
 
@@ -11,7 +10,7 @@ const prefixMap = new Map();
 
 let defaultPrefix = "!";
 
-class ChatCommand {
+export class ChatCommand {
     static get defaultPrefix(){
         return defaultPrefix;
     }
@@ -261,10 +260,8 @@ class ChatCommand {
     }
 }
 
-export { ChatCommand };
-export { ChatCommand as default };
-
-EventListener.register(VanillaEvents.beforeChat, (event) => {
-    if (event.cancel) return;
+VanillaWorld.beforeEvents.chat.subscribe(function (event){
+    if (event.cancel)
+        return;
     ChatCommand.receiveBeforeChatEvent(event);
-});
+});    

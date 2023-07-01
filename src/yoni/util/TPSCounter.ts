@@ -1,4 +1,4 @@
-import { runTask } from "yoni-mcscripts-lib";
+import { runTask } from "../basis.js";
 
 let tickTimeRecords: number[] = [];
 let maxRecordTicks: number = 20;

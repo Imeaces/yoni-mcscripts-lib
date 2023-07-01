@@ -1,5 +1,5 @@
 
-export default class ConsoleLogger {
+export class ConsoleLogger {
     static print = globalThis.print;
     static log = globalThis.console.log?.bind(globalThis.console);
     static trace = globalThis.console.trace?.bind(globalThis.console);
@@ -9,3 +9,5 @@ export default class ConsoleLogger {
     static error = globalThis.console.error?.bind(globalThis.console);
     static fatal = globalThis.console.fatal?.bind(globalThis.console);
 }
+
+export default ConsoleLogger;

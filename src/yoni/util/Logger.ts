@@ -1,8 +1,8 @@
 import { VanillaWorld } from "../basis.js";
 import { Command, AsyncCommandSender } from "../command.js";
 
-import { visualizeValue } from "./console.js";
-import { dealWithCmd as JSONModifier_dealWithCmd } from "../lib/utils.js";
+import { visualizeValue } from "../lib/console.js";
+import { dealWithCmd as JSONModifier_dealWithCmd } from "../lib/commandutils.js";
 
 import { config } from "../config.js";
 import { setDebugFunction } from '../debug.js';
@@ -346,7 +346,7 @@ if (config.getBoolean("logging.overrideDefaultConsole")){
 }
 
 setDebugFunction(async function (ChatCommandModule: any){
-    const { ChatCommand }: { ChatCommand: typeof import("../util/ChatCommand.js").ChatCommand } = await ChatCommandModule;
+    const { ChatCommand }: { ChatCommand: typeof import("../command/ChatCommand.js").ChatCommand } = await ChatCommandModule;
     
     ChatCommand.registerPrefixCommand("$", "log", onCommandExecute);
     
@@ -379,4 +379,4 @@ setDebugFunction(async function (ChatCommandModule: any){
             sender.sendMessage("日志输出 §a开启");
         }
     }
-}, import("../util/ChatCommand.js"));
+}, import("../command/ChatCommand.js"));

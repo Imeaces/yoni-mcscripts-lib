@@ -1,5 +1,8 @@
 import { IEventTrigger } from "./IEventTrigger.js";
 
+/**
+ * @deprecated 废弃，等待重写
+ */
 export interface IEventSignal {
     
     /**

@@ -5,6 +5,9 @@ import { IEventSignal } from "./IEventSignal.js";
 import { Trigger } from "./Trigger.js";
 import { EventCallbacks } from "./Event.js";
 
+/**
+ * @deprecated 废弃，等待重写
+ */
 class Signal implements IEventSignal {
     #trigger: IEventTrigger | Trigger;
     #callbacks = [];

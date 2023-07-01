@@ -1,8 +1,6 @@
 import { logger } from "../logger.js";
 
 const eventList = [
-  "./BeforeItemUseOnEvent.js",
-  "./BeforeItemUseEvent.js",
   "./EntityHurtEvent.js",
 ];
 

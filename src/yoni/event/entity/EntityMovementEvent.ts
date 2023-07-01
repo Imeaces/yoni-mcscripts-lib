@@ -5,7 +5,7 @@ import { EntityBase } from "../../entity.js";
 import { YoniEntity } from "../../entity.js";
 import { Location } from "../../Location.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
-import { World } from "../../world.js";
+import { world as World } from "../../world.js";
 import { logger } from "../logger.js";
 
 export class EntityMovementEventSignal extends EventSignal {

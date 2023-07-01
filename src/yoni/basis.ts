@@ -5,10 +5,8 @@ export { MinecraftGui } from "./modules/MinecraftGui.js";
 export { Gametest } from "./modules/Gametest.js";
 
 export const VanillaWorld: Minecraft.World = Minecraft.world;
-export const VanillaEvents: Minecraft.Events = VanillaWorld.events;
 export const VanillaScoreboard: Minecraft.Scoreboard = VanillaWorld.scoreboard;
 export const MinecraftSystem: Minecraft.System = Minecraft.system;
-export const SystemEvents: Minecraft.SystemEvents = MinecraftSystem.events;
 
 /**
  * @param {(...args: any[]) => void} callback 

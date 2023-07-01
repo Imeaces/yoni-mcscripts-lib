@@ -1,4 +1,4 @@
-import { World } from "../../world.js";
+import { world as World } from "../../world.js";
 import { YoniScheduler } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { EventTriggerBuilder, EventListener, EventSignal } from "../../event.js";

@@ -2,7 +2,7 @@ import {
     Minecraft,
     VanillaWorld, 
     StatusCode } from "../basis.js";
-import { dealWithCmd } from "../lib/utils.js";
+import { dealWithCmd } from "../lib/commandutils.js";
 import { Command } from "../command.js";
 import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 import { getNumber } from "../lib/getNumber.js";

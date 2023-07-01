@@ -291,9 +291,9 @@ class Entry {
                     entry.#entity = null;
                 }
             } else if (entry.#entity !== null
-            && entry.#entity.scoreboard !== entry.#vanillaScbid
+            && entry.#entity.scoreboardIdentity !== entry.#vanillaScbid
             ){
-                let scbid = entry.#entity.scoreboard;
+                let scbid = entry.#entity.scoreboardIdentity;
                 if (scbid instanceof Minecraft.ScoreboardIdentity){
                     entry.#vanillaScbid = scbid;
                 } else {
@@ -387,7 +387,7 @@ class Entry {
             } else {
                 type = EntryType.ENTITY;
             }
-            vanillaScbid = vanillaEntity.scoreboard;
+            vanillaScbid = vanillaEntity.scoreboardIdentity;
             
             //若实体在计分板上所有记分项中都没有分数记录
             //其scbid为空
