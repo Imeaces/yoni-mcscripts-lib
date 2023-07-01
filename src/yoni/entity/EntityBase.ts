@@ -106,6 +106,11 @@ abstract class EntityBase {
         return (<Minecraft.EntityInventoryComponent>entity.getComponent("minecraft:inventory")).container;
     }
     
+    static getItemInMainHand(entity: EntityValue): Minecraft.ItemStack | undefined {
+        //@ts-ignore
+        return EntityBase.getInventory(entity).getItem(entity.selectedSlot);
+    }
+    
     /**
      * 获取实体的血量
      * @param {EntityValue} entity
