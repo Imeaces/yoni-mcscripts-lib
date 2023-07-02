@@ -118,7 +118,7 @@ abstract class EntityBase {
      */
     static getCurrentHealth(entity: EntityValue): number {
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.current;
+        return (component === undefined) ? 0 : component.currentValue;
     }
     
     /**
@@ -180,7 +180,7 @@ abstract class EntityBase {
      */
     static getMaxHealth(entity: EntityValue){
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.value;
+        return (component === undefined) ? 0 : component.effectiveMax;
     }
     
     /**
@@ -290,7 +290,7 @@ abstract class EntityBase {
         let comp = entity.getComponent("minecraft:health");
         if (comp == null)
             return false;
-        if ((<Minecraft.EntityHealthComponent>comp).current > 0)
+        if ((<Minecraft.EntityHealthComponent>comp).currentValue > 0)
             return true;
         return false;
     }
@@ -352,7 +352,7 @@ abstract class EntityBase {
         if (!component){
             throw new Error("No health component for this entity");
         }
-        component.setCurrent(val);
+        component.setCurrentValue(val);
     }
     
 }

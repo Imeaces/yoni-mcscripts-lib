@@ -1,8 +1,9 @@
 import { world as World } from "../../world.js";
 import { YoniScheduler } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
-import { EventTriggerBuilder, EventListener, EventSignal } from "../../event.js";
+import { EventTriggerBuilder, EventTypes, EventSignal } from "../../event.js";
 import { Player } from "yoni/entity.js";
+import "./PlayJoinedEvent.js";
 
 export class PlayerDeadEvent extends PlayerEvent {
     constructor(player: Player){
@@ -41,15 +42,17 @@ const trigger = new EventTriggerBuilder()
                 trigger.triggerEvent(player);
             }
         }, 0, 1);
-        eventId1 = EventListener.register("yoni:playerJoined", (event: PlayerEvent) => {
-            if (event.player.getCurrentHealth() <= 0) {
-                deadPlayers.add(event.player);
-            }
-        });
+        EventTypes.get("yoni:playerJoined").subscribe(onHurt);
     })
     .whenLastUnsubscribe(() => {
         YoniScheduler.removeSchedule(eventId0);
-        EventListener.unregister(eventId1);
+        EventTypes.get("yoni:playerJoined").unsubscribe(onHurt);
     })
     .build()
     .registerEvent();
+
+function onHurt(event: PlayerEvent){
+    if (event.player.getCurrentHealth() <= 0) {
+        deadPlayers.add(event.player);
+    }
+}

@@ -74,7 +74,7 @@ ChatCommand.registerPrefixCommand("$", "geval", (sender, rawCommand, label, args
     }
 });
 
-EventListener.register("minecraft:beforeChat", (event)=>{
+EventListener.register("minecraft:beforeEvents.chat", (event)=>{
     let { sender, message } = event;
     if (evaledPlayers.has(sender)) event.cancel = true;
     else return;

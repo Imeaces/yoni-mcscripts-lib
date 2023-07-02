@@ -5,8 +5,11 @@ class System {
     run(callback: (...args: any[]) => void, ...args: any[]){
         runTask(callback, ...args);
     }
-    get events(){
-        return MinecraftSystem.events;
+    get beforeEvents(){
+        return MinecraftSystem.beforeEvents;
+    }
+    get afterEvents(){
+        return MinecraftSystem.afterEvents;
     }
     get currentTick(){
         return MinecraftSystem.currentTick
