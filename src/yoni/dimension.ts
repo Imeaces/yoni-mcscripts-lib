@@ -12,8 +12,8 @@ import { Command } from "./command.js";
 
 import { DimensionValues } from "./dim.js";
 
-import { Entity } from "./entity/Entity.js";
-import { Player } from "./entity/Player.js";
+import { Entity, YoniEntity } from "./entity/Entity.js";
+import { Player, YoniPlayer } from "./entity/Player.js";
 import { debug } from "./config.js";
 
 class Dimension {
@@ -215,10 +215,10 @@ class Dimension {
      *
      * ```
      */
-    * getEntities<Entity>(getEntities?: Minecraft.EntityQueryOptions) {
+    * getEntities(getEntities?: Minecraft.EntityQueryOptions): Generator<YoniEntity> {
         //@ts-ignore
         for (let ent of this.vanillaDimension.getEntities.apply(this.vanillaDimension, arguments)){
-            yield EntityBase.from(ent);
+            yield EntityBase.from(ent) as YoniEntity;
         }
     }
     /**
@@ -230,7 +230,7 @@ class Dimension {
      * @returns
      * Zero or more entities at the specified location.
      */
-    getEntitiesAtBlockLocation(location: Vector3): Entity[] {
+    getEntitiesAtBlockLocation(location: Vector3): YoniEntity[] {
         //@ts-ignore
         return this.vanillaDimension.getEntitiesAtBlockLocation.apply(this.vanillaDimension, arguments).map(EntityBase.from);
     }
@@ -245,7 +245,7 @@ class Dimension {
      * Additional options for processing this raycast query.
      * @throws This function can throw errors.
      */
-    getEntitiesFromRay(location: Vector3, direction: Vector3, options?: Minecraft.EntityRaycastOptions): Entity[] {
+    getEntitiesFromRay(location: Vector3, direction: Vector3, options?: Minecraft.EntityRaycastOptions): YoniEntity[] {
         //@ts-ignore
         return this.vanillaDimension.getEntitiesFromRay.apply(this.vanillaDimension, arguments).map(EntityBase.from);
     }
@@ -259,10 +259,10 @@ class Dimension {
      * A player array.
      * @throws This function can throw errors.
      */
-    * getPlayers<Player>(getPlayers?: Minecraft.EntityQueryOptions) {
+    * getPlayers(getPlayers?: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         //@ts-ignore
         for (let pl of this.vanillaDimension.getPlayers.apply(this.vanillaDimension, arguments)){
-            yield EntityBase.from(pl);
+            yield EntityBase.from(pl) as YoniPlayer;
         }
     }
     /**
@@ -338,7 +338,7 @@ class Dimension {
      *          });
      * ```
      */
-    spawnEntity(identifier: string, location: Vector3): Entity {
+    spawnEntity(identifier: string, location: Vector3): YoniEntity {
         //@ts-ignore
         return EntityBase.from(this.vanillaDimension.spawnEntity.apply(this.vanillaDimension, arguments));
     }
@@ -376,7 +376,7 @@ class Dimension {
      *          log("New feather created!");
      * ```
      */
-    spawnItem(item: Minecraft.ItemStack, location: Vector3): Entity {
+    spawnItem(item: Minecraft.ItemStack, location: Vector3): YoniEntity {
         //@ts-ignore
         return EntityBase.getYoniEntity(this.vanillaDimension.spawnItem.apply(this.vanillaDimension, arguments));
     }

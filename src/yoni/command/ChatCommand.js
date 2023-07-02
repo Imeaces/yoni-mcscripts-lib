@@ -260,7 +260,7 @@ export class ChatCommand {
     }
 }
 
-VanillaWorld.beforeEvents.chat.subscribe(function (event){
+VanillaWorld.beforeEvents.chatSend.subscribe(function (event){
     if (event.cancel)
         return;
     ChatCommand.receiveBeforeChatEvent(event);
