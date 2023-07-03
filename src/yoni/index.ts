@@ -38,6 +38,7 @@ export { Schedule } from "./schedule.js";
 export { Logger } from "./util/Logger.js";
 export { Config } from "./util/Config.js";
 export { Location } from "./Location.js";
+export { UUID } from "./util/UUID.js";
 
 // type exports
 export {

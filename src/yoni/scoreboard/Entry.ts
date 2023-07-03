@@ -8,8 +8,8 @@ import { EntryType, EntryValueType } from "./EntryType.js";
 
 const { ScoreboardIdentityType } = Minecraft;
 
-import { debug, useOptionalFasterCode, enableScoreboardIdentityByNumberIdQuery } from "../config.js";
-import { system as System } from "../system.js";
+import { config, isDebug } from "../config.js";
+import { system } from "../system.js";
 
 /*
  存十万条就很卡了
@@ -17,14 +17,14 @@ import { system as System } from "../system.js";
 */
 
 let idRecords: Map<number, Entry>;
-if (enableScoreboardIdentityByNumberIdQuery){
+if (config.getBoolean("enableScoreboardIdentityByNumberIdQuery")){
     idRecords = new Map();
 }
 let nameRecords: Map<string, Entry> = new Map();
 let entityRecords: WeakMap<Minecraft.Entity, Entry> = new WeakMap();
 let scbidRecords: WeakMap<Minecraft.ScoreboardIdentity, Entry> = new WeakMap();
 
-if (debug){ // @ts-ignore 测试使用，将记录公开以便于查询
+if (isDebug()){ // @ts-ignore 测试使用，将记录公开以便于查询
     globalThis.EntryRecords = { idRecords, nameRecords, entityRecords, scbidRecords };
 }
 
@@ -123,7 +123,7 @@ class Entry {
         }
         
         if (entry == null
-        && enableScoreboardIdentityByNumberIdQuery
+        && config.getBoolean("enableScoreboardIdentityByNumberIdQuery")
         && id != null
         ){
             entry = idRecords.get(id);
@@ -154,7 +154,7 @@ class Entry {
             }
         }
         
-        if (enableScoreboardIdentityByNumberIdQuery
+        if (config.getBoolean("enableScoreboardIdentityByNumberIdQuery")
         && entry.id != null)
             idRecords.set(entry.id, entry);
         
@@ -173,7 +173,7 @@ class Entry {
      * @returns {Minecraft.ScoreboardIdentity[]}
      */
     static getVanillaScoreboardParticipants(): Readonly<Minecraft.ScoreboardIdentity[]> {
-        let currentTick = System.currentTick;
+        let currentTick = system.currentTick;
         if (currentTick !== Entry.#vanillaScbidsLastUpdateTime){
             let scbids = VanillaScoreboard.getParticipants();
             if (! Array.isArray(scbids)){
@@ -452,44 +452,36 @@ class Entry {
 export { Entry, EntryType };
 export default Entry;
 
-if (useOptionalFasterCode){
-    //等待下一次优化
-    
-    let YoniScheduler, console: any;
-
-    // 缓存分数持有者映射 //
-    import("../schedule.js")
-    .then(m => {
-        YoniScheduler = m.YoniScheduler
-        return import("../util/Logger.js");
-    })
-    .then(m => {
-        console = m.console;
-    })
-    .then(() => {
-        throw new Error("temp disable mapping caching");
-        YoniScheduler.runCycleTickTask(async ()=>{
-            console.trace("缓存分数持有者映射");
-            let count = 0;
-            for (let scbid of Array.from(VanillaScoreboard.getParticipants())){
-                //scbid为空
-                //可能是mojang抽风了
-                //不用担心，忽略就行
-                //就是可能会报错
-                //那个没办法
-                //存多了就会这样
-                //目前没法解决
-                if (!scbid)
-                    return;
-                await Entry.findEntry({ scbid: scbid, id: scbid.id, type: scbid.type }); //to cache entry result
-                count++;
-            }
-            if (debug){
-                console.trace("重新映射了{}位分数持有者的Entry", count);
-            }
-        }, 0, 600, true); //每600t运行一次任务，异步
-    });
-//接下来的想法是弄好原版scbid的信息缓存
-//但比较麻烦的是小概率事件
+if (config.getBoolean("useOptionalFasterCode")){
+    optionalFasterCode(import("../schedule.js"), import("../util/Logger.js"));
 }
 
+async function optionalFasterCode(YoniSchedulerModulePromise: any, LoggerModulePromise: any){
+    throw new Error("temp disable mapping caching");
+
+    const { YoniScheduler }: { YoniScheduler: typeof import("../schedule.js").YoniScheduler } = await YoniSchedulerModulePromise;
+    const { Logger }: { Logger: typeof import("../util/Logger.js").Logger } = await LoggerModulePromise;
+    const logger = new Logger("ScoreboardEntryCacher");
+    
+    // 每600刻运行一次
+    YoniScheduler.runCycleTickTask(update, 600, 600, true);
+    
+    //接下来的想法是弄好原版scbid的信息缓存
+    //但比较麻烦的是小概率事件
+    
+    async function update(){
+        logger.trace("缓存分数持有者映射");
+        let count = 0;
+        for (let scbid of Array.from(VanillaScoreboard.getParticipants())){
+             // 测试发现数量太多的时候偶尔会出现空值，在这里排除掉
+             if (!scbid)
+                 return;
+                 
+             //to cache entry result
+             await Entry.findEntry({ scbid: scbid, id: scbid.id, type: scbid.type });
+             
+             count++;
+         }
+         logger.trace("重新映射了 {} 位分数持有者的 Entry", count);
+    }
+}

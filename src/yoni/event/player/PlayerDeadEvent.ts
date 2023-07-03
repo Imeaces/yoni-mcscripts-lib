@@ -3,7 +3,7 @@ import { YoniScheduler } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { EventTriggerBuilder, EventTypes, EventSignal } from "../../event.js";
 import { Player } from "yoni/entity.js";
-import "./PlayJoinedEvent.js";
+import "./PlayerJoinedEvent.js";
 
 export class PlayerDeadEvent extends PlayerEvent {
     constructor(player: Player){

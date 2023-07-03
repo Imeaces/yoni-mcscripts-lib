@@ -234,8 +234,16 @@ class Location implements ILocation {
     constructor(...values: LocationParams){
         
         
-        if (values.length === 1 && values[0] instanceof Location)
-            return values[0].clone();
+        if (values.length === 1 && values[0] instanceof Location){
+            const { dimension, x, y, z, rx, ry } = values[0];
+            this.#x = x;
+            this.#y = y;
+            this.#x = x;
+            this.#rx = rx;
+            this.#ry = ry;
+            this.#dimension = dimension;
+            return;
+        }
         
         let { x, y, z, rx, ry, dimension } = makeLocation(values);
         

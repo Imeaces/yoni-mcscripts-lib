@@ -33,6 +33,11 @@ class UUID {
     clone(){
         return new UUID(this);
     }
+    equals(uuid){
+        if (uuid instanceof UUID)
+            return uuid.uuidSequene.join("") === this.uuidSequene.join("");
+        return false;
+    }
     toString(){
         let str = "";
         this.#uuidSequene.forEach((part)=>{

@@ -1,24 +1,26 @@
-import { ChatCommand } from "./util/ChatCommand.js";
+import { ChatCommand } from "./command/ChatCommand.js";
 import { Command } from "./command.js";
 import { Minecraft, MinecraftGui, Gametest, dim,
-    VanillaWorld, VanillaScoreboard, VanillaEvents,
+    VanillaWorld, VanillaScoreboard, Minecraft as VanillaEvents,
     MinecraftSystem, runTask,
-    SystemEvents } from "./basis.js";
+    Minecraft as SystemEvents } from "./basis.js";
 
 import { EntityBase } from "./entity.js";
 
-import { send, say } from "./util/utils.js";
+import { send, say } from "./utils.js";
 import { Logger, log } from "./util/Logger.js";
 
 import { world as World } from "./world.js";
 import Scoreboard from "./scoreboard.js";
 
 import { EventListener, EventTypes, events } from "./event.js";
+import { ConsoleLogger } from "./lib/ConsoleLogger.js";
 
-import { getErrorMsg } from "./util/console.js";
-import { load } from "./loader.js";
+import { getErrorMsg } from "./lib/console.js";
+import { Minecraft as load } from "./basis.js";
 import { getKeys, ObjectUtils } from "./lib/ObjectUtils.js";
 import { setTimeout, clearTimeout, setInterval, clearInterval } from "./lib/Timeout.js";
+import { config } from "./config.js";
 
 let logger = new Logger("debug");
 
@@ -29,7 +31,8 @@ let doEval;
         let { Minecraft, MinecraftGui, Gametest, dim, VanillaWorld, VanillaScoreboard, VanillaEvents, MinecraftSystem, runTask,
         SystemEvents, load, getKeys, logger, getErrorMsg, EventListener,
         EventTypes, events, Logger, Command, ChatCommand, send, say, EntityBase, sv,
-        setTimeout, clearTimeout, setInterval, clearInterval, ObjectUtils, World } = arguments[0];
+        setTimeout, clearTimeout, setInterval, clearInterval, ObjectUtils, World,
+        ConsoleLogger, config } = arguments[0];
         return function (sender, code){
             return (async () => {
                 globalThis._ = eval(code);
@@ -48,7 +51,7 @@ let doEval;
         SystemEvents, load, getKeys, logger, getErrorMsg, EventListener,
         EventTypes, events, Logger, Command, ChatCommand, send, say, EntityBase, sv, ObjectUtils,
         setTimeout, clearTimeout, setInterval, clearInterval, 
-        World
+        World, ConsoleLogger, config,
     });
 })();
 

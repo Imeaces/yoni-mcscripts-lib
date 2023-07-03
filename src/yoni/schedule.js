@@ -1,4 +1,4 @@
-import { SystemEvents } from "./basis.js";
+import { MinecraftSystem } from "./basis.js";
 import { Logger } from "./util/Logger.js";
 import { runTask } from "./basis.js";
 import { debug } from "./config.js";
@@ -439,7 +439,7 @@ export class YoniScheduler {
 export default YoniScheduler;
 
 //对于异常挂断的特殊处理，但是不知道有没有用
-SystemEvents.beforeWatchdogTerminate.subscribe((event)=>{
+MinecraftSystem.beforeEvents.watchdogTerminate.subscribe((event)=>{
     if (executingSchedule !== null){
         logger.warn("在执行一个任务的过程中碰到了脚本挂断事件，事件id: {}, 类型: {}, 挂断原因: {}", executingSchedule.id, String(executingSchedule.type), event.terminateReason);
         if (debug){

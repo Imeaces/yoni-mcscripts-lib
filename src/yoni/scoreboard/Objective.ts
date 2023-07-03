@@ -12,9 +12,7 @@ import {
 } from "./ScoreboardError.js"
 
 import {
-    useOptionalFasterCode,
-    enableScoreboardIdentityByNumberIdQuery,
-    emitLegacyMode
+    config,
 } from "../config.js";
 import { EntityBase } from "../entity.js";
 import { EntityValue } from "../entity/EntityTypeDefs.js";
@@ -382,7 +380,7 @@ class Objective {
             type = EntryType.FAKE_PLAYER;
             name = one;
         } else if (isFinite(Number(one))){
-            if (!enableScoreboardIdentityByNumberIdQuery)
+            if (!config.getBoolean("enableScoreboardIdentityByNumberIdQuery"))
                 throw new Error("scbid search by number id is disable, set 'enableScoreboardIdentityByNumberIdQuery' to 'true' to enable it");
             return Objective.findCommandRequirement(Entry.findEntry({id: Number(one)}));
         } else {

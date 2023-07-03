@@ -1,8 +1,8 @@
-import { say } from "./util/utils.js";
-import { printError } from "./util/console.js";
-import { VanillaWorld, dim } from "./basis.js";
+import { say } from "../utils.js";
+import { printError } from "../lib/console.js";
+import { VanillaWorld, dim } from "../basis.js";
 //import { Entry, EntryType, Scoreboard } from "./scoreboard.js";
-import { Entry, EntryType, Scoreboard } from "./scoreboard_only.js";
+import { Entry, EntryType, Scoreboard } from "../scoreboard.js";
 
 async function print(msg){
     await say(msg);

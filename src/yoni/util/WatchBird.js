@@ -1,4 +1,4 @@
-import { SystemEvents } from "../basis.js";
+import { MinecraftSystem } from "../basis.js";
 
 export function WatchBird(){
     if (hasInitiated)
@@ -12,7 +12,7 @@ let hasInitiated = false;
 const interruptRecord = [];
 
 function startWatchBird(){
-    SystemEvents.beforeWatchdogTerminate.subscribe(listenEvent);
+    MinecraftSystem.beforeEvents.watchdogTerminate.subscribe(listenEvent);
 }
 
 function listenEvent(event){

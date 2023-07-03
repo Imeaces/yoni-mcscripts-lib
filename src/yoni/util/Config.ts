@@ -1,5 +1,7 @@
+import { deepcopy } from "../lib/deepcopy.js";
+
 export class Config {
-    #configMap: ConfigMap = Object.create(null);
+    #configMap: ConfigMap = Config.createConfigMapObject();
     /**
      * 根据指定的键获取一个 Config 对象。
      * @param key - 配置键。
@@ -17,7 +19,7 @@ export class Config {
             throw new TypeError("the value that key linked doesn't a config map");
     }
     createConfig(key: string): Config {
-        this.setConfig(key, Config.createFromConfigMap(Object.create(null)));
+        this.setConfig(key, Config.createConfigMapObject())
         return this.getConfig(key) as Config;
     }
     /**
@@ -151,9 +153,12 @@ export class Config {
      * @param config - 要设置的 Config 对象。
      * @throws 如果提供的值不是 Config 对象，则抛出错误。
      */
-    setConfig(key: string, config: Config){
+    setConfig(key: string, config: Config | ConfigMap){
         if (config instanceof Config)
             this.set(key, config);
+        else if (typeof config === "object"
+        && Config.isConfigMap(config))
+            this.#configMap[key] = config;
         else
             throw new TypeError("not a config");
     }
@@ -279,7 +284,7 @@ export class Config {
             }
             
             if (map[oneKey] === undefined || map[oneKey] === null){
-                map[oneKey] = Object.create(null);
+                map[oneKey] = Config.createConfigMapObject();
             }
             if (typeof map[oneKey] !== "object"){
                 throw new Error("不允许间接覆盖一个非空值");
@@ -298,7 +303,7 @@ export class Config {
      * @returns 返回调用对象自身以允许链式调用。
      * @throws 如果提供的值不是 Config 对象，则抛出错误。
      */
-    addConfig(key: string, config: Config): Config {
+    addConfig(key: string, config: Config | ConfigMap): Config {
         this.setConfig(key, config);
         return this;
     }
@@ -469,37 +474,16 @@ export class Config {
             return;
         
         if (typeof config === "string"){
-            Object.assign(this.#configMap, JSON.parse(config));
+            deepcopy(JSON.parse(config), {
+                rootObject: this.#configMap,
+                newObjectMaker: Config.createConfigMapObject,
+                copyFunction: Config.#configValueCopyFunction,
+            });
         } else {
-            for (const kv of config){
+            for (const kv of config.entries()){
                 this.set(kv[0], kv[1]);
             }
         }
-    }
-    /**
-     * 创建新的 Config 对象，将 `configMap` 作为其内部的 ConfigMap。
-     * @param configMap - 配置映射对象。
-     * @returns 新创建的 Config 对象。
-     */
-    static createFromConfigMap(configMap: ConfigMap){
-        const config = new Config();
-        config.#configMap = configMap;
-        return config;
-    }
-    static fromConfigObject(object: {}){
-        return new Config(JSON.stringify(object));
-    }
-    /**
-     * 读取配置键名为一个数组。
-     * @param key - 配置键。
-     * @returns 配置的键数组。
-     */
-    static getConfigKeys(key: string){
-        //@ts-ignore
-        let chain = String.prototype.split.call(key, ".");
-        if (chain.includes(""))
-            throw new Error("invalid key");
-        return chain;
     }
     /**
      * 克隆此 Config。
@@ -526,6 +510,97 @@ export class Config {
     }
     offConfigChanged(...cbs: ConfigChangeCallbackFunc[]): void {
         this.#onConfigChangedCallbacks = this.#onConfigChangedCallbacks.filter(icb => !cbs.includes(icb));
+    }
+    static createConfigMapObject(): ConfigMap {
+        const object = Object.create(null);
+        Config.#configObjects.add(object);
+        return object;
+    }
+    static #configObjects = new WeakSet<ConfigMap>();
+    /**
+     * 创建新的 Config 对象，并从keyvaluemap中读取值，写入到新创建的Config对象当中。
+     * @param configMap - 配置存储对象。
+     * @returns 新创建的 Config 对象。
+     */
+    static createFromMap(config: Map<string, ConfigValue>){
+        return new Config(config);
+    }
+    /**
+     * 创建新的 Config 对象，并将configMap作为新创建的Cinfig对象的存储。
+     * @param configMap - 配置映射对象。
+     * @returns 新创建的 Config 对象。
+     */
+    static createFromConfigMap(configMap: ConfigMap){
+        if (Config.isConfigMap(configMap)){
+            const config = new Config();
+            config.#configMap = configMap;
+            return config;
+        }
+        
+        throw new TypeError("unexpected config object");
+    }
+    /**
+     * 创建新的 Config对象，并从object中获取配置的值后写入新创建的Config对象当中。
+     */
+    static createFromObject(object: ConfigMap){
+        const config = new Config();
+        deepcopy(object, {
+            rootObject: config.#configMap,
+            newObjectMaker: Config.createConfigMapObject,
+            copyFunction: Config.#configValueCopyFunction,
+        });
+        return config;
+    }
+    static #configValueCopyFunction = {
+        isCopyableValue(value: any){
+            switch (typeof value){
+                case "string":
+                case "boolean":
+                case "bigint":
+                case "number":
+                case "undefined":
+                    break;
+                case "object":
+                    if (value === null)
+                        break;
+                default:
+                    return false;
+            }
+            return true;
+        },
+        getCopiedValue(value: any){
+            switch (typeof value){
+                case "string":
+                case "boolean":
+                case "bigint":
+                case "number":
+                    break;
+                case "undefined":
+                    value = null;
+                    break;
+                case "object":
+                    if (value === null)
+                        break;
+                default:
+                    throw new TypeError("value not copyable");
+            }
+            return value;
+        }        
+    }
+    /**
+     * 读取配置键名为一个数组。
+     * @param key - 配置键。
+     * @returns 配置的键数组。
+     */
+    static getConfigKeys(key: string){
+        //@ts-ignore 只是觉得很有趣
+        let chain = String.prototype.split.call(key, ".");
+        if (chain.includes(""))
+            throw new Error("invalid key");
+        return chain;
+    }
+    static isConfigMap(v: any): v is ConfigMap {
+        return Config.#configObjects.has(v);
     }
 }
 

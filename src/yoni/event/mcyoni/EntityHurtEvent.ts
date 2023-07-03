@@ -36,7 +36,7 @@ class EntityHurtEventSignal {
             event = new EntityHurtEvent(event);
             callback(event);
         }
-        let vanillaSignal = EventTypes.get("minecraft:entityHurt");
+        let vanillaSignal = EventTypes.get("minecraft:afterEvents.entityHurt");
         if (options)
             vanillaSignal.subscribe(func, options);
         else
@@ -48,7 +48,7 @@ class EntityHurtEventSignal {
         let cab = this.#callbacks.get(callback);
         
         if (cab){
-            EventTypes.get("minecraft:entityHurt").unsubscribe(cab);
+            EventTypes.get("minecraft:afterEvents.entityHurt").unsubscribe(cab);
             this.#callbacks.delete(callback);
         }
     }

@@ -7,6 +7,7 @@ import { dealWithCmd as JSONModifier_dealWithCmd } from "../lib/commandutils.js"
 import { config } from "../config.js";
 import { setDebugFunction } from '../debug.js';
 import ConsoleLogger from "../lib/ConsoleLogger.js";
+
 async function sendMessageTo(receiver: AsyncCommandSender, message: string){
     let rawtext = JSON.stringify({rawtext:[{text: message}]}, JSONModifier_dealWithCmd);
     await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
@@ -31,7 +32,7 @@ function showLoggerUsageOnce(){
 
 function sendToConsole(
   method: (...data: any[]) => void, msg: string){
-    
+    method(msg);
 }
 
 function getTimeString(now: Date = new Date()): string {
@@ -48,7 +49,7 @@ function getTimeString(now: Date = new Date()): string {
     sM = sM.slice(sM.length - 2);
     
     let sS = "00" + S;
-    sS = sS.slice(sH.length - 2);
+    sS = sS.slice(sS.length - 2);
     
     let sMS = MS + "000";
     sMS = sMS.slice(0,3);
@@ -69,6 +70,14 @@ enum LoggingLevel {
     DEBUG = 4,
     TRACE = 5,
     VERBOSE = 6,
+}
+
+function getLoggingLevelName(code: LoggingLevel){
+    for (const key of Object.keys(LoggingLevel))
+        //@ts-ignore
+        if (LoggingLevel[key] === code)
+            return key;
+    return "LOG";
 }
 
 export const LoggingNameMappings = {
@@ -128,7 +137,7 @@ function transferHolder(msg: string, replacer: any[]){
 }
 
 function sendLogText(level: string, msg: string, rps: any[], time: Date, ignoreLevel = false){
-    const shouldSendToConsole = ignoreLevel || config.getBoolean("selogging.outputToConsole");
+    const shouldSendToConsole = ignoreLevel || config.getBoolean("logging.outputToConsole");
     
     const players = Array.from( //我们对旧版有良好的兼容性！（翻译：就是想用，你打我啊）
       VanillaWorld.getPlayers({ tags: [ config.getString("logging.playerConsoleSpecificTag", "yoni:console") ] })
@@ -216,7 +225,8 @@ export class Logger {
             msg = "";
         }
         msg = `[${this.name}]: ${msg}`;
-        sendLogText(lv, msg, rps, time);
+        //@ts-ignore
+        sendLogText(getLoggingLevelName(LoggingNameMappings[lv]), msg, rps, time);
     }
         
     addLevelLogFunc(level: string, levelCode: LoggingLevel){

@@ -1,6 +1,8 @@
-import { VanillaWorld, overworld } from "../basis.js";
-import { Command } from "../command.js";
-import { dealWithCmd } from "../lib/utils.js";
+import { VanillaWorld, overworld } from "./basis.js";
+import { Command } from "./command.js";
+import { dealWithCmd } from "./lib/commandutils.js";
+
+export { log } from "./util/Logger.js";
 
 export async function say(msg = "", displayNameOrSender="commands.origin.script"){
     let runner;
