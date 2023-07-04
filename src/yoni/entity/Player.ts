@@ -22,10 +22,6 @@ class Player extends Entity {
         return MinecraftEntityTypes.player;
     }
     
-    get inventory(){
-        return EntityBase.getInventory(this);
-    }
-    
     get [Symbol.toStringTag](){
         let player = <YoniPlayer><unknown>this;
         if (player instanceof Player)
@@ -42,6 +38,10 @@ class Player extends Entity {
         return player.level;
     }
     
+    getItemInMainHand(): Minecraft.ItemStack {
+        return EntityBase.getItemInMainHand(this);
+    }
+
     /**
      * 设置玩家的经验等级。
      * @param {number} level
