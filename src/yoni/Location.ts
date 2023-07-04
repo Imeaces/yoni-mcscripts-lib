@@ -238,7 +238,7 @@ class Location implements ILocation {
             const { dimension, x, y, z, rx, ry } = values[0];
             this.#x = x;
             this.#y = y;
-            this.#x = x;
+            this.#z = z;
             this.#rx = rx;
             this.#ry = ry;
             this.#dimension = dimension;
