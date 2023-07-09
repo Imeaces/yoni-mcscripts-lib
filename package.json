@@ -1,16 +1,14 @@
 {
   "dependencies": {
     "@minecraft/server": "1.4.0-beta.1.20.10-preview.21",
-    "@minecraft/server-gametest": "1.0.0-beta.1.20.10-preview.21",
-    "@minecraft/server-ui": "1.1.0-beta.1.20.10-preview.21",
-    "@minecraft/vanilla-data": "1.20.10-preview.21"
+    "@minecraft/server-gametest": "1.0.0-beta.1.20.10-preview.21"
   },
   "devDependencies": {
     "typescript": "4.9.3"
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "0.11.1-beta",
+  "version": "0.11.2-dev.1",
   "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
