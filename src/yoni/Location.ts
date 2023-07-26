@@ -202,6 +202,67 @@ export class Location {
     
     //魔法代码，用于快速复制Location对象
     static #magicCloneSymbol = {x: 0, y: 0, z: 0};
+    
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotationX: number, rotationY: number);
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Vector2);
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Rotation);
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: RotationArray);
+    constructor(dimension: DimensionLikeValue, x: number, y: number, z: number);
+    
+    constructor(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotationX: number, rotationY: number);
+    constructor(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: Vector2);
+    constructor(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: Rotation);
+    constructor(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: RotationArray);
+    constructor(positionInfoArray: [DimensionLikeValue, ...CoordsArray]);
+    
+    constructor(position: DimensionPosition, rotationX: number, rotationY: number);
+    constructor(position: DimensionPosition, rotation: Vector2);
+    constructor(position: DimensionPosition, rotation: Rotation);
+    constructor(position: DimensionPosition, rotation: RotationArray);
+    constructor(position: DimensionPosition);
+
+    constructor(position: PositionInfo, rotationX: number, rotationY: number);
+    constructor(position: PositionInfo, rotation: Vector2);
+    constructor(position: PositionInfo, rotation: Rotation);
+    constructor(position: PositionInfo, rotation: RotationArray);
+    constructor(position: PositionInfo);
+
+    constructor(dimension: DimensionLikeValue, coords: CoordsArray, rotationX: number, rotationY: number);
+    constructor(dimension: DimensionLikeValue, coords: CoordsArray, rotation: Vector2);
+    constructor(dimension: DimensionLikeValue, coords: CoordsArray, rotation: Rotation);
+    constructor(dimension: DimensionLikeValue, coords: CoordsArray, rotation: RotationArray);
+    constructor(dimension: DimensionLikeValue, coords: CoordsArray);
+
+    constructor(dimension: DimensionLikeValue, coords: Coords, rotationX: number, rotationY: number);
+    constructor(dimension: DimensionLikeValue, coords: Coords, rotation: Vector2);
+    constructor(dimension: DimensionLikeValue, coords: Coords, rotation: Rotation);
+    constructor(dimension: DimensionLikeValue, coords: Coords, rotation: RotationArray);
+    constructor(dimension: DimensionLikeValue, coords: Coords);
+
+    constructor(locationInfo: LocationInfo);
+
+    constructor(positionPointInfo: PositionPointInfo);
+
+    constructor(x: number, y: number, z: number, rotationX: number, rotationY: number);
+    constructor(x: number, y: number, z: number, rotation: Vector2);
+    constructor(x: number, y: number, z: number, rotation: Rotation);
+    constructor(x: number, y: number, z: number, rotation: RotationArray);
+    constructor(x: number, y: number, z: number);
+    
+    constructor(coordsArray: CoordsArray, rotationX: number, rotationY: number);
+    constructor(coordsArray: CoordsArray, rotation: Vector2);
+    constructor(coordsArray: CoordsArray, rotation: Rotation);
+    constructor(coordsArray: CoordsArray, rotation: RotationArray);
+    constructor(coordsArray: CoordsArray);
+    
+    constructor(coords: Coords, rotationX: number, rotationY: number);
+    constructor(coords: Coords, rotation: Vector2);
+    constructor(coords: Coords, rotation: Rotation);
+    constructor(coords: Coords, rotation: RotationArray);
+    constructor(coords: Coords);
+
+    constructor(locationPointInfoArray: [ ...CoordsArray, ...RotationArray ]);
+    constructor(uncertainOneParam: LocationParamsOneArg);
     /**
      * 创建一个代表MC中特定位置的对象。其中包括维度，坐标，旋转角。
      
@@ -470,6 +531,66 @@ export class Location {
         return new Location(JSON.parse(v) as unknown as LocationParamsOneArg);
     }
     
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Vector2): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Rotation): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number): Readonly<Location>;
+    
+    static createReadonly(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: Vector2): Readonly<Location>;
+    static createReadonly(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: Rotation): Readonly<Location>;
+    static createReadonly(positionInfoArray: [DimensionLikeValue, ...CoordsArray], rotation: RotationArray): Readonly<Location>;
+    static createReadonly(positionInfoArray: [DimensionLikeValue, ...CoordsArray]): Readonly<Location>;
+    
+    static createReadonly(position: DimensionPosition, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(position: DimensionPosition, rotation: Vector2): Readonly<Location>;
+    static createReadonly(position: DimensionPosition, rotation: Rotation): Readonly<Location>;
+    static createReadonly(position: DimensionPosition, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(position: DimensionPosition): Readonly<Location>;
+
+    static createReadonly(position: PositionInfo, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(position: PositionInfo, rotation: Vector2): Readonly<Location>;
+    static createReadonly(position: PositionInfo, rotation: Rotation): Readonly<Location>;
+    static createReadonly(position: PositionInfo, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(position: PositionInfo): Readonly<Location>;
+
+    static createReadonly(dimension: DimensionLikeValue, coords: CoordsArray, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: CoordsArray, rotation: Vector2): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: CoordsArray, rotation: Rotation): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: CoordsArray, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: CoordsArray): Readonly<Location>;
+
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotation: Vector2): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotation: Rotation): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(dimension: DimensionLikeValue, coords: Coords): Readonly<Location>;
+
+    static createReadonly(locationInfo: LocationInfo): Readonly<Location>;
+
+    static createReadonly(positionPointInfo: PositionPointInfo): Readonly<Location>;
+
+    static createReadonly(x: number, y: number, z: number, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number, rotation: Vector2): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number, rotation: Rotation): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(x: number, y: number, z: number): Readonly<Location>;
+    
+    static createReadonly(coordsArray: CoordsArray, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(coordsArray: CoordsArray, rotation: Vector2): Readonly<Location>;
+    static createReadonly(coordsArray: CoordsArray, rotation: Rotation): Readonly<Location>;
+    static createReadonly(coordsArray: CoordsArray, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(coordsArray: CoordsArray): Readonly<Location>;
+    
+    static createReadonly(coords: Coords, rotationX: number, rotationY: number): Readonly<Location>;
+    static createReadonly(coords: Coords, rotation: Vector2): Readonly<Location>;
+    static createReadonly(coords: Coords, rotation: Rotation): Readonly<Location>;
+    static createReadonly(coords: Coords, rotation: RotationArray): Readonly<Location>;
+    static createReadonly(coords: Coords): Readonly<Location>;
+
+    static createReadonly(locationPointInfoArray: [ ...CoordsArray, ...RotationArray ]): Readonly<Location>;
+    static createReadonly(uncertainOneParam: LocationParamsOneArg): Readonly<Location>;
     /**
      * 创建一个只读的Location对象。
      * @returns {Readonly<Location>}
@@ -625,6 +746,16 @@ function requireBlockObject(argc: 1, args: any[]){
     let { dimension } = block;
     return requireVector3Object(1, [block])
       && requireDimensionValue(1, [dimension]);
+}
+
+function requireObjectWithPositionAndRotationObject(argc: 1, args: any[]){
+    const object = args[0];
+    let { location, rotation } = object;
+    if (!rotation)
+        rotation = object.getRotation();
+    
+    return requireVector3Object(1, [location])
+      && requireVector2Object(1, [rotation]);
 }
 
 // seq 1
@@ -931,6 +1062,21 @@ overrides.addOverrides(
         const rx = rotation.x;
         const ry = rotation.y;
         return { dimension, x, y, z, rx, ry };
+    }
+);
+overrides.addOverrides(
+    [
+        { argc: 1, condition: requireObjectWithPositionAndRotationObject }
+    ],
+    function (args: any[]){
+        const entity = args[0];
+        let { location, rotation } = entity;
+        if (! rotation)
+            rotation = entity.getRotation();
+        const { x, y, z } = location;
+        const rx = rotation.x;
+        const ry = rotation.y;
+        return { x, y, z, rx, ry };
     }
 );
 
@@ -1355,8 +1501,10 @@ export interface DimensionPosition extends Position {
     dimension: DimensionLikeValue;
 }
 export type LocationInfo = (RotationGetter & DimensionPosition)
-    | ( DimensionPosition & { rotation: Vector2 });
-    
+    | ( Position & { rotation: Vector2 });
+export type PositionPointInfo = (RotationGetter & DimensionPosition)
+    | ( Position & { rotation: Vector2 });
+
 export interface PositionInfo extends Coords {
     dimension: DimensionLikeValue;
 }
@@ -1411,6 +1559,8 @@ type LocationParams =
     
     | [ LocationInfo ]
     
+    | [ PositionPointInfo ]
+    
     | [ ...CoordsArray, ...RotationArray ]
     | [ ...CoordsArray, RotationArray ]
     | [ ...CoordsArray, Rotation ]
@@ -1428,7 +1578,7 @@ type LocationParams =
     | [ Coords ]
     
     | [ [ ...CoordsArray, ...RotationArray ] ]
-    | [ LocationParamsOneArg ]
+    | [ LocationParamsOneArg ] /* 为了让ts识别的轻松一点 */
 
 export type LocationParamsOneArg = 
     [DimensionLikeValue, ...CoordsArray]
@@ -1447,3 +1597,5 @@ function makeLocation(values: LocationParams){
     
     return overrideMathces.result;
 }
+
+
