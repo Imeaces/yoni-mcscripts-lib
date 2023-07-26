@@ -1,6 +1,6 @@
 import { Entry } from "./Entry.js";
 import { Minecraft } from "../basis.js";
-import { EntityValue } from "../entity/EntityTypeDefs.js";
+import { EntityValue } from "../entity/EntityTypeDefs";
 
 /**
  * 可以被作为分数持有者的类型。

@@ -566,4 +566,3 @@ class Objective {
 }
 
 export { Objective, ScoreInfo };
-export default Objective;

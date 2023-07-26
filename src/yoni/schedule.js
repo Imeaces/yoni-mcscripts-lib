@@ -436,8 +436,6 @@ export class YoniScheduler {
     }
 }
 
-export default YoniScheduler;
-
 //对于异常挂断的特殊处理，但是不知道有没有用
 MinecraftSystem.beforeEvents.watchdogTerminate.subscribe((event)=>{
     if (executingSchedule !== null){

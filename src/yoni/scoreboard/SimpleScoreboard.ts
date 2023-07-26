@@ -7,7 +7,7 @@ import {
     // ObjectiveUnregisteredError,
     // UnknownEntryError,
 } from "./ScoreboardError.js"
-import Objective from "./Objective.js";
+import { Objective } from "./Objective.js";
 import { Entry, EntryType } from "./Entry.js";
 import { EntryValueType } from "./EntryType.js";
 
@@ -382,5 +382,3 @@ export class SimpleScoreboard {
         }
     }
 }
-
-export default SimpleScoreboard;

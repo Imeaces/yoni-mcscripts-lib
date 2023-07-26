@@ -25,11 +25,11 @@ export * as YoniUtils from "./utils.js";
 export { Command } from "./command.js";
 export { Scoreboard } from "./scoreboard.js";
 export { ChatCommand } from "./command/ChatCommand.js";
-export { EntityBase } from "./entity/EntityBase.js";
+export { EntityBase } from "./entity.js";
 export { YoniScheduler } from "./schedule.js";
 export { TPSCounter } from "./util/TPSCounter.js";
 export { ObjectUtils } from "./lib/ObjectUtils.js";
-export { Dimension } from "./dimension.js";
+export { Dimension }from "./dimension.js";
 export { Block } from "./block.js";
 
 // class exports
@@ -38,23 +38,11 @@ export { Logger } from "./util/Logger.js";
 export { Config } from "./util/Config.js";
 export { Location } from "./Location.js";
 export { UUID } from "./util/UUID.js";
-
-// type exports
-export {
-    YoniEntity,
-    YoniPlayer,
-    YoniSimulatedPlayer,
-} from "./entity.js";
-export {
-  Vector3,
-  DimensionLikeValue
-} from "./Location.js";
 export {
   Entry,
   Objective,
 } from "./scoreboard.js";
 export { YoniWorld } from "./world.js";
-export { YoniDimension } from "./dimension.js";
 export { YoniBlock } from "./block.js";
 
 // enum

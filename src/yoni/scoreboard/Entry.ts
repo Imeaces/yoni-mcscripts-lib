@@ -1,8 +1,7 @@
 import { VanillaScoreboard, Minecraft, Gametest } from "../basis.js";
 import { EntityBase } from "../entity/EntityBase.js";
 import { EntityValue } from "../entity/EntityTypeDefs.js";
-import Entity from "../entity/Entity.js";
-import Player from "../entity/Player.js";
+import { YoniEntity } from "../entity/Entity.js";
 import { UnknownEntryError } from "./ScoreboardError.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 
@@ -329,7 +328,7 @@ class Entry {
      * @returns {Entity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
      */
     getEntity(){
-        return EntityBase.from(this.getVanillaEntity()) as unknown as Entity;
+        return EntityBase.from(this.getVanillaEntity()) as unknown as YoniEntity;
     }
     
     /**
@@ -450,7 +449,6 @@ class Entry {
 }
 
 export { Entry, EntryType };
-export default Entry;
 
 if (config.getBoolean("useOptionalFasterCode")){
     optionalFasterCode();

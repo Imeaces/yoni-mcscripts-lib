@@ -1,5 +1,5 @@
-import { Minecraft } from "./basis.js";
-import Location from "./Location.js";
+import Minecraft from "./minecraft.js";
+import { Location } from "./Location.js";
 import { Dimension } from "./dimension.js";
 
 class Block {
@@ -251,4 +251,3 @@ class Block {
 }
 
 export { Block, Block as YoniBlock };
-export default Block;

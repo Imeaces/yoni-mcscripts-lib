@@ -1,55 +1,47 @@
 import { VanillaWorld, Minecraft } from "./basis.js";
 
-import {
-    Location,
-    LocationParamsOneArg,
-    DimensionLikeValue,
-    Vector3 } from "./Location.js";
+import { Location } from "./Location.js";
 
-import { Block } from "./block.js";
+import { YoniEntity, YoniPlayer } from "./entity.js";
+
+import { LocationParamsOneArg, Vector3 } from "./Location.js";
+import { DimensionLikeValue } from "./dim.js";
+
+import { YoniBlock, Block } from "./block.js";
 import { EntityBase } from "./entity/EntityBase.js";
 import { Command } from "./command.js";
 
 import { DimensionValues } from "./dim.js";
 
-import { Entity, YoniEntity } from "./entity/Entity.js";
-import { Player, YoniPlayer } from "./entity/Player.js";
-import { debug } from "./config.js";
-
-class Dimension {
-    static #dimMap = new WeakMap();
+export class Dimension {
+    static #dimensionMappings = new Map();
     
-    static dim(dimid: DimensionLikeValue): Dimension {
-        let dim: Minecraft.Dimension | null = null;
+    static toDimension(dimid: DimensionLikeValue): YoniDimension {
+        let vanilla: Minecraft.Dimension | null = null;
         if (typeof dimid === "string" || typeof dimid === "number"){
-            dim = DimensionValues[dimid];
-            if (dim == null){
-                try {
-                    // @ts-ignore
-                    dim = VanillaWorld.getDimension(dimid);
-                } catch (e){
-                    // @ts-ignore
-                    throw new Error(e);
-                }
+            vanilla = DimensionValues[dimid];
+            if (vanilla == null){
+                //此处可能抛出错误，如果参数错误的话
+                vanilla = VanillaWorld.getDimension(dimid as string);
             }
         } else if (dimid instanceof Dimension){
-            return dimid;
+            return dimid as YoniDimension;
         } else if (dimid instanceof Minecraft.Dimension){
-            dim = dimid;
+            vanilla = dimid;
         }
         
-        if (dim == null){
+        if (vanilla == null){
             throw new Error("specific identifier doesn't refer to a dimension");
         }
-        let dimV = Dimension.#dimMap.get(dim);
-        if (dimV === undefined){
-            dimV = new Dimension(dim);
-            Dimension.#dimMap.set(dim, dimV);
+        let result = Dimension.#dimensionMappings.get(vanilla);
+        if (result === undefined){
+            result = new Dimension(vanilla);
+            Dimension.#dimensionMappings.set(vanilla, result);
         }
-        return dimV;
+        return result;
     }
 
-    static isDimension(object: any): object is (Minecraft.Dimension | Dimension){
+    static isDimension(object: any): object is (Minecraft.Dimension | YoniDimension | Dimension){
         return object instanceof Minecraft.Dimension || object instanceof Dimension;
     }
     
@@ -66,7 +58,7 @@ class Dimension {
      * @hideconstructor
      * @param {Minecraft.Dimension}
      */
-    constructor(vanillaDimension: Minecraft.Dimension){
+    protected constructor(vanillaDimension: Minecraft.Dimension){
         Object.defineProperty(this, "vanillaDimension", {
             configurable: false,
             enumerable: false,
@@ -96,7 +88,7 @@ class Dimension {
      * Block at the specified location.
      * @throws This function can throw errors.
      */
-    getBlock(location: LocationParamsOneArg): Block {
+    getBlock(location: LocationParamsOneArg): YoniBlock {
         let loc: Location;
         if (location instanceof Location){
             loc = location;
@@ -106,70 +98,8 @@ class Dimension {
         let vanillaBlock = this.vanillaDimension.getBlock(loc.getVanillaBlockLocation());
         if (vanillaBlock)
             return Block.from(vanillaBlock);
-        else if (debug)
-            throw new Error("This location has not been loaded\n"+loc.toString());
         else
-            throw new Error("This location has not been loaded");
-    }
-    /**
-     * @beta
-     * @remarks
-     * Creates an explosion at the specified location.
-     * @param location
-     * The location of the explosion.
-     * @param radius
-     * Radius, in blocks, of the explosion to create.
-     * @param explosionOptions
-     * Additional configurable options for the explosion.
-     * @throws This function can throw errors.
-     * @example createExplosion.ts
-     * ```typescript
-     *          overworld.createExplosion(targetLocation, 10, new mc.ExplosionOptions());
-     * ```
-     * @example createFireAndWaterExplosions.ts
-     * ```typescript
-     *        const explosionLoc: mc.Vector3 = { x: targetLocation.x + 0.5, y: targetLocation.y + 0.5, z: targetLocation.z + 0.5 };
-     *
-     *        const fireExplosionOptions = new mc.ExplosionOptions();
-     *
-     *        // Explode with fire
-     *        fireExplosionOptions.causesFire = true;
-     *
-     *        overworld.createExplosion(explosionLoc, 15, fireExplosionOptions);
-     *        const waterExplosionOptions = new mc.ExplosionOptions();
-     *
-     *        // Explode in water
-     *        waterExplosionOptions.allowUnderwater = true;
-     *
-     *        const belowWaterLoc: mc.Vector3 = { x: targetLocation.x + 3, y: targetLocation.y + 1, z: targetLocation.z + 3 };
-     *
-     *        overworld.createExplosion(belowWaterLoc, 10, waterExplosionOptions);
-     *
-     * ```
-     * @example createNoBlockExplosion.ts
-     * ```typescript
-     *        const explosionOptions = new mc.ExplosionOptions();
-     *
-     *        // Start by exploding without breaking blocks
-     *        explosionOptions.breaksBlocks = false;
-     *
-     *        const explodeNoBlocksLoc: mc.Vector3 = {
-     *          x: Math.floor(targetLocation.x + 1),
-     *          y: Math.floor(targetLocation.y + 2),
-     *          z: Math.floor(targetLocation.z + 1),
-     *        };
-     *
-     *        overworld.createExplosion(explodeNoBlocksLoc, 15, explosionOptions);
-     *
-     * ```
-     */
-    createExplosion(location: Vector3, radius: number, explosionOptions?: Minecraft.ExplosionOptions): void {
-        //@ts-ignore
-        return this.vanillaDimension.createExplosion.apply(this.vanillaDimension, arguments);
-    }
-    fillBlocks(begin: Vector3, end: Vector3, block: Minecraft.BlockPermutation | Minecraft.BlockType, options?: Minecraft.BlockFillOptions): number {
-        //@ts-ignore
-        return this.vanillaDimension.fillBlocks.apply(this.vanillaDimension, arguments);
+            throw new Error("This location has not been loaded\n"+loc.toString());
     }
     /**
      * @beta
@@ -182,9 +112,9 @@ class Dimension {
      * Additional options for processing this raycast query.
      * @throws This function can throw errors.
      */
-    getBlockFromRay(location: Vector3, direction: Vector3, options?: Minecraft.BlockRaycastOptions): Block {
+    getBlockFromRay(location: Vector3, direction: Vector3, options?: Minecraft.BlockRaycastOptions): YoniBlock {
         //@ts-ignore
-        return Block.from(this.vanillaDimension.getBlockFromRay.apply(this.vanillaDimension, arguments));
+        return Block.from(this.vanillaDimension.getBlockFromRay.apply(this.vanillaDimension, arguments)) ?? null;
     }
     /**
      * @beta
@@ -259,32 +189,12 @@ class Dimension {
      * A player array.
      * @throws This function can throw errors.
      */
-    * getPlayers(getPlayers?: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
+    getPlayers(getPlayers?: Minecraft.EntityQueryOptions): YoniPlayer[] {
         //@ts-ignore
-        for (let pl of this.vanillaDimension.getPlayers.apply(this.vanillaDimension, arguments)){
-            yield EntityBase.from(pl) as YoniPlayer;
-        }
-    }
-    /**
-     * @remarks
-     * Runs a particular command asynchronously from the context of
-     * the broader dimension.  Note that there is a maximum queue
-     * of 128 asynchronous commands that can be run in a given
-     * tick.
-     * @param commandString
-     * Command to run. Note that command strings should not start
-     * with slash.
-     * @returns
-     * For commands that return data, returns a CommandResult with
-     * an indicator of command results.
-     * @throws This function can throw errors.
-     */
-    runCommandAsync(commandString: string): Promise<Minecraft.CommandResult> {
-        //@ts-ignore
-        return this.vanillaDimension.runCommandAsync.apply(this.vanillaDimension, arguments);
+        return this.vanillaDimension.getPlayers.apply(this.vanillaDimension, arguments).map(EntityBase.from);
     }
     fetchCommand(commandString: string){
-        return Command.fetchExecute(this, commandString);
+        return Command.fetchExecute(this.vanillaDimension, commandString);
     }
     /**
      * @beta
@@ -401,5 +311,5 @@ class Dimension {
     }
 }
 
-export { Dimension, Dimension as YoniDimension };
-export default Dimension;
+type BaseVanillaDimensionClass = Omit<Minecraft.Dimension, keyof Dimension>;
+export type YoniDimension = Dimension & BaseVanillaDimensionClass;

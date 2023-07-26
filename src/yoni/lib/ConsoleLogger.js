@@ -9,5 +9,3 @@ export class ConsoleLogger {
     static error = globalThis.console.error?.bind(globalThis.console);
     static fatal = globalThis.console.fatal?.bind(globalThis.console);
 }
-
-export default ConsoleLogger;

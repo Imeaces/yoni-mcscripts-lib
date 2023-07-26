@@ -36,10 +36,15 @@ export function fromValueGetDimension(value){
  */
 export function getAllDims(){ 
     return [dim(0), dim(1), dim(-1)];
-    let ks = getKeys(Object.getPrototypeOf(Minecraft.MinecraftDimensionTypes));
-    return Object.getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
-        .filter(k => {
-            return false == k.includes(ks);
-        })
-        .map(dimid => VanillaWorld.getDimension(dimid));
 }
+
+import { Dimension } from "./dimension.js";
+export type NetherDimensionLikeValue = -1 | 'minecraft:nether' | 'nether';
+export type OverworldDimensionLikeValue = 0 | 'minecraft:overworld' | 'overworld';
+export type TheEndDimensionLikeValue = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
+export type DimensionLikeValue =
+    NetherDimensionLikeValue
+    | OverworldDimensionLikeValue
+    | TheEndDimensionLikeValue
+    | Minecraft.Dimension
+    | Dimension;

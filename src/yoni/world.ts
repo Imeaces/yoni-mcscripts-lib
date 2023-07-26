@@ -1,12 +1,11 @@
 import { VanillaWorld, Minecraft } from "./basis.js";
 import { getAllDims } from "./dim.js";
 import { EntityBase } from "./entity.js";
-import Scoreboard from "./scoreboard.js";
+import { Scoreboard } from "./scoreboard.js";
 import { Dimension } from "./dimension.js";
 import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
-import { YoniEntity } from "./entity/Entity.js";
-import { YoniPlayer } from "./entity/Player.js";
+import { YoniEntity, YoniPlayer } from "./entity.js";
 
 export class World {
     static isWorld(object: any){
@@ -57,7 +56,7 @@ export class World {
      */
     getDimension(dimid: string|number){
         //@ts-ignore
-        return Dimension.dim(dimid);
+        return Dimension.toDimension(dimid);
     }
     
     /**
@@ -97,6 +96,6 @@ export class World {
 
 copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanillaWorld");
 
-export type YoniWorld = World & Minecraft.World;
+export type YoniWorld = World & Omit<Minecraft.World, keyof World>;
 
 export const world = new World(VanillaWorld) as unknown as YoniWorld;

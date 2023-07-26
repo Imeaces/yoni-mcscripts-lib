@@ -126,6 +126,5 @@ class Trigger implements IEventTrigger {
     }
 }
 
-export default Trigger;
 export { Trigger };
 export { Trigger as EventTrigger };

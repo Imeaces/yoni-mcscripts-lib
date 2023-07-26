@@ -6,7 +6,7 @@ import { dealWithCmd as JSONModifier_dealWithCmd } from "../lib/commandutils.js"
 
 import { config } from "../config.js";
 import { setDebugFunction } from '../debug.js';
-import ConsoleLogger from "../lib/ConsoleLogger.js";
+import { ConsoleLogger } from "../lib/ConsoleLogger.js";
 
 async function sendMessageTo(receiver: AsyncCommandSender, message: string){
     let rawtext = JSON.stringify({rawtext:[{text: message}]}, JSONModifier_dealWithCmd);

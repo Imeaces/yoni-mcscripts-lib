@@ -9,4 +9,3 @@ export class Event {
         Object.assign(this, ...values);
     }
 }
-export default Event;

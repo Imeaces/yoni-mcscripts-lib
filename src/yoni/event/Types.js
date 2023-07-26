@@ -248,7 +248,6 @@ export const events = new Proxy({}, {
         return Array.from(new Set(defaultKeys.concat(typeKeys)));
     }
 });
-export default Types;
 export { Types };
 export { Types as EventTypes };
 export { EventRegisterListener };

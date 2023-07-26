@@ -1,6 +1,7 @@
 import Minecraft from "./minecraft.js";
-import Dimension from "./dimension.js";
-import Block from "./block.js";
+import { Dimension, YoniDimension } from "./dimension.js";
+import { Block, YoniBlock } from "./block.js";
+import { DimensionLikeValue } from "./dim.js";
 
 function getFiniteNumber(v: any): number {
     v = Number(v);
@@ -51,7 +52,7 @@ export class Location {
     }
     
     // @ts-ignore
-    #dimension: Dimension = null;
+    #dimension: YoniDimension = null;
     
     #x: number = NaN;
     #y: number = NaN;
@@ -90,6 +91,7 @@ export class Location {
         this.#z = getFiniteNumber(z);
         return this;
     }
+    setPosition(coords: Coords): void;
     /**
      * 设置此位置对应的坐标。
      * @param x
@@ -97,7 +99,14 @@ export class Location {
      * @param z
      * @returns 返回此位置本身。
      */
-    setPosition(x: number, y: number, z: number){
+    setPosition(x: number, y: number, z: number): void;
+    setPosition(...args: [ Coords ] | [ ...CoordsArray ]){
+        let x: number, y: number, z: number;
+        if (args.length === 1)
+            ({x, y, z} = args[0]);
+        else
+            ([x, y, z] = args);
+        
         this.x = x;
         this.y = y;
         this.z = z;
@@ -122,13 +131,32 @@ export class Location {
         this.#ry = Location.normalizeYaw(ry);
         return this;
     }
+    setRotation(rotation: Vector2): void;
+    /**
+     * 设置此位置对应的旋转角。
+     * @param rx
+     * @param ry
+     * @returns 返回此位置本身。
+     */
+    setRotation(rx: number, ry: number): void;
+    setRotation(...args: [ Vector2 ] | [ ...RotationArray ]){
+        let x: number, y: number;
+        if (args.length === 1)
+            ({x, y} = args[0]);
+        else
+            ([x, y] = args);
+        
+        this.rx = x;
+        this.ry = y;
+        return this;
+    }
     /**
      * 设置此位置所在的维度
      * @param dim
      */
     setDimension(dim: DimensionLikeValue){
         Location.#checkReadOnly(this);
-        this.#dimension = Dimension.dim(dim);
+        this.#dimension = Dimension.toDimension(dim);
         return this;
     }
     
@@ -165,7 +193,7 @@ export class Location {
     /**
      * 此位置所处的维度。
      */
-    get dimension(): Dimension {
+    get dimension(): YoniDimension {
         return this.#dimension;
     }
     set dimension(dim){
@@ -302,7 +330,7 @@ export class Location {
     /**
      * @returns 此位置上的方块。
      */
-    getBlock(): Block {
+    getBlock(): YoniBlock {
         return this.dimension.getBlock(this);
     }
     getBlockX(){
@@ -421,7 +449,7 @@ export class Location {
         let dimension = this.dimension.id;
         return { x, y, z, rx, ry, dimension };
     }
-    static fromBlock(block: Minecraft.Block | Block){
+    static fromBlock(block: Minecraft.Block | YoniBlock){
         return new Location(block.dimension, block.x, block.y, block.z, 0, 0);
     }
     
@@ -1344,7 +1372,7 @@ export interface RotationGetter {
 export type CoordsArray = Vector3Array;
 export type RotationArray = Vector2Array;
 
-export type LocationParams = 
+type LocationParams = 
     [ DimensionLikeValue, ...CoordsArray, ...RotationArray ]
     | [ DimensionLikeValue, ...CoordsArray, RotationArray ]
     | [ DimensionLikeValue, ...CoordsArray, Rotation ]
@@ -1410,18 +1438,6 @@ export type LocationParamsOneArg =
     | CoordsArray
     | Coords
     | [ ...CoordsArray, ...RotationArray ]
-
-export type NetherDimensionLikeValue = -1 | 'minecraft:nether' | 'nether';
-export type OverworldDimensionLikeValue = 0 | 'minecraft:overworld' | 'overworld';
-export type TheEndDimensionLikeValue = 1 | 'minecraft:the_end' | 'the_end' | 'theEnd' | 'the end';
-export type DimensionLikeValue =
-    NetherDimensionLikeValue
-    | OverworldDimensionLikeValue
-    | TheEndDimensionLikeValue
-    | Minecraft.Dimension
-    | Dimension;
-
-export default Location;
 
 function makeLocation(values: LocationParams){
     let overrideMathces = overrides.match(values);

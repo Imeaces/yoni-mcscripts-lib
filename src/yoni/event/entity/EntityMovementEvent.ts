@@ -1,11 +1,9 @@
 import { EventSignal, EventTriggerBuilder } from "../../event.js";
 import { EntityEvent } from "./EntityEvent.js";
-import { EntityValue } from "../../entity/EntityTypeDefs.js";
-import { EntityBase } from "../../entity.js";
-import { YoniEntity } from "../../entity.js";
+import { EntityValue, EntityBase, YoniEntity } from "../../entity.js";
 import { Location } from "../../Location.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
-import { world as World } from "../../world.js";
+import { world } from "../../world.js";
 import { logger } from "../logger.js";
 
 export class EntityMovementEventSignal extends EventSignal {
@@ -93,7 +91,7 @@ function getTargetEntities(): Iterable<YoniEntity> {
     const filters = getFilters();
     if (filters.size === 0
     || filters.has(null)){
-        return World.getLoadedEntities();
+        return world.getLoadedEntities();
     }
     
     const targets: YoniEntity[] = [];
@@ -117,7 +115,7 @@ function getTargetEntities(): Iterable<YoniEntity> {
                 if (typedEntities.has(entityType))
                     continue;
                 typedEntities.set(entityType, Array.from(
-                    World.selectEntities({
+                    world.selectEntities({
                         type: entityType
                     })
                 ));

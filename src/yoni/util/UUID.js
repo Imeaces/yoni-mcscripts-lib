@@ -69,7 +69,6 @@ class UUID {
     }
 }
 UUID.NIL_UUID = new UUID(UUID.NIL_UUID_STR, true);
-export default UUID;
 export { UUID };
 /*
 1 2089 2581 9614 6291 7470 6176n

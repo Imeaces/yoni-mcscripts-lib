@@ -174,6 +174,5 @@ class TriggerBuilder {
     }
 }
 
-export default TriggerBuilder;
 export { TriggerBuilder };
 export { TriggerBuilder as EventTriggerBuilder };

@@ -90,6 +90,5 @@ class Signal implements IEventSignal {
     }
 }
 
-export default Signal;
 export { Signal };
 export { Signal as EventSignal };

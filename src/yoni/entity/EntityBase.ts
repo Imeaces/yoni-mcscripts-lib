@@ -4,18 +4,16 @@ import {
     VanillaWorld,
 } from "../basis.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
-import { DimensionLikeValue } from "../Location.js";
 import { Dimension } from "../dimension.js";
 import { EntityValue } from "./EntityTypeDefs.js";
+import { DimensionLikeValue } from "../dim.js";
 
-import YoniEntity from "./Entity.js";
-
-import YoniPlayer from "./Player.js";
+import { YoniPlayer, YoniEntity, YoniSimulatedPlayer } from "../entity.js";
 
 /**
  * 代表一个实体
  */
-abstract class EntityBase {
+export abstract class EntityBase {
     
     /**
      * @type {Minecraft.Entity}
@@ -27,7 +25,7 @@ abstract class EntityBase {
      * @hideconstructor
      * @param {Minecraft.Entity} entity
      */
-    constructor(entity: Minecraft.Entity){
+    protected constructor(entity: Minecraft.Entity){
     
         if (!EntityClassRegistry.includesInSrcPrototype(Object.getPrototypeOf(entity)))
             throw new TypeError("no mapping for the object proto");
@@ -70,7 +68,7 @@ abstract class EntityBase {
      * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity: EntityValue): entity is (Minecraft.Player | YoniPlayer ) {
+    static entityIsPlayer(entity: EntityValue): entity is (Minecraft.Player | YoniPlayer) {
         entity = EntityBase.getMinecraftEntity(entity);
         if (entity instanceof Minecraft.Player)
             return true;
@@ -152,10 +150,10 @@ abstract class EntityBase {
         }
         
         if (!options){
-            return Dimension.dim(dimension).vanillaDimension.getEntities();
+            return Dimension.toDimension(dimension).vanillaDimension.getEntities();
         }
         
-        return Dimension.dim(dimension).vanillaDimension.getEntities(options);
+        return Dimension.toDimension(dimension).vanillaDimension.getEntities(options);
     }
     
     static getWorldPlayers(options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Player> {
@@ -364,5 +362,3 @@ abstract class EntityBase {
     }
     
 }
-
-export { EntityBase };

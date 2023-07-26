@@ -1,6 +1,6 @@
 import { Event } from "../../event.js";
 import { EntityBase } from "../../entity.js";
-import { EntityValue } from "../../entity/EntityTypeDefs.js";
+import { EntityValue } from "../../entity.js";
 
 export class EntityEvent extends Event {
     readonly entity;
