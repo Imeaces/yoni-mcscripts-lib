@@ -1,5 +1,5 @@
 import { VanillaWorld }  from "../basis.js";
-import { EntityBase, YoniPlayer } from "../entity.js";
+import { EntityBase } from "../entity.js";
 import { Logger } from "../util/Logger.js";
 
 const logger = new Logger("ChatCommand");

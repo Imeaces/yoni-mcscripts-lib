@@ -55,7 +55,7 @@ export class Player extends Entity {
      */
     setExperienceLevel(this: YoniPlayer, level: number){
         level = getNumber(level);
-        if (this.level !== level)
+        if (this.vanillaPlayer.level !== level)
             this.addLevels(level - this.experienceLevel);
     }
     
@@ -108,7 +108,7 @@ export class Player extends Entity {
         xpCount -= v0;
         this.addExperience(-v0);
   
-        while (xpCount > 0 && this.level > 0){
+        while (xpCount > 0 && this.vanillaPlayer.level > 0){
             this.addLevels(-1);
             xpCount -= this.totalXpNeededForNextLevel;
         }
@@ -132,6 +132,15 @@ export class Player extends Entity {
 copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity");
 EntityClassRegistry.register(Player, Minecraft.Player);
 
-type BaseVanillaPlayerClass = Omit<Omit<Minecraft.Player, keyof Minecraft.Entity>, keyof Player>;
+type BaseVanillaPlayerClass = Omit<
+    Omit<
+        Omit<
+            Minecraft.Player,
+            keyof Minecraft.Entity
+        >,
+        "level"
+    >,
+    keyof Player
+>;
 
 export type YoniPlayer = Player & YoniEntity & BaseVanillaPlayerClass;

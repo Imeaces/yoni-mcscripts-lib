@@ -1,7 +1,7 @@
 import Minecraft from "./minecraft.js";
 import { Dimension, YoniDimension } from "./dimension.js";
 import { Block, YoniBlock } from "./block.js";
-import { DimensionLikeValue } from "./dim.js";
+import { DimensionLikeValue, DimensionValues } from "./dim.js";
 
 function getFiniteNumber(v: any): number {
     v = Number(v);
@@ -203,6 +203,10 @@ export class Location {
     //魔法代码，用于快速复制Location对象
     static #magicCloneSymbol = {x: 0, y: 0, z: 0};
     
+    constructor(locationInfo: LocationInfo);
+
+    constructor(positionPointInfo: PositionPointInfo);
+
     constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotationX: number, rotationY: number);
     constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Vector2);
     constructor(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Rotation);
@@ -238,10 +242,6 @@ export class Location {
     constructor(dimension: DimensionLikeValue, coords: Coords, rotation: Rotation);
     constructor(dimension: DimensionLikeValue, coords: Coords, rotation: RotationArray);
     constructor(dimension: DimensionLikeValue, coords: Coords);
-
-    constructor(locationInfo: LocationInfo);
-
-    constructor(positionPointInfo: PositionPointInfo);
 
     constructor(x: number, y: number, z: number, rotationX: number, rotationY: number);
     constructor(x: number, y: number, z: number, rotation: Vector2);
@@ -531,6 +531,10 @@ export class Location {
         return new Location(JSON.parse(v) as unknown as LocationParamsOneArg);
     }
     
+    static createReadonly(locationInfo: LocationInfo): Readonly<Location>;
+
+    static createReadonly(positionPointInfo: PositionPointInfo): Readonly<Location>;
+
     static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotationX: number, rotationY: number): Readonly<Location>;
     static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Vector2): Readonly<Location>;
     static createReadonly(dimension: DimensionLikeValue, x: number, y: number, z: number, rotation: Rotation): Readonly<Location>;
@@ -566,10 +570,6 @@ export class Location {
     static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotation: Rotation): Readonly<Location>;
     static createReadonly(dimension: DimensionLikeValue, coords: Coords, rotation: RotationArray): Readonly<Location>;
     static createReadonly(dimension: DimensionLikeValue, coords: Coords): Readonly<Location>;
-
-    static createReadonly(locationInfo: LocationInfo): Readonly<Location>;
-
-    static createReadonly(positionPointInfo: PositionPointInfo): Readonly<Location>;
 
     static createReadonly(x: number, y: number, z: number, rotationX: number, rotationY: number): Readonly<Location>;
     static createReadonly(x: number, y: number, z: number, rotation: Vector2): Readonly<Location>;
@@ -660,7 +660,8 @@ import { FunctionParamsOverrides } from "./lib/FunctionParamsOverrides.js";
 
 const overrides = new FunctionParamsOverrides();
 function requireDimensionValue(argc: 1, args: any[]){
-    return args[0] instanceof Object;
+    const value = args[0];
+    return value && Dimension.isDimension(value) || (value in DimensionValues);
 }
 function requireVector3Object(argc: 1, args: any[]){
     const { x, y, z } = args[0];
@@ -704,59 +705,116 @@ function requireRotation(argc: 1, args: any[]){
 }
 
 function requireObjectWithDimensionAndCoords(argc: 1, args: any[]){
-    return requireDimensionValue(1, args[0].dimension)
-        && requireVector3Object(1, args[0].location);
+    return requireDimensionValue(1, [args[0].dimension])
+        && requireVector3Object(1, [args[0].location]);
 }
 
 
 function requireObjectWithDimensionAndVector3(argc: 1, args: any[]){
-    return requireDimensionValue(1, args[0].dimension)
-        && requireVector3Object(1, args[0]);
+    return requireDimensionValue(1, [args[0].dimension])
+        && requireVector3Object(1, args);
 }
 
 
 function requireArrayWithVector3AndVector2(argc: 1, args: any[]){
     const loc = args[0];
     
-    return requireVector3Array(1, Array.prototype.slice.call(args[0], 0, 3))
-    && requireVector2Array(1, Array.prototype.slice.call(args[0], 3, 2));
+    return requireVector3(3, Array.prototype.slice.call(args[0], 0, 3))
+    && requireVector2(2, Array.prototype.slice.call(args[0], 3, 2));
 }
 
 function requireArrayWithDimensionAndVector3(argc: 1, args: any[]){
     const loc = args[0];
     
     return requireDimensionValue(1, args[0])
-    && requireVector3Array(1, Array.prototype.slice.call(args[0], 1));
+    && requireVector3(3, Array.prototype.slice.call(args[0], 1, 3));
 }
-
-requireArrayWithDimensionAndVector3
 
 function requireEntityObject(argc: 1, args: any[]){
     const entity = args[0];
     let { location, dimension, rotation } = entity;
-    if (!rotation)
-        rotation = entity.getRotation();
+    if (!rotation && "function" === typeof entity.getRotation){
+        try {
+            rotation = entity.getRotation();
+        } catch {}
+    }
     
-    return requireVector3Object(1, [location])
+    return location && rotation && dimension
+      && requireVector3Object(1, [location])
       && requireVector2Object(1, [rotation])
       && requireDimensionValue(1, [dimension]);
 }
 function requireBlockObject(argc: 1, args: any[]){
     const block = args[0];
-    let { dimension } = block;
-    return requireVector3Object(1, [block])
-      && requireDimensionValue(1, [dimension]);
+    return block && block.dimension
+      && requireVector3Object(1, [block])
+      && requireDimensionValue(1, [block.dimension]);
 }
 
 function requireObjectWithPositionAndRotationObject(argc: 1, args: any[]){
     const object = args[0];
     let { location, rotation } = object;
-    if (!rotation)
-        rotation = object.getRotation();
+    if (!rotation && "function" === typeof object.getRotation){
+        try {
+            rotation = object.getRotation();
+        } catch {}
+    }
     
-    return requireVector3Object(1, [location])
+    return location && rotation
+      && requireVector3Object(1, [location])
       && requireVector2Object(1, [rotation]);
 }
+
+
+// seq 1 variant 4
+// high priority
+
+overrides.addOverrides(
+    [
+        { argc: 1, condition: requireEntityObject }
+    ],
+    function (args: any[]){
+        const entity = args[0];
+        let { location, dimension, rotation } = entity;
+        if (! rotation)
+            rotation = entity.getRotation();
+        const { x, y, z } = location;
+        const rx = rotation.x;
+        const ry = rotation.y;
+        return { dimension, x, y, z, rx, ry };
+    }
+);
+overrides.addOverrides(
+    [
+        { argc: 1, condition: requireObjectWithPositionAndRotationObject }
+    ],
+    function (args: any[]){
+        const entity = args[0];
+        let { location, rotation } = entity;
+        if (! rotation)
+            rotation = entity.getRotation();
+        const { x, y, z } = location;
+        const rx = rotation.x;
+        const ry = rotation.y;
+        return { x, y, z, rx, ry };
+    }
+);
+
+//see seq 1 variant 3 over 5
+//same to only requireArrayWithDimensionAndVector3
+/*
+
+overrides.addOverrides(
+    [
+        { argc: 1, condition: requireBlockObject }
+    ],
+    function (args: any[]){
+        const block = args[0];
+        const { dimension, x, y, z } = blcok;
+        return { dimension, x, y, z };
+    }
+);
+*/
 
 // seq 1
 
@@ -1046,55 +1104,6 @@ overrides.addOverrides(
         return { dimension, x, y, z };
     }
 );
-
-// seq 1 variant 4
-
-overrides.addOverrides(
-    [
-        { argc: 1, condition: requireEntityObject }
-    ],
-    function (args: any[]){
-        const entity = args[0];
-        let { location, dimension, rotation } = entity;
-        if (! rotation)
-            rotation = entity.getRotation();
-        const { x, y, z } = location;
-        const rx = rotation.x;
-        const ry = rotation.y;
-        return { dimension, x, y, z, rx, ry };
-    }
-);
-overrides.addOverrides(
-    [
-        { argc: 1, condition: requireObjectWithPositionAndRotationObject }
-    ],
-    function (args: any[]){
-        const entity = args[0];
-        let { location, rotation } = entity;
-        if (! rotation)
-            rotation = entity.getRotation();
-        const { x, y, z } = location;
-        const rx = rotation.x;
-        const ry = rotation.y;
-        return { x, y, z, rx, ry };
-    }
-);
-
-//see seq 1 variant 3 over 5
-//same to only requireArrayWithDimensionAndVector3
-/*
-
-overrides.addOverrides(
-    [
-        { argc: 1, condition: requireBlockObject }
-    ],
-    function (args: any[]){
-        const block = args[0];
-        const { dimension, x, y, z } = blcok;
-        return { dimension, x, y, z };
-    }
-);
-*/
 
 // seq 2
 
@@ -1387,8 +1396,8 @@ overrides.addOverrides(
         { argc: 1, condition: requireVector2Object }
     ],
     function (args: any[]){
-        const { x, y, z } = args[1];
-        const rotation = args[2];
+        const { x, y, z } = args[0];
+        const rotation = args[1];
         const rx = rotation.x;
         const ry = rotation.y;
         return { x, y, z, rx, ry };
@@ -1396,10 +1405,10 @@ overrides.addOverrides(
 );
 overrides.addOverrides(
     [
-        { argc: 3, condition: requireVector3Object }
+        { argc: 1, condition: requireVector3Object }
     ],
     function (args: any[]){
-        const { x, y, z } = args[1];
+        const { x, y, z } = args[0];
         return { x, y, z };
     }
 );
@@ -1469,10 +1478,10 @@ overrides.addOverrides(
 );
 overrides.addOverrides(
     [
-        { argc: 3, condition: requireVector3Array }
+        { argc: 1, condition: requireVector3Array }
     ],
     function (args: any[]){
-        const locarr = args[1];
+        const locarr = args[0];
         const x = locarr[0];
         const y = locarr[1];
         const z = locarr[2];
@@ -1501,8 +1510,8 @@ export interface DimensionPosition extends Position {
     dimension: DimensionLikeValue;
 }
 export type LocationInfo = (RotationGetter & DimensionPosition)
-    | ( Position & { rotation: Vector2 });
-export type PositionPointInfo = (RotationGetter & DimensionPosition)
+    | ( DimensionPosition & { rotation: Vector2 });
+export type PositionPointInfo = (RotationGetter & Position)
     | ( Position & { rotation: Vector2 });
 
 export interface PositionInfo extends Coords {
@@ -1521,7 +1530,11 @@ export type CoordsArray = Vector3Array;
 export type RotationArray = Vector2Array;
 
 type LocationParams = 
-    [ DimensionLikeValue, ...CoordsArray, ...RotationArray ]
+    [ LocationInfo ]
+    
+    | [ PositionPointInfo ]
+    
+    | [ DimensionLikeValue, ...CoordsArray, ...RotationArray ]
     | [ DimensionLikeValue, ...CoordsArray, RotationArray ]
     | [ DimensionLikeValue, ...CoordsArray, Rotation ]
     | [ DimensionLikeValue, ...CoordsArray, Vector2 ]
@@ -1556,10 +1569,6 @@ type LocationParams =
     | [ DimensionLikeValue, Coords, Rotation ]
     | [ DimensionLikeValue, Coords, Vector2 ]
     | [ DimensionLikeValue, Coords ]
-    
-    | [ LocationInfo ]
-    
-    | [ PositionPointInfo ]
     
     | [ ...CoordsArray, ...RotationArray ]
     | [ ...CoordsArray, RotationArray ]
@@ -1597,5 +1606,3 @@ function makeLocation(values: LocationParams){
     
     return overrideMathces.result;
 }
-
-

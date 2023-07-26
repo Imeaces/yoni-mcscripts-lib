@@ -14,9 +14,16 @@ import { Command } from "./command.js";
 import { DimensionValues } from "./dim.js";
 
 export class Dimension {
-    static #dimensionMappings = new Map();
+    static #dimensionMappings = new Map<any, YoniDimension>();
     
     static toDimension(dimid: DimensionLikeValue): YoniDimension {
+    
+        //使用缓存加快异型参数处理速度
+        let result = Dimension.#dimensionMappings.get(dimid);
+        if (result){
+            return result;
+        }
+        
         let vanilla: Minecraft.Dimension | null = null;
         if (typeof dimid === "string" || typeof dimid === "number"){
             vanilla = DimensionValues[dimid];
@@ -33,15 +40,16 @@ export class Dimension {
         if (vanilla == null){
             throw new Error("specific identifier doesn't refer to a dimension");
         }
-        let result = Dimension.#dimensionMappings.get(vanilla);
+        result = Dimension.#dimensionMappings.get(vanilla);
         if (result === undefined){
-            result = new Dimension(vanilla);
+            result = new Dimension(vanilla) as YoniDimension;
+            Dimension.#dimensionMappings.set(dimid, result);
             Dimension.#dimensionMappings.set(vanilla, result);
         }
-        return result;
+        return result as YoniDimension;
     }
 
-    static isDimension(object: any): object is (Minecraft.Dimension | YoniDimension | Dimension){
+    static isDimension(object: any): object is (Minecraft.Dimension | YoniDimension){
         return object instanceof Minecraft.Dimension || object instanceof Dimension;
     }
     

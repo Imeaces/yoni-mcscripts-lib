@@ -3,13 +3,13 @@ import { Location } from "./Location.js";
 import { YoniDimension } from "./dimension.js";
 
 class Block {
-    static isBlock(object: any): object is (Minecraft.Block | Block) {
+    static isBlock(object: any): object is (Minecraft.Block | YoniBlock) {
         return object instanceof Minecraft.Block || object instanceof Block;
     }
-    static from(block: Minecraft.Block){
+    static from(block: Minecraft.Block): YoniBlock {
         if (block == null)
             throw new TypeError("null object");
-        return new Block(block);
+        return new Block(block) as unknown as YoniBlock;
     }
     
     // @ts-ignore
@@ -83,4 +83,7 @@ class Block {
     }
 }
 
-export { Block, Block as YoniBlock };
+export { Block };
+
+type BaseVanillaBlockClass = Omit<Minecraft.Block, keyof Block>;
+export type YoniBlock = Block & BaseVanillaBlockClass;

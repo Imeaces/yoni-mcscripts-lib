@@ -11,7 +11,7 @@ import { send, say } from "./utils.js";
 import { Logger, log } from "./util/Logger.js";
 
 import { world as World } from "./world.js";
-import Scoreboard from "./scoreboard.js";
+import { Scoreboard } from "./scoreboard.js";
 
 import { EventListener, EventTypes, events } from "./event.js";
 import { ConsoleLogger } from "./lib/ConsoleLogger.js";

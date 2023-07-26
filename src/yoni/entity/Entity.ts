@@ -143,6 +143,23 @@ export class Entity extends EntityBase {
     get target(): YoniEntity {
         return (EntityBase.from(this.vanillaEntity.target) ?? undefined) as unknown as YoniEntity;
     }
+    
+    addEffect(effectType: string | Minecraft.EffectType, duration: number, amplifier: number, showParticle: boolean): void;
+    addEffect(effectType: string | Minecraft.EffectType, duration: number, options?: Minecraft.EntityEffectOptions): void;
+    addEffect(effectType: string | Minecraft.EffectType, duration: number, amplifier?: Minecraft.EntityEffectOptions | number, showParticles?: boolean): void {
+        let option = amplifier as Minecraft.EntityEffectOptions;
+        if (isFinite(amplifier as number)){
+            option = {
+                amplifier: amplifier as number,
+                showParticles: showParticles as boolean
+            }
+        }
+        if (option){
+            this.vanillaEntity.addEffect(effectType, duration, option);
+        } else {
+            this.vanillaEntity.addEffect(effectType, duration);
+        }
+    }
 
 }
 
@@ -150,5 +167,5 @@ copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "van
 
 EntityClassRegistry.register(Entity, Minecraft.Entity);
 
-type BaseVanillaEntityClass = Omit<Omit<Minecraft.Entity, "getRotation" | "getVelocity" | "scoreboard">, keyof Entity>;
+type BaseVanillaEntityClass = Omit<Omit<Minecraft.Entity, "getRotation" | "getVelocity" | "addEffect">, keyof Entity>;
 export type YoniEntity = Entity & BaseVanillaEntityClass;
