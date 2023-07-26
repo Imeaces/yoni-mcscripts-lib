@@ -12,13 +12,13 @@ export interface IEventSignal {
      * @returns {(arg: any[]) => void} 传入的回调函数。
      */
     subscribe(
-        callback: (arg: any[]) => void,
+        callback: (...args: any[]) => void,
         ...filters: any[]
-    ): (arg: any[]) => void;
+    ): (...args: any[]) => void;
     
     /**
      * 从订阅中移除指定的回调函数
      * @param callback - 指定的回调函数
      */
-    unsubscribe(callback: (arg: any[]) => void): void;
+    unsubscribe(callback: (...args: any[]) => void): void;
 }

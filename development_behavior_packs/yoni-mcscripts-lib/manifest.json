@@ -4,8 +4,8 @@
     "name": "yoni-mcscripts-lib",
     "description": "Yoni Script Module",
     "uuid": "0b7ef624-e6b8-11ec-b378-df8eb4284b8b",
-    "version": [0, 9, 1],
-    "min_engine_version": [1, 19, 80]
+    "version": [0, 11, 1],
+    "min_engine_version": [1, 20, 0]
   },
   "modules": [
     {
@@ -27,7 +27,7 @@
     /* Gametest需要的依赖项 begin */
     {
       "module_name": "@minecraft/server",
-      "version": "1.2.0-beta"
+      "version": "1.4.0-beta"
     },
     {
       "module_name": "@minecraft/server-gametest",

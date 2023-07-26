@@ -453,14 +453,15 @@ export { Entry, EntryType };
 export default Entry;
 
 if (config.getBoolean("useOptionalFasterCode")){
-    optionalFasterCode(import("../schedule.js"), import("../util/Logger.js"));
+    optionalFasterCode();
 }
 
-async function optionalFasterCode(YoniSchedulerModulePromise: any, LoggerModulePromise: any){
+async function optionalFasterCode(){
     throw new Error("temp disable mapping caching");
 
-    const { YoniScheduler }: { YoniScheduler: typeof import("../schedule.js").YoniScheduler } = await YoniSchedulerModulePromise;
-    const { Logger }: { Logger: typeof import("../util/Logger.js").Logger } = await LoggerModulePromise;
+    const { YoniScheduler } = await import("../schedule.js");
+    const { Logger } = await import("../util/Logger.js");
+    
     const logger = new Logger("ScoreboardEntryCacher");
     
     // 每600刻运行一次

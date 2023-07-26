@@ -4,7 +4,7 @@ import {
     VanillaWorld,
 } from "../basis.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
-import { DimensionLike } from "../Location.js";
+import { DimensionLikeValue } from "../Location.js";
 import { Dimension } from "../dimension.js";
 import { EntityValue } from "./EntityTypeDefs.js";
 
@@ -102,13 +102,29 @@ abstract class EntityBase {
      * @returns {Minecraft.InventoryComponentContainer}
      */
     static getInventory(entity: EntityValue): Minecraft.Container {
+        if (EntityBase.#inventoryCache.has(entity))
+            return EntityBase.#inventoryCache.get(entity) as Minecraft.Container;
+        
         EntityBase.checkIsEntity(entity);
-        return (<Minecraft.EntityInventoryComponent>entity.getComponent("minecraft:inventory")).container;
+        
+        const comp = entity.getComponent("minecraft:inventory") as unknown as Minecraft.EntityInventoryComponent;
+        
+        const inv = comp.container;
+        
+        EntityBase.#inventoryCache.set(entity, inv);
+        
+        return inv;
     }
+    static #inventoryCache = new WeakMap<Object, Minecraft.Container>();
     
     static getItemInMainHand(entity: EntityValue): Minecraft.ItemStack | undefined {
         //@ts-ignore
         return EntityBase.getInventory(entity).getItem(entity.selectedSlot);
+    }
+    
+    static setItemInMainHand(entity: EntityValue, item?: Minecraft.ItemStack): void {
+        //@ts-ignore
+        EntityBase.getInventory(entity).setItem(entity.selectedSlot, item);
     }
     
     /**
@@ -121,11 +137,7 @@ abstract class EntityBase {
         return (component === undefined) ? 0 : component.currentValue;
     }
     
-    /**
-     * @param {import('../Location.js').DimensionLike} dimension
-     * @param {Minecraft.EntityQueryOptions} [options]
-     */
-    static getDimensionEntities(dimension?: DimensionLike, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity> {
+    static getDimensionEntities(dimension?: DimensionLikeValue, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity> {
         if (!dimension){
             let ents = Object
                 .getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
@@ -146,10 +158,6 @@ abstract class EntityBase {
         return Dimension.dim(dimension).vanillaDimension.getEntities(options);
     }
     
-    /**
-     * @param {import('.../Location.js').DimensionLike}
-     * @param {Minecraft.EntityQueryOptions} [options]
-     */
     static getWorldPlayers(options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Player> {
         if (!options){
             return VanillaWorld.getPlayers();

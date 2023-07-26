@@ -356,7 +356,7 @@ if (config.getBoolean("logging.overrideDefaultConsole")){
 }
 
 setDebugFunction(async function (ChatCommandModule: any){
-    const { ChatCommand }: { ChatCommand: typeof import("../command/ChatCommand.js").ChatCommand } = await ChatCommandModule;
+    const { ChatCommand } = await import("../command/ChatCommand.js");
     
     ChatCommand.registerPrefixCommand("$", "log", onCommandExecute);
     
@@ -389,4 +389,4 @@ setDebugFunction(async function (ChatCommandModule: any){
             sender.sendMessage("日志输出 §a开启");
         }
     }
-}, import("../command/ChatCommand.js"));
+});

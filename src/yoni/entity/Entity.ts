@@ -1,5 +1,5 @@
 import { Minecraft } from "../basis.js";
-import { Location, Location1Arg, DimensionLike, Vector3 } from "../Location.js";
+import { Location, LocationParamsOneArg, DimensionLikeValue, Vector3 } from "../Location.js";
 import { Dimension } from "../dimension.js";
 import { Block, YoniBlock } from "../block.js";
 import { Command } from "../command.js";
@@ -15,7 +15,7 @@ const { EntityTypes } = Minecraft;
 export interface EntityTeleportOptions {
     rotation?: Vector2;
     faceLocation?: Vector3;
-    dimension?: DimensionLike;
+    dimension?: DimensionLikeValue;
     keepVelocity?: boolean;
     checkForBlocks?: boolean;
 }
@@ -149,7 +149,7 @@ class Entity extends EntityBase {
     }
     
     teleport(whereLocation: Location): void;
-    teleport(whereLocation: Location1Arg): void;
+    teleport(whereLocation: LocationParamsOneArg): void;
     teleport(whereLocation: Vector3, teleportOption: EntityTeleportOptions): void;
     teleport(){
         //@ts-ignore

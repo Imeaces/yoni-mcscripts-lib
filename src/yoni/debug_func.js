@@ -1,6 +1,6 @@
 import { ChatCommand } from "./command/ChatCommand.js";
 import { Command } from "./command.js";
-import { Minecraft, MinecraftGui, Gametest, dim,
+import { Minecraft, Gametest, dim,
     VanillaWorld, VanillaScoreboard, Minecraft as VanillaEvents,
     MinecraftSystem, runTask,
     Minecraft as SystemEvents } from "./basis.js";
@@ -28,7 +28,7 @@ let doEval;
 (async function(){
     let sv = new Object(null);
     doEval = new Function(`
-        let { Minecraft, MinecraftGui, Gametest, dim, VanillaWorld, VanillaScoreboard, VanillaEvents, MinecraftSystem, runTask,
+        let { Minecraft, Gametest, dim, VanillaWorld, VanillaScoreboard, VanillaEvents, MinecraftSystem, runTask,
         SystemEvents, load, getKeys, logger, getErrorMsg, EventListener,
         EventTypes, events, Logger, Command, ChatCommand, send, say, EntityBase, sv,
         setTimeout, clearTimeout, setInterval, clearInterval, ObjectUtils, World,
@@ -47,7 +47,7 @@ let doEval;
             });
         };
     `)({
-        Minecraft, MinecraftGui, Gametest, dim, VanillaWorld, VanillaScoreboard, VanillaEvents, MinecraftSystem, runTask,
+        Minecraft, Gametest, dim, VanillaWorld, VanillaScoreboard, VanillaEvents, MinecraftSystem, runTask,
         SystemEvents, load, getKeys, logger, getErrorMsg, EventListener,
         EventTypes, events, Logger, Command, ChatCommand, send, say, EntityBase, sv, ObjectUtils,
         setTimeout, clearTimeout, setInterval, clearInterval, 

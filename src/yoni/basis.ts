@@ -1,7 +1,6 @@
 import { Minecraft } from "./modules/Minecraft.js";
 export { Minecraft }
 
-export { MinecraftGui } from "./modules/MinecraftGui.js";
 export { Gametest } from "./modules/Gametest.js";
 
 export const VanillaWorld: Minecraft.World = Minecraft.world;
@@ -12,7 +11,7 @@ export const MinecraftSystem: Minecraft.System = Minecraft.system;
  * @param {(...args: any[]) => void} callback 
  * @param {...any} args
  */
-export function runTask(callback: (...args: any[]) => void, ...args: any[]){
+export function runTask(callback: (() => void) | ((...args: any[]) => void), ...args: any[]){
     if (args.length === 0)
         MinecraftSystem.run(callback);
     else

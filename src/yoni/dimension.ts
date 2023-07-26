@@ -2,8 +2,8 @@ import { VanillaWorld, Minecraft } from "./basis.js";
 
 import {
     Location,
-    Location1Arg,
-    DimensionLike,
+    LocationParamsOneArg,
+    DimensionLikeValue,
     Vector3 } from "./Location.js";
 
 import { Block } from "./block.js";
@@ -19,7 +19,7 @@ import { debug } from "./config.js";
 class Dimension {
     static #dimMap = new WeakMap();
     
-    static dim(dimid: DimensionLike): Dimension {
+    static dim(dimid: DimensionLikeValue): Dimension {
         let dim: Minecraft.Dimension | null = null;
         if (typeof dimid === "string" || typeof dimid === "number"){
             dim = DimensionValues[dimid];
@@ -96,7 +96,7 @@ class Dimension {
      * Block at the specified location.
      * @throws This function can throw errors.
      */
-    getBlock(location: Location1Arg): Block {
+    getBlock(location: LocationParamsOneArg): Block {
         let loc: Location;
         if (location instanceof Location){
             loc = location;

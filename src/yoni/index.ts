@@ -1,7 +1,6 @@
 // vanilla module exports
 export {
   Minecraft,
-  MinecraftGui,
   Gametest,
 } from "./basis.js";
 
@@ -47,7 +46,6 @@ export {
     YoniSimulatedPlayer,
 } from "./entity.js";
 export {
-  ILocation,
   Vector3,
   DimensionLikeValue
 } from "./Location.js";
@@ -57,6 +55,7 @@ export {
 } from "./scoreboard.js";
 export { YoniWorld } from "./world.js";
 export { YoniDimension } from "./dimension.js";
+export { YoniBlock } from "./block.js";
 
 // enum
 export { EntryType } from "./scoreboard.js";

@@ -1,7 +1,9 @@
+//@ts-nocheck
+
 import { Minecraft, dim, VanillaWorld } from "./basis.js";
 import { getKeys } from "./lib/ObjectUtils.js";
 
-export const DimensionValues = Object.freeze({
+export const DimensionValues: Readonly<Record<string | number, Minecraft.Dimension>> = Object.freeze({
     "minecraft:nether": dim.nether,
     "nether": dim.nether,
     "-1": dim.nether,

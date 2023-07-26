@@ -38,8 +38,12 @@ class Player extends Entity {
         return player.level;
     }
     
-    getItemInMainHand(): Minecraft.ItemStack {
+    getItemInMainHand(): Minecraft.ItemStack | undefined {
         return EntityBase.getItemInMainHand(this);
+    }
+
+    setItemInMainHand(item?: Minecraft.ItemStack): void {
+        return EntityBase.setItemInMainHand(this, item);
     }
 
     /**
