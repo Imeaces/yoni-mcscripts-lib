@@ -47,11 +47,8 @@ async function initEvalFunction(){
     
     // dpEval Function Code
     generateFunctionCodeLines.push(`
-    function doEval(sender, code){
-        async function evalCode(){
-            return eval(code);
-        }
-        return evalCode();
+    let doEval = async (sender, code) => {
+        return eval(code);
     }
     `);
     generateFunctionCodeLines.push("return doEval;");
@@ -96,16 +93,18 @@ function onRequestChatEventAsEval(sender: YoniPlayer, command: string, label: st
 function hasPermission(player: YoniPlayer | Minecraft.Player): boolean {
     return player.isOp();
 }
-function executeEval(sender: YoniPlayer, code: string){
+async function executeEval(sender: YoniPlayer, code: string){
     if (!hasPermission(sender)){
         sender.sendMessage("§c没有权限");
         return;
     }
     sender.sendMessage("> "+code);
     
+    runTask(() =>
     doEval(sender, code)
     .then(onSuccess)
-    .catch(onError);
+    .catch(onError)
+    );
     
     function onSuccess(result: any){
         (globalThis as any)._ = result;
