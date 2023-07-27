@@ -3,6 +3,8 @@ import { Logger } from "./util/Logger.js";
 import { runTask } from "./basis.js";
 import { debug } from "./config.js";
 
+// WARN!!! 
+// 计时相关代码有错误！！！
 
 const logger = new Logger("Schedule");
 
