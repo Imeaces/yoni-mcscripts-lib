@@ -46,14 +46,19 @@ async function initEvalFunction(){
     generateFunctionCodeLines.push("let logger = arguments[4];");
     
     // dpEval Function Code
-    let doEvalFunctionCode = `
+    generateFunctionCodeLines.push(`
     function doEval(sender, code){
-        return eval(code);
+        async function evalCode(){
+            return eval(code);
+        }
+        return evalCode();
     }
-    `;
-    /* return doEval Function */ generateFunctionCodeLines.push("return " + doEvalFunctionCode);
+    `);
+    generateFunctionCodeLines.push("return doEval;");
     
     let generateFunction = new Function(generateFunctionCodeLines.join("\n"));
+    
+    logger.info(generateFunctionCodeLines.join("\n"));
     
     doEval = generateFunction(yonilib, ObjectUtils, timeoutlib, s, logger);
 }
@@ -91,7 +96,7 @@ function onRequestChatEventAsEval(sender: YoniPlayer, command: string, label: st
 function hasPermission(player: YoniPlayer | Minecraft.Player): boolean {
     return player.isOp();
 }
-async function executeEval(sender: YoniPlayer, code: string){
+function executeEval(sender: YoniPlayer, code: string){
     if (!hasPermission(sender)){
         sender.sendMessage("§c没有权限");
         return;
@@ -108,7 +113,7 @@ async function executeEval(sender: YoniPlayer, code: string){
     }
     function onError(error: any){
         (globalThis as any)._error = error;
-        sender.sendMessage("§c" + getErrorMsg(error).msg);
+        sender.sendMessage("§c" + getErrorMsg(error).errMsg);
     }
 }
 
@@ -126,4 +131,6 @@ ChatCommand.registerPrefixCommand("$", "run", (sender, rawCommand, label, args) 
 });
 
 doEvalFunctionInitizePromise.then( () => 
-logger.info("debug功能已加载，使用$eval可以执行代码"));
+logger.info("debug功能已加载，使用$eval可以执行代码"))
+.catch( (e) => 
+logger.info("debug功能加载出现错误", e));
