@@ -91,14 +91,19 @@ export class ChatCommand {
         }
     }
     
-    static registerPrefixCommand(...args){
-        this.registerCustomPrefixCommand(...args);
+    /**
+     * @param {string} prefix 
+     * @param {string} command 
+     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     */
+    static registerPrefixCommand(prefix, command, executor){
+        this.registerCustomPrefixCommand.apply(this, arguments);
     }
     
     /**
      * 
      * @param {string} command 
-     * @param {(sender: YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
      */
     static registerCommand(command, executor){
         if (typeof command !== "string" || command.length === 0)
@@ -118,6 +123,10 @@ export class ChatCommand {
         logger.trace("移除命令 command: {}", command);
     }
     
+    /**
+     * @param {string} command 
+     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     */
     static registerNonPrefixCommand(command, executor){
         if (typeof command !== "string" || command.length === 0)
             throw new TypeError("command not valid");
@@ -135,6 +144,11 @@ export class ChatCommand {
         logger.trace("移除无前缀命令 command: {}", command);
     }
     
+    /**
+     * @param {string} prefix 
+     * @param {string} command 
+     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     */
     static registerCustomPrefixCommand(prefix, command, executor){
         if (typeof prefix !== "string" || prefix.length === 0)
             throw new TypeError("prefix not valid");
