@@ -1,16 +1,14 @@
-import { runTask } from "../basis.js";
+import { YoniScheduler } from "../schedule.js";
 
 let tickTimeRecords: number[] = [];
 let maxRecordTicks: number = 20;
 
-runTask(function countTPS(){
-    runTask(countTPS);
+YoniScheduler.runCycleTickTask(function countTPS(){
+    tickTimeRecords.push(Date.now());
     
-    tickTimeRecords.unshift(Date.now());
-    
-    if (tickTimeRecords.length > maxRecordTicks + 1)
-        tickTimeRecords.length = maxRecordTicks + 1;
-});
+    if (tickTimeRecords.length > maxRecordTicks * 2)
+        tickTimeRecords = tickTimeRecords.slice(tickTimeRecords.length - maxRecordTicks, maxRecordTicks);
+}, 1, 1, false);
 
 export class TPSCounter {
     static get maxRecordTicks(){
@@ -30,7 +28,7 @@ export class TPSCounter {
      */
     static getTPS(recentSeconds: number = 1, tickRate: number = 20): number {
         
-        if (recentSeconds * 1000 > tickTimeRecords[0] - tickTimeRecords[tickTimeRecords.length-1]){
+        if (recentSeconds * 1000 > tickTimeRecords[tickTimeRecords.length-1] - tickTimeRecords[0]){
             // not such record
             return -1;
         }
@@ -39,10 +37,10 @@ export class TPSCounter {
         
         const totalRecordedTicks = tickTimeRecords.length - 1;
         
-        const oldestTickRecordIndex = Math.min(Math.floor(shouldPassedTicks), totalRecordedTicks);
+        const recordedTicks = Math.min(Math.floor(shouldPassedTicks), totalRecordedTicks);
         
-        const oldestTickTime = tickTimeRecords[oldestTickRecordIndex];
-        const lastTickTime = tickTimeRecords[0];
+        const oldestTickTime = tickTimeRecords[totalRecordedTicks - recordedTicks];
+        const lastTickTime = tickTimeRecords[totalRecordedTicks];
         
         const intervalBetweenStartEndRecord = lastTickTime - oldestTickTime;
         
