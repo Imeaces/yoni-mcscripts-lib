@@ -9,6 +9,6 @@ export async function runTaskIfDebug(callback: () => void){
     setDebugFunction(callback);
 }
 
-export { isDebug };
+export { isDebug, isDebug as isDebugMode };
 
 setDebugFunction(() => import("./debug_func.js"));
