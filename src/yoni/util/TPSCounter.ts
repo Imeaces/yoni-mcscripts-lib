@@ -1,16 +1,16 @@
-import { runTask } from "../basis.js";
+import { YoniScheduler } from "../schedule.js";
 
 let tickTimeRecords: number[] = [];
 let maxRecordTicks: number = 20;
 
-runTask(function countTPS(){
-    runTask(countTPS);
+YoniScheduler.runCycleTickTask(countTPS, 1, 1, false);
+function countTPS(){
     
     tickTimeRecords.unshift(Date.now());
     
     if (tickTimeRecords.length > maxRecordTicks + 1)
         tickTimeRecords.length = maxRecordTicks + 1;
-});
+}
 
 export class TPSCounter {
     static get maxRecordTicks(){

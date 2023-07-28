@@ -3,7 +3,8 @@ import { EntityBase } from "./EntityBase.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
 import { Entry } from "../scoreboard/Entry.js";
 import { Dimension } from "../dimension.js";
-import { Location } from "../Location.js";
+import { DimensionLikeValue } from "../dim.js";
+import { Location, Vector2, Vector3 } from "../Location.js";
 import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 import { Command } from "../command.js";
 
@@ -160,7 +161,68 @@ export class Entity extends EntityBase {
             this.vanillaEntity.addEffect(effectType, duration);
         }
     }
-
+    
+    //@ts-ignore 我也不知道是怎么回事
+    teleport(location: Vector3, options?: Minecraft.TeleportOptions): void;
+    //@ts-ignore 反正已经实现了
+    teleport(coords: Vector3, dimension: DimensionLikeValue, rotationX: number, rotationY: number, keepVelocity?: boolean): void;
+    //@ts-ignore
+    teleport(location: Location, keepVelocity?: boolean): void;
+    teleport(...params: [ Location ] | [ Location, boolean ]
+        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
+        | [ Vector3, DimensionLikeValue, number, number ]
+        | [ Vector3, DimensionLikeValue, number, number, boolean ]){
+        this.#executeTeleport(this.vanillaEntity.teleport, params);
+    }
+    
+    //@ts-ignore 我也不知道是怎么回事
+    tryTeleport(location: Vector3, options?: Minecraft.TeleportOptions): boolean;
+    //@ts-ignore 反正已经实现了
+    tryTeleport(coords: Vector3, dimension: DimensionLikeValue, rotationX: number, rotationY: number, keepVelocity?: boolean): boolean;
+    //@ts-ignore
+    tryTeleport(location: Location, keepVelocity?: boolean): boolean;
+    tryTeleport(...params: [ Location ] | [ Location, boolean ]
+        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
+        | [ Vector3, DimensionLikeValue, number, number ]
+        | [ Vector3, DimensionLikeValue, number, number, boolean ]){
+        return this.#executeTeleport(this.vanillaEntity.tryTeleport, params) as boolean;
+    }
+    
+    #executeTeleport(teleportFunc: any, params: [ Location ] | [ Location, boolean ]
+        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
+        | [ Vector3, DimensionLikeValue, number, number ]
+        | [ Vector3, DimensionLikeValue, number, number, boolean ]): any {
+        
+        let coords: Vector3;
+        //@ts-ignore
+        let options: Minecraft.TeleportOptions = {};
+        if (params[0] instanceof Location){
+            const location = params[0];
+            coords = location.getVanillaLocation();
+        } else {
+            coords = params[0] as Vector3;
+        }
+        if (params.length === 2){
+            if (params[1] === true || params[1] === false)
+                options.keepVelocity = params[1];
+            else
+                options = params[1] as Minecraft.TeleportOptions;
+        } else if (params.length === 1 && (params[0] instanceof Location)){
+            const location = params[0] as Location;
+            options.dimension = location.dimension.vanillaDimension;
+            const { rx: x, ry: y } = location;
+            const rotation: Vector2 = { x, y };
+            options.rotation = rotation;
+        } else if (params.length > 1){
+            options.dimension = Dimension.toDimension(params[1] as DimensionLikeValue).vanillaDimension;
+            const rotation: Vector2 = { x: params[2] as number, y: params[3] as number };
+            options.rotation = rotation;
+            if (params[4] === true || params[4] === false)
+                options.keepVelocity = params[4];
+        }
+        
+        teleportFunc.call(this.vanillaEntity, coords, options);
+    }
 }
 
 copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "vanillaEntity");

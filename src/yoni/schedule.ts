@@ -79,7 +79,7 @@ export class Schedule {
     /**
      * 任务类型。
      */
-    readonly "type": ScheduleType
+    readonly "type": ScheduleType;
     /**
      * 是否为异步任务。
      * 对于异步任务，如果任务回调返回了 Promise 对象，
@@ -245,6 +245,10 @@ let executingSchedule: Schedule | null = null;
  * @param schedule 任务
  */
 function executeSchedule(schedule: Schedule){
+    if (executingSchedule !== null){
+        logger.warn("上一个任务没有正常结束，id: {}", executingSchedule.id);
+        executingSchedule = null;
+    }
     if (schedule.async) {
         function onSuccess(result: any){
             lastSuccess(schedule, Date.now());
@@ -280,7 +284,7 @@ function executeSchedule(schedule: Schedule){
 
 //TODO: 判断是否应该执行在同一游戏刻中添加的tick任务
 function shouldExecuteOneTimeDelaySchedule(schedule: Schedule): boolean {
-    return scheduleAddToQueueGameTick.get(schedule) === MinecraftSystem.currentTick;
+    return scheduleAddToQueueGameTick.get(schedule) !== MinecraftSystem.currentTick;
 }
 
 const scheduleExecuteTimer = new WeakMap<Schedule, number>();
@@ -330,13 +334,25 @@ MinecraftSystem.runInterval(doTimeDelaySchedule, 1);
 MinecraftSystem.runInterval(doTickCycleSchedule, 1);
 MinecraftSystem.runInterval(doTimeCycleSchedule, 1);
 
+const doTickDelayScheduleTasks: Schedule[] = [];
+const doTimeDelayScheduleTasks: Schedule[] = [];
+const doTickCycleScheduleTasks: Schedule[] = [];
+const doTimeCycleScheduleTasks: Schedule[] = [];
+
+function executeTasks(tasks: Schedule[]){
+    for (const schedule of tasks) {
+        executeSchedule(tasks.pop() as Schedule);
+    }
+}
+
 //处理只执行一次的tick任务 tickdelay
 function doTickDelaySchedule() {
     let schedules = queueSchedulesTypedRecord[Schedule.tickDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    let tasks: Schedule[] = [];
+    const tasks: Schedule[] = doTickDelayScheduleTasks;
+    executeTasks(tasks); //处理可能的没有执行但是应该执行的任务
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         let lessTime = scheduleExecuteTimer.get(schedule) as number;
@@ -351,17 +367,17 @@ function doTickDelaySchedule() {
             scheduleExecuteTimer.set(schedule, lessTime);
         }
     }
-    for (const schedule of tasks) {
-        executeSchedule(schedule);
-    }
+    executeTasks(tasks);
 }
+
 //处理只执行一次的time任务 timedelay
 function doTimeDelaySchedule() {
     let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    let tasks: Schedule[] = [];
+    const tasks: Schedule[] = doTimeDelayScheduleTasks;
+    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         const time = Date.now();
@@ -374,17 +390,17 @@ function doTimeDelaySchedule() {
             removeScheduleFromQueue(schedule);
         }
     }
-    for (const schedule of tasks) {
-        executeSchedule(schedule);
-    }
+    executeTasks(tasks);
 }
+
 //处理重复执行的tick任务 tickcycle
 function doTickCycleSchedule() {
     let schedules = queueSchedulesTypedRecord[Schedule.tickCycleSchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    let tasks: Schedule[] = [];
+    const tasks: Schedule[] = doTickCycleScheduleTasks;
+    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         
@@ -405,17 +421,17 @@ function doTickCycleSchedule() {
             scheduleExecuteTimer.set(schedule, lessTime);
         }
     }
-    for (const schedule of tasks) {
-        executeSchedule(schedule);
-    }
+    executeTasks(tasks);
 }
+
 //处理重复执行的time任务 timecycle
 function doTimeCycleSchedule() {
     let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    let tasks: Schedule[] = [];
+    const tasks: Schedule[] = doTimeCycleScheduleTasks;
+    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         
@@ -439,9 +455,7 @@ function doTimeCycleSchedule() {
             scheduleAddToQueueTime.set(schedule, time);
         }
     }
-    for (const schedule of tasks) {
-        executeSchedule(schedule);
-    }
+    executeTasks(tasks);
 }
 
 
@@ -575,7 +589,7 @@ export class YoniScheduler {
     }
 }
 
-//对于异常挂断的特殊处理，但是不知道有没有用
+//对于异常挂断的特殊处理，但是没见他触发过一次
 MinecraftSystem.beforeEvents.watchdogTerminate.subscribe((event) => {
     if (executingSchedule !== null) {
         logger.warn("在执行一个任务的过程中碰到了脚本挂断事件，事件id: {}, 类型: {}, 挂断原因: {}", executingSchedule.id, String(executingSchedule.type), event.terminateReason);

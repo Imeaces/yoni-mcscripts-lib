@@ -1,3 +1,6 @@
+import { WatchBird } from "./util/WatchBird.js";
+WatchBird();
+
 // vanilla module exports
 export {
   Minecraft,
@@ -85,3 +88,4 @@ export const EntityClass = {
     Player,
     SimulatedPlayer
 };
+

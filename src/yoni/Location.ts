@@ -1,7 +1,7 @@
 import Minecraft from "./minecraft.js";
 import { Dimension, YoniDimension } from "./dimension.js";
 import { Block, YoniBlock } from "./block.js";
-import { DimensionLikeValue, DimensionValues } from "./dim.js";
+import { DimensionLikeValue, isDimensionValue } from "./dim.js";
 
 function getFiniteNumber(v: any): number {
     v = Number(v);
@@ -661,7 +661,7 @@ import { FunctionParamsOverrides } from "./lib/FunctionParamsOverrides.js";
 const overrides = new FunctionParamsOverrides();
 function requireDimensionValue(argc: 1, args: any[]){
     const value = args[0];
-    return value && Dimension.isDimension(value) || (value in DimensionValues);
+    return isDimensionValue(value);
 }
 function requireVector3Object(argc: 1, args: any[]){
     const { x, y, z } = args[0];

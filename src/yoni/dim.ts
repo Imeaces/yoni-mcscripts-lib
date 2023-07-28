@@ -48,3 +48,7 @@ export type DimensionLikeValue =
     | TheEndDimensionLikeValue
     | Minecraft.Dimension
     | Dimension;
+
+export function isDimensionValue(value: any): value is DimensionLikeValue {
+    return value != null && Dimension.isDimension(value) || (value in DimensionValues);
+}

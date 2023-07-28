@@ -1,4 +1,4 @@
-import { MinecraftSystem } from "../basis.js";
+import { MinecraftSystem, Minecraft } from "../basis.js";
 
 export function WatchBird(){
     if (hasInitiated)
@@ -8,14 +8,14 @@ export function WatchBird(){
     hasInitiated = true;
 }
 
-let hasInitiated = false;
-const interruptRecord = [];
+let hasInitiated: boolean = false;
+const interruptRecord: number[] = [];
 
 function startWatchBird(){
     MinecraftSystem.beforeEvents.watchdogTerminate.subscribe(listenEvent);
 }
 
-function listenEvent(event){
+function listenEvent(event: Minecraft.WatchdogTerminateBeforeEvent){
     interruptRecord.unshift(Date.now());
     
     if (interruptRecord.length >= 5){
@@ -24,12 +24,11 @@ function listenEvent(event){
         let firstInterruptTime = interruptRecord[4];
         let lastInterruptTime = interruptRecord[0];
         
-        if (lastInterruptTime - firstInterruptTime < 60 * 1000)
+        if (lastInterruptTime - firstInterruptTime < 60 * 1000){
+            console.error("WatchdogTerminate");
             return;
+        }
     }
     
     event.cancel = true;
 }
-
-//兼容
-WatchBird();
