@@ -2,25 +2,31 @@
 
 interface DeepCopyOption {
     newObjectMaker(): {};
-    dealCircular: "ignore" |"error";
+    dealCircular: "ignore" | "error";
     copyFunction: CopyFunction;
     rootObject: {}
 }
 interface CopyFunction {
     getCopiedValue(value: any): any;
+    /**
+     * 返回 `value` 是否可以复制。
+     *
+     * 注意：为原始值返回 `false` 会出现错误。
+     */
     isCopyableValue(value: any): boolean;
 }
 
-export function deepcopy(value: {}, applyOption: Partial<DeepCopyOption> = {}, option: DeepCopyOption = {
-    rootObject: null,
-    newObjectMaker: () => ({}),
-    dealCircular: ["ignore", "error"][1],
-    copyFunction: {
-        getCopiedValue,
-        isCopyableValue,
-    }
-}){
-    applyOption = Object.assign(option, applyOption);
+export function deepcopy(value: {}, option: Partial<DeepCopyOption> = {}){
+    let applyOption = Object.assign({
+        rootObject: undefined,
+        newObjectMaker: () => ({}),
+        dealCircular: ["ignore", "error"][1],
+        copyFunction: {
+            getCopiedValue,
+            isCopyableValue,
+        }
+    }, option);
+    
     const { newObjectMaker, dealCircular } = applyOption;
     const { getCopiedValue, isCopyableValue } = applyOption.copyFunction;
 
@@ -45,7 +51,7 @@ export function deepcopy(value: {}, applyOption: Partial<DeepCopyOption> = {}, o
             let subvalue = value[key];
             if (isCopyableValue(subvalue)){
                 nvalue[key] = getCopiedValue(subvalue);
-            } else{
+            } else {
                 let subobject = newObjectMaker();
                 referenceChainRecord.set(subobject, referenceRecord.slice(0));
                 nvalue[key] = subobject;
