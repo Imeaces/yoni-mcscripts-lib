@@ -34,6 +34,7 @@ export { TPSCounter } from "./util/TPSCounter.js";
 export { ObjectUtils } from "./lib/ObjectUtils.js";
 export { Dimension } from "./dimension.js";
 export { Block } from "./block.js";
+export { Yoni } from "./Yoni.js";
 
 // class exports
 export { Schedule } from "./schedule.js";
