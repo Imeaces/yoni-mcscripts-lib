@@ -101,6 +101,9 @@ export class Schedule {
     isQueue(): boolean {
         return scheduleQueue.has(this);
     }
+    get startInQueueTime(): number {
+        return scheduleStartInQueueTime.get(this) ?? -1;
+    }
     /**
      * 任务是否正在执行。
      * @returns 在同步任务的回调当中会返回 `true`，
@@ -282,13 +285,13 @@ function executeSchedule(schedule: Schedule){
     }
 }
 
-//TODO: 判断是否应该执行在同一游戏刻中添加的tick任务
-function shouldExecuteOneTimeDelaySchedule(schedule: Schedule): boolean {
-    return scheduleAddToQueueGameTick.get(schedule) !== MinecraftSystem.currentTick;
+function shouldExecuteOneTimeDelaySchedule(schedule: Schedule, curTick: number): boolean {
+    return scheduleAddToQueueGameTick.get(schedule) !== curTick;
 }
 
 const scheduleExecuteTimer = new WeakMap<Schedule, number>();
 const scheduleAddToQueueTime = new WeakMap<Schedule, number>();
+const scheduleStartInQueueTime = new WeakMap<Schedule, number>();
 /** 仅用于 {@link shouldExecuteOneTimeDelaySchedule} */
 const scheduleAddToQueueGameTick = new WeakMap<Schedule, number>();
 const queueSchedulesTypedRecord: Record<string, Schedule[]> = {};
@@ -305,6 +308,7 @@ function removeScheduleFromQueue(schedule: Schedule): boolean {
         return false;
     }
     queue.splice(location, 1);
+    scheduleStartInQueueTime.delete(schedule);
     scheduleAddToQueueTime.delete(schedule);
     scheduleExecuteTimer.delete(schedule);
     scheduleQueue.delete(schedule);
@@ -321,6 +325,7 @@ function addScheduleToQueue(schedule: Schedule): boolean {
         return false;
     } else {
         queue.push(schedule);
+        scheduleStartInQueueTime.set(schedule, Date.now());
         scheduleAddToQueueTime.set(schedule, Date.now());
         scheduleExecuteTimer.set(schedule, schedule.delay);
         scheduleQueue.add(schedule);
@@ -346,17 +351,19 @@ function executeTasks(tasks: Schedule[]){
 }
 
 //处理只执行一次的tick任务 tickdelay
-function doTickDelaySchedule() {
+function doTickDelaySchedule(){
     let schedules = queueSchedulesTypedRecord[Schedule.tickDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
+    const curTick = MinecraftSystem.currentTick;
+
     const tasks: Schedule[] = doTickDelayScheduleTasks;
     executeTasks(tasks); //处理可能的没有执行但是应该执行的任务
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         let lessTime = scheduleExecuteTimer.get(schedule) as number;
-        if (lessTime === 1 && !shouldExecuteOneTimeDelaySchedule(schedule)){
+        if (lessTime === 1 && !shouldExecuteOneTimeDelaySchedule(schedule, curTick)){
             continue;
         }
         
@@ -398,6 +405,8 @@ function doTickCycleSchedule() {
     let schedules = queueSchedulesTypedRecord[Schedule.tickCycleSchedule as unknown as string];
     if (schedules === undefined)
         return;
+
+    const curTick = MinecraftSystem.currentTick;
     
     const tasks: Schedule[] = doTickCycleScheduleTasks;
     executeTasks(tasks);
@@ -410,7 +419,7 @@ function doTickCycleSchedule() {
         }
         
         let lessTime = scheduleExecuteTimer.get(schedule) as number;
-        if (lessTime === 1 && !shouldExecuteOneTimeDelaySchedule(schedule)){
+        if (lessTime === 1 && !shouldExecuteOneTimeDelaySchedule(schedule, curTick)){
             continue;
         }
         
