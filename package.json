@@ -34,6 +34,7 @@
   "files": [
     "@types/",
     "yoni-mcscripts-lib.js",
+    "example.js",
     "src/",
     "yoni/",
     "tsconfig.json"

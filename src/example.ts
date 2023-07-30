@@ -1,32 +1,3 @@
-# yoni-mcscripts-lib
-
-基本上是对原有API的一些 wrapper，除此之外还提供了一些便捷的小工具。
-
-当前支持的游戏版本为 测试版**1.20.10.21**。
-
-## 使用
-
-为了能在您的脚本中从 'yoni-mcscripts-lib' 中导入内容，你需要将编译后的文件手动复制到你的脚本目录中。
-
-暂时未能支持 Webpack 打包，因为其中有一些东西并不是直接使用 import 语句导入的，所以并不能正确的被识别到。
-
-## 进度
-
-已经完成对方块和实体对象的包装。
-
-尝试由 JSDoc 生成文档中（尚未开始）。
-
-正在转到 Typescript，目前将近一半的代码已经使用 Typescript 编写。
-
-尝试支持 Webpack 打包（尚未开始）。
-
-个人水平不足，基本上这只是给我自己用的。但是在有补全的情况下，你或许可以根据命名来猜测用法。我会尽快添加更多文档的。
-
-## 示例
-
-一段简单的示例代码
-
-```ts
 // 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
 //import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni/index.js";
 import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
@@ -63,15 +34,3 @@ YoniScheduler.runDelayTickTask(function doSome(){
 }, 1200);
 //延迟一分钟再执行（1*60*20=1200）
 
-```
-
-## 引用
-
-目前尚无除了 @minecraft 之外的引用。
-
-## Page Views
-
-我也不知道加这个是干嘛
-
-[![Page Views Count](https://badges.toozhao.com/badges/01H306S1JD8VWVQ03QW1EYPR0E/orange.svg)](https://badges.toozhao.com/stats/01H306S1JD8VWVQ03QW1EYPR0E "Get your own page views count badge on badges.toozhao.com")
-[![npm version](https://badge.fury.io/js/yoni-mcscripts-lib.svg)](https://badge.fury.io/js/yoni-mcscripts-lib)
