@@ -3,7 +3,6 @@ import { Minecraft, VanillaWorld, StatusCode, VanillaScoreboard, overworld } fro
 import { Entry } from "./Entry.js";
 import { EntryValueType, EntryType } from "./EntryType.js";
 import { ScoreInfo } from "./ScoreInfo.js";
-import { SimpleScoreboard } from "./SimpleScoreboard.js";
 import {
     NameConflictError,
     ScoreRangeError,
@@ -160,6 +159,7 @@ class Objective {
     
     /**
      * 为分数持有者在记分项上增加分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.addScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要增加的分数。
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
@@ -173,6 +173,7 @@ class Objective {
     
     /**
      * 为分数持有者在记分项上设置一个随机的分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.randomScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} min - 随机分数的最小值。
      * @param {number} max - 随机分数的最大值。
@@ -209,6 +210,7 @@ class Objective {
     
     /**
      * 为分数持有者在记分项上减少分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.removeScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要减少的分数。
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
@@ -222,6 +224,7 @@ class Objective {
     
     /**
      * 在记分项上重置指定分数持有者的分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.resetScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
      */
@@ -232,6 +235,7 @@ class Objective {
     
     /**
      * 重置所有在此记分项上的分数持有者的分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.resetScores}
      * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
      * @throws 未知的命令错误。
      */
@@ -248,6 +252,7 @@ class Objective {
     
     /**
      * 将分数持有者在记分项上的分数设置为指定的值。
+     * @deprecated 建议使用其同步版本 {@link Objective.setScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要设置的分数。
      * @returns {Promise<number>} 由 `score` 指定的新分数。
@@ -262,6 +267,7 @@ class Objective {
     
     /**
      * 异步获取分数持有者在记分项上的分数。
+     * @deprecated 建议使用其同步版本 {@link Objective.getScore}
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @returns {Promise<number>} 此分数持有者在记分项上的分数。若未设定，返回 `undefined`。
      */
@@ -337,6 +343,50 @@ class Objective {
     }
     
     /**
+     * 为分数持有者在记分项上执行特定的操作。
+     * @param {string} option - 操作类型。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @param {...any} args - 操作所需要的参数。
+     * @throws 未知的命令错误。
+     * @throws 若尝试为虚拟玩家设置分数，且世界中有相同名字的玩家时，抛出 `NameConflictError`。
+     */
+    #playerCommand(option: string, one: EntryValueType, ...args: any[]){
+        let { entity, name, type } = Objective.findCommandRequirement(one);
+               
+        if (type === EntryType.PLAYER || type === EntryType.ENTITY){
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", this.#id);
+            let result = Command.execute(entity as EntityValue, Command.getCommand(cmd, ...args));
+            
+            if (result.statusCode === StatusCode.success){
+                return true;
+            }
+            this.checkUnregistered();
+           //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+            throw new Error(`Could not ${option} score, `
+                + "maybe entity or player disappeared?"
+                + "\n  cause by: "
+                + result.statusMessage);
+        } else if (name){
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, this.#id);
+            let result = Command.run(Command.getCommand(cmd, ...args));
+            if (result.statusCode === StatusCode.success){
+                return true;
+            }
+            this.checkUnregistered();
+            if (VanillaWorld.getPlayers({name}).length !== 0)
+                throw new NameConflictError(name as string);
+                
+            //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+            throw new Error(`Could not ${option} score, `
+                + "maybe entity or player disappeared?"
+                + "\n  cause by: "
+                + result.statusMessage);
+        } else {
+            throw new Error("unknown error");
+        }
+    }
+
+    /**
      * 寻找用于在记分项上执行特定的操作的与分数持有者有关的信息。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      */
@@ -402,16 +452,28 @@ class Objective {
         else
             entry = Entry.guessEntry(one);
         
-        let scbid = entry.vanillaScbid;
+        let oneValue;
         
-        if (scbid !== undefined){
+        if (entry.vanillaScbid !== undefined){
+            oneValue = entry.vanillaScbid;
+        } else if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
+            oneValue = entry.getVanillaEntity();
+            if (oneValue == null){
+                throw new Error("Could not find the entity");
+            }
+        } else {
+            oneValue = entry.displayName;
+        }
+        
+        if (oneValue !== undefined){
             try {
-                return this.vanillaObjective.getScore(scbid);
+                return this.vanillaObjective.getScore(oneValue);
             } catch {
                 this.checkUnregistered();
                 return undefined;
             }
         } else {
+            //可能永远也执行不到
             return undefined;
         }
     }
@@ -474,18 +536,27 @@ class Objective {
         else
             entry = Entry.guessEntry(one);
         
-        if (entry.vanillaScbid)
+        if (entry.type === EntryType.FAKE_PLAYER){
+            this.vanillaObjective.setScore(entry.displayName, score);
+        } else if (entry.type === EntryType.ENTITY
+        || entry.type === EntryType.PLAYER){
+            this.vanillaObjective.setScore(entry.getVanillaEntity(), score);
+        } else if (entry.vanillaScbid){
+            //可能永远执行不到这里，但是我还是保留它
             this.vanillaObjective.setScore(entry.vanillaScbid, score);
-        else
+        } else {
             throw new Error("scbid doesn't initialize");
+        }
     }
+    
+    /* 看错文档了，这是更新版本的实现
     /**
      * 为分数持有者在记分项上增加分数。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param score - 要增加的分数。
-     * @returns 执行成功后，此 `Promise` 将会敲定。
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
+     /*
     addScore(one: EntryValueType, score: number){
         checkScoreIsInRange(score);
         
@@ -495,6 +566,34 @@ class Objective {
         else
             entry = Entry.guessEntry(one);
         
+        if (entry.type === EntryType.FAKE_PLAYER){
+            this.vanillaObjective.addScore(entry.displayName, score);
+        } else if (entry.type === EntryType.ENTITY
+        || entry.type === EntryType.PLAYER){
+            this.vanillaObjective.addScore(entry.getVanillaEntity(), score);
+        } else if (entry.vanillaScbid){
+            //可能永远执行不到这里，但是我还是保留它
+            this.vanillaObjective.addScore(entry.vanillaScbid, score);
+        } else {
+            throw new Error("scbid doesn't initialize");
+        }
+    }
+    */
+    /**
+     * 为分数持有者在记分项上增加分数。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @param score - 要增加的分数。
+     * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
+     */
+    addScore(one: EntryValueType, score: number){
+        checkScoreIsInRange(score);
+
+        let entry: Entry;
+        if (one instanceof Entry)
+            entry = one;
+        else
+            entry = Entry.guessEntry(one);
+            
         score = (this.getScore(entry) ?? 0) + score;
         //取32位整数
         score = score >> 0;
@@ -508,60 +607,77 @@ class Objective {
      * 为分数持有者在记分项上减少分数。
      * @param {EntryValueType} one - 可能为分数持有者的值。
      * @param {number} score - 要减少的分数。
-     * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
     removeScore(one: EntryValueType, score: number){
         checkScoreIsInRange(score);
-        
+        this.addScore(one, -score);
+    }
+    
+    /**
+     * 为分数持有者在记分项上设置一个随机的分数。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @param {number} min - 随机分数的最小值。
+     * @param {number} max - 随机分数的最大值。
+     * @param {boolean} [useBuiltIn] - 是否在 JavaScript 代码层面进行随机。
+     *
+     * 由于实现原理以及 Minecraft 自身的特性，使用 Minecraft的随机命令时，
+     * 只会有 2^64-1 种可能。
+     * 如果将最小值设置为 `-2147483648`，并将最大值设置为 `2147483647`，
+     * 随机的结果一定会是 `-2147483648`。
+     * 
+     * 如果想要避免这种情况，请将此项设置为 `true`。
+     * @returns {number} 随机得到的新分数。
+     * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
+     * @throws 若 `useBuiltIn` 为 `false` ，且 `min > max` 。
+     */
+    randomScore(one: EntryValueType, min: number = -2147483647, max: number = 2147483647, useBuiltIn: boolean = true){
+        checkScoreIsInRange(min, max);
+        if (useBuiltIn) {
+            //在想能不能把这东西拿来随机
+            //((Math.max(Math.random()*Math.random()/Math.random(), Math.random()/Math.random()*Math.random())*1000000000000000000 >>2 | 0 )<<8 )|0
+            let vals = max - min;
+            let randomScore = vals * Math.random();
+            let result = Math.round(randomScore + min);
+            return this.setScore(one, result);
+        } else {
+            if (min > max){
+                throw new Error("min > max");
+            }
+            this.#playerCommand("random", one, min, max);
+            return this.getScore(one);
+        }
+    }
+    /**
+     * 在记分项上重置指定分数持有者的分数。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     */
+    resetScore(one: EntryValueType){
         let entry: Entry;
         if (one instanceof Entry)
             entry = one;
         else
             entry = Entry.guessEntry(one);
         
-        score = (this.getScore(entry) ?? 0) - score;
-        //取32位整数
-        score = score >> 0;
-        
-        if (entry.vanillaScbid)
-            this.vanillaObjective.setScore(entry.vanillaScbid, score);
-        else
+        if (entry.type === EntryType.FAKE_PLAYER){
+            this.vanillaObjective.removeParticipant(entry.displayName);
+        } else if (entry.type === EntryType.ENTITY
+        || entry.type === EntryType.PLAYER){
+            this.vanillaObjective.removeParticipant(entry.getVanillaEntity());
+        } else if (entry.vanillaScbid){
+            //可能永远执行不到这里，但是我还是保留它
+            this.vanillaObjective.removeParticipant(entry.vanillaScbid);
+        } else {
             throw new Error("scbid doesn't initialize");
-    }
-    
-    /**
-     * 为分数持有者在记分项上设置一个随机的分数。
-     * @deprecated 由于新版本移除了runCommand()，故原有的方法
-     * 不再可用，请改用 {@link Objective.postRandomScore}。
-     * @param {EntryValueType} one - 可能为分数持有者的值。
-     * @param {number} min - 随机分数的最小值。
-     * @param {number} max - 随机分数的最大值。
-     * @param {boolean} [useBuiltIn] - 是否在 JavaScript 代码层面进行随机。
-     *
-     * 由于实现原理以及 Minecraft 自身的特性，使用 Minecraf t的随机命令时，
-     * 只会有 2^64-1 种可能。
-     * 如果将最小值设置为 `-2147483648`，并将最大值设置为 `2147483647`，
-     * 随机的结果一定会是 `-2147483648`。
-     * 
-     * 如果想要避免这种情况，请将此项设置为 `true`。
-     * @returns {Promise<number>} 随机得到的新分数。只有在 `useBuiltIn` 被设置为 `true` 时，才会返回此结果，
-     * 否则将只会返回一个 `Promise<void>`，其在完成后被敲定。
-     * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
-     * @throws 若 `useBuiltIn` 为 `false` ，且 `min > max` 。
-     */
-    randomScore(one: EntryValueType, min: number = -2147483647, max: number = 2147483647, useBuiltIn: boolean = true){
-        return this.postRandomScore.apply(this, <any>arguments);
+        }
     }
     /**
-     * 在记分项上重置指定分数持有者的分数。
-     * @deprecated 由于新版本移除了runCommand()，故原有的方法
-     * 不再可用，请改用 {@link Objective.postResetScore}。
-     * @param {EntryValueType} one - 可能为分数持有者的值。
-     * @returns {Promise<void>} 执行成功后，此 `Promise` 将会敲定。
+     * 重置记分项所有分数持有者的分数。
      */
-    resetScore(one: EntryValueType){
-        return this.postResetScore.apply(this, <any>arguments);
+    resetScores(){
+        for (const part of this.vanillaObjective.getParticipants()){
+            this.vanillaObjective.removeParticipant(part);
+        }
     }
 }
 

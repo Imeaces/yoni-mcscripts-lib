@@ -20,15 +20,15 @@ export enum DisplaySlot {
     /**
      * 在暂停菜单中显示。
      */
-    list = "list",
+    list = Minecraft.DisplaySlotId.List,
     /**
      * 在屏幕右侧显示。
      */
-    sidebar = "sidebar",
+    sidebar = Minecraft.DisplaySlotId.Sidebar,
     /**
      * 在玩家名字下方显示。
      */
-    belowname = "belowname",
+    belowname = Minecraft.DisplaySlotId.BelowName,
 }
 
 /**
@@ -47,13 +47,6 @@ export enum ObjectiveSortOrder {
 
 /**
  * 描述了显示位上显示的记分项，以及显示方式。
- * @interface
- * @typedef DisplayOptions
- * @property {ObjectiveSortOrder} [sortOrder] - 记分项的项目显示在此位置上时，项目排序的方式。
- * @property {Objective} objective - 显示的记分项。
- */
-/**
- * 描述了显示位上显示的记分项，以及显示方式。
  */
 export interface DisplayOptions {
     /**
@@ -70,13 +63,6 @@ export interface DisplayOptions {
 
 /**
  * 定义了显示位上显示的记分项，以及显示方式。
- * @interface
- * @typedef DisplayOptionsDefinition
- * @property {ObjectiveSortOrder} [sortOrder] - 记分项的项目显示在此位置上时，项目排序的方式。
- * @property {Objective|Minecraft.ScoreboardObjective|string} objective - 显示的记分项。
- */
-/**
- * 定义了显示位上显示的记分项，以及显示方式。
  */
 export interface DisplayOptionsDefinition {
     /**
@@ -90,9 +76,9 @@ export interface DisplayOptionsDefinition {
 }
 
 /**
- * 记分板包括了记分项，分数持有者以及他们的分数。
+ * 记分板。
  */
-export class SimpleScoreboard {
+export class Scoreboard {
     /**
      * 存储记分项对象。
      * @type {Map<string, Objective>}
@@ -106,27 +92,27 @@ export class SimpleScoreboard {
      * @param {string} [displayName] - 为新添加的记分项指定显示名称，
      * 若不指定则将 `name` 作为显示名称。
      * @returns {Objective} 添加的记分项的对象。
-     * @throws 若准则不为 `"dummy"` ，抛出错误。
+     * @throws 若准则不为 `"dummy"`，抛出错误。
      * @throws 若 `name` 指定的记分项已经存在，抛出错误。
      */
-    static addObjective(name: string, criteria: string = "dummy", displayName: string = name): Objective{
+    static addObjective(name: string, criteria: string = "dummy", displayName: string = name): Objective {
         if (!name || typeof name !== "string")
             throw new TypeError("Objective name not valid!");
-        if (SimpleScoreboard.getObjective(name) !== null)
+        if (Scoreboard.getObjective(name) !== null)
             throw new Error("Objective "+name+" existed!");
         if (criteria !== "dummy")
             throw new Error("Unsupported criteria: " + criteria);
-        if (!name || typeof name !== "string")
+        if (typeof name !== "string" || name.length === 0)
             throw new TypeError("Objective display name not valid!");
         
         let vanillaObjective = VanillaScoreboard.addObjective(name, displayName);
         
         let newObjective = new Objective({
-            scoreboard: SimpleScoreboard,
+            scoreboard: Scoreboard,
             name, criteria, displayName,
             vanillaObjective
         });
-        SimpleScoreboard.#objectives.set(name, newObjective);
+        Scoreboard.#objectives.set(name, newObjective);
         
         return newObjective;
     }
@@ -136,7 +122,7 @@ export class SimpleScoreboard {
      * @param {string|Objective|Minecraft.ScoreboardObjective} nameOrObjective - 要移除的记分项，可以直接指定记分项的名称。
      * @returns {boolean} 是否成功移除了记分项。
      */
-    static removeObjective(nameOrObjective: string|Objective|Minecraft.ScoreboardObjective): boolean{
+    static removeObjective(nameOrObjective: string|Objective|Minecraft.ScoreboardObjective): boolean {
         let objectiveId;
         if (nameOrObjective instanceof Objective || nameOrObjective instanceof Minecraft.ScoreboardObjective){
             objectiveId = nameOrObjective.id;
@@ -144,8 +130,8 @@ export class SimpleScoreboard {
             objectiveId = nameOrObjective;
         }
         if (objectiveId && typeof objectiveId === "string"){
-            if (SimpleScoreboard.#objectives.has(objectiveId)){
-                SimpleScoreboard.#objectives.delete(objectiveId);
+            if (Scoreboard.#objectives.has(objectiveId)){
+                Scoreboard.#objectives.delete(objectiveId);
             }
             try {
                 return VanillaScoreboard.removeObjective(objectiveId);
@@ -165,29 +151,41 @@ export class SimpleScoreboard {
      * 若不存在名称为 `name` 的记分项，且未设置 `autoCreateDummy` 为 `true`，返回 `null`。
      * 若不存在名称为 `name` 的记分项，且设置了 `autoCreateDummy` 为 `true`，创建名称为 `name` 的记分项，并返回其对象。
      */
-    static getObjective(name: string|Minecraft.ScoreboardObjective, autoCreateDummy: boolean=false): Objective {
+    static getObjective(name: string | Minecraft.ScoreboardObjective, autoCreateDummy: true): Objective;
+    static getObjective(name: string | Minecraft.ScoreboardObjective, autoCreateDummy: false): Objective | null;
+    static getObjective(name: string | Minecraft.ScoreboardObjective): Objective | null;
+    static getObjective(name: string|Minecraft.ScoreboardObjective, autoCreateDummy: boolean = false ): Objective | null {
+        let vanillaObjective: Minecraft.ScoreboardObjective | undefined = undefined;
         let result: Objective | null = null;
         
         if (name instanceof Minecraft.ScoreboardObjective){
-            name = name.id;
+            if (name.isValid()){
+                vanillaObjective = name;
+            } else {
+                try {
+                    vanillaObjective = VanillaScoreboard.getObjective(name.id);
+                } catch {
+                }
+                if (vanillaObjective == null)
+                    throw new ReferenceError("attempt to get an removed objective");
+            }
+            name = vanillaObjective.id;
+        } else if (typeof name === "string"){
+            vanillaObjective = VanillaScoreboard.getObjective(name);
         }
-        
-        let record = SimpleScoreboard.#objectives.get(name);
-        let vanillaObjective = VanillaScoreboard.getObjective(name);
         if (vanillaObjective == null && autoCreateDummy){
             vanillaObjective = VanillaScoreboard.addObjective(name, name);
         }
-        //这种条件下，不会将记录的结果作为返回值
-        if (record == null || record.isUnregistered()){
-            //这种情况下，会创建对应的记分项对象，不可以合并判断条件
-            if (vanillaObjective != null){
-                result = new Objective(SimpleScoreboard, name, "dummy", vanillaObjective.displayName, vanillaObjective);
-                SimpleScoreboard.#objectives.set(name, result);
+        
+        if (vanillaObjective != null){
+            let record = Scoreboard.#objectives.get(name);
+            if (record === undefined || record.vanillaObjective !== vanillaObjective){
+                record = new Objective(Scoreboard, name, "dummy", vanillaObjective.displayName, vanillaObjective);
+                Scoreboard.#objectives.set(name, record);
             }
-        } else {
             result = record;
         }
-        return result as unknown as Objective;
+        return result;
     }
     
     /** 
@@ -196,19 +194,19 @@ export class SimpleScoreboard {
      */
     static getObjectives(): Objective[]{
         return Array.from(VanillaScoreboard.getObjectives())
-            .map(obj=>SimpleScoreboard.getObjective(obj.id));
+            .map(obj => Scoreboard.getObjective(obj.id) as Objective);
     }
     
     /**
      * 获得显示位上正在显示的内容的信息。
-     * @param {DisplaySlot} slot - 显示位。
+     * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
      * @returns {DisplayOptions} - 显示位上显示的内容。
      */
-    static getDisplayAtSlot(slot: DisplaySlot): DisplayOptions{
-        let rt = VanillaScoreboard.getObjectiveAtDisplaySlot(slot);
+    static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions{
+        let rt = VanillaScoreboard.getObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
         let result: DisplayOptions = {
             objective: rt.objective ?
-                SimpleScoreboard.getObjective(rt.objective.id) :
+                Scoreboard.getObjective(rt.objective.id) :
                 null
         };
         if ("sortOrder" in rt){
@@ -229,12 +227,12 @@ export class SimpleScoreboard {
     
     /**
      * 设置显示位上显示的记分项，并允许额外的设置。
-     * @param {DisplaySlot} slot - 显示位。
+     * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
      * @param {DisplayOptionsDefinition} settings - 显示位的设置。
      * @returns {Objective} 显示位先前显示的记分项的对象，若先前未显示任何记分项，返回 `undefined` 。
      */
-    static setDisplayAtSlot(slot: DisplaySlot, settings: DisplayOptionsDefinition){
-        let objective = SimpleScoreboard.getObjective(SimpleScoreboard.#getIdOfObjective(settings?.objective));
+    static setDisplayAtSlot(slot: DisplaySlot|Minecraft.DisplaySlotId, settings: DisplayOptionsDefinition){
+        let objective = Scoreboard.getObjective(Scoreboard.#getIdOfObjective(settings?.objective));
         
         if (objective == null){
             throw new Error("Unknown objective in settings");
@@ -260,28 +258,28 @@ export class SimpleScoreboard {
             };
             if ("sortOrder" in settings){
                 settingArg.sortOrder = settings.sortOrder === "ascending"
-                    ? Minecraft.ObjectiveSortOrder.ascending
-                    : Minecraft.ObjectiveSortOrder.descending;
+                    ? Minecraft.ObjectiveSortOrder.Ascending
+                    : Minecraft.ObjectiveSortOrder.Descending;
             }
         }
         let lastDisplayingObjective = VanillaScoreboard.setObjectiveAtDisplaySlot(
-            slot,
+            slot as Minecraft.DisplaySlotId,
             settingArg
         );
         if (lastDisplayingObjective == undefined)
             return undefined;
-        return SimpleScoreboard.getObjective(lastDisplayingObjective.id);
+        return Scoreboard.getObjective(lastDisplayingObjective.id);
     }
     
     /**
      * 清空显示位上正显示的记分项。
-     * @param {DisplaySlot} slot - 显示位。
+     * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
      * @returns {Objective} 显示位先前显示的记分项，若无，返回 `null` 。
      */
-    static clearDisplaySlot(slot: DisplaySlot): Objective | null{
-        let rt = VanillaScoreboard.clearObjectiveAtDisplaySlot(slot);
+    static clearDisplaySlot(slot: DisplaySlot|Minecraft.DisplaySlotId): Objective | null{
+        let rt = VanillaScoreboard.clearObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
         if (rt?.id != null){
-            return SimpleScoreboard.getObjective(rt.id);
+            return Scoreboard.getObjective(rt.id);
         } else {
             return null;
         }
@@ -303,14 +301,59 @@ export class SimpleScoreboard {
      * 移除记分板的所有记分项。
      */
     static removeAllObjectives(){
-        Array.from(VanillaScoreboard.getObjectives())
-            .forEach(obj=>{
-                SimpleScoreboard.removeObjective(obj);
-            });
+        for (const objective of VanillaScoreboard.getObjectives()){
+            Scoreboard.removeObjective(objective);
+        }
     }
     
     /**
+     * 重置记分板上所有分数持有者的所有分数记录。
+     */
+    static resetAllScores(){
+        for (const objective of VanillaScoreboard.getObjectives()){
+            for (const scbid of objective.getParticipants()){
+                objective.removeParticipant(scbid);
+            }
+        }
+    }
+
+    /**
+     * 重置记分板上指定分数持有者的所有分数记录。
+     * @param {EntryValueType} one - 可能对应分数持有者的值。
+     * @throws 当分数持有者为虚拟玩家，并且世界上存在与其名字相同的玩家时，抛出 `NameConflictError`。
+     * @throws 未能在世界上找到分数持有者的实体对象时，抛出错误。
+     */
+    static resetScore(one: EntryValueType){
+        let entry: Entry;
+        if (one instanceof Entry)
+            entry = one;
+        else
+            entry = Entry.guessEntry(one);
+        
+        let oneValue;
+        
+        if (entry.vanillaScbid){
+            oneValue = entry.vanillaScbid;
+        } else if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
+            oneValue = entry.getVanillaEntity();
+            if (oneValue == null){
+                throw new Error("Could not find the entity");
+            }
+        } else {
+            oneValue = entry.displayName;
+        }
+        
+        for (const objective of VanillaScoreboard.getObjectives()){
+            if (objective.hasParticipant(oneValue)){
+                objective.removeParticipant(oneValue);
+            }
+        }
+    }
+
+    /**
      * 以异步方式重置分数持有者的分数。
+     * @deprecated 不再推荐使用，建议使用{@link Scoreboard.getEntries}并过滤特定条目后
+     使用{@link Scoreboard.resetScore}移除，或使用{@link Scoreboard.resetAllScores}。
      * @param {(entry: Entry) => boolean} [filter] - 可选的过滤器函数，
      * 将所有分数持有者的 `Entry` 对象依次传入，若得到 `true` ，则重置
      * 此分数持有者的分数，否则将不会重置。
@@ -329,7 +372,7 @@ export class SimpleScoreboard {
         let promise = new Promise((re)=>{
             resolve = re;
         });
-        let entries = SimpleScoreboard.getEntries();
+        let entries = Scoreboard.getEntries();
         let successCount = 0;
         let doneCount = 0;
         let successCountAdder = ()=>{
@@ -342,7 +385,7 @@ export class SimpleScoreboard {
         };
         // @ts-ignore 能用，忽略类型问题。
         entries.filter(filter).forEach((id)=>{
-            SimpleScoreboard.postResetScore(id)
+            Scoreboard.postResetScore(id)
                 .then(successCountAdder)
                 .finally(resolveIfDone);
         });
@@ -351,6 +394,7 @@ export class SimpleScoreboard {
     
     /**
      * 重置记分板上指定分数持有者的所有分数记录。
+     * @deprecated 建议使用其同步版本 {@link Scoreboard.resetScore}
      * @param {EntryValueType} one - 可能对应分数持有者的值。
      * @throws 当分数持有者为虚拟玩家，并且世界上存在与其名字相同的玩家时，抛出 `NameConflictError`。
      * @throws 未能在世界上找到分数持有者的实体对象时，抛出错误。

@@ -12,13 +12,13 @@ export enum EntryType {
     /**
      * 玩家类型的分数持有者。
      */
-    PLAYER = Minecraft.ScoreboardIdentityType.player,
+    PLAYER = Minecraft.ScoreboardIdentityType.Player,
     /**
      * 实体类型的分数持有者。
      */
-    ENTITY = Minecraft.ScoreboardIdentityType.entity,
+    ENTITY = Minecraft.ScoreboardIdentityType.Entity,
     /**
      * 记分板虚拟玩家类型的分数持有者。
      */
-    FAKE_PLAYER = Minecraft.ScoreboardIdentityType.fakePlayer,
+    FAKE_PLAYER = Minecraft.ScoreboardIdentityType.FakePlayer,
 }
