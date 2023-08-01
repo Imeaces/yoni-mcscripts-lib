@@ -5,8 +5,8 @@ export class CommandList<T> {
     #indexes: number[] = [0, 0, 0, 0, 0];
     #count: number[] = [0, 0, 0, 0, 0];
     hasNext(): boolean {
-        for (const priv of [0, 1, 2, 3, 4]){
-            if (this.#count[priv] > 0)
+        for (const prio of [0, 1, 2, 3, 4]){
+            if (this.#count[prio] > 0)
                 return true;
         }
         return false;
@@ -14,12 +14,12 @@ export class CommandList<T> {
     next(): T {
         let nextCommand: T | null = null;
         
-        for (const privIndex of [0, 1, 2, 3, 4]){
-            if (this.#count[privIndex] > 0){
-                const index = this.#indexes[privIndex];
-                nextCommand = this.#commands[privIndex][index];
-                this.#indexes[privIndex] += 1;
-                this.#count[privIndex] -= 1;
+        for (const prioIndex of [0, 1, 2, 3, 4]){
+            if (this.#count[prioIndex] > 0){
+                const index = this.#indexes[prioIndex];
+                nextCommand = this.#commands[prioIndex][index];
+                this.#indexes[prioIndex] += 1;
+                this.#count[prioIndex] -= 1;
                 break;
             }
         }
@@ -29,10 +29,10 @@ export class CommandList<T> {
             
         return nextCommand;
     }
-    add(priv: CommandPriority, command: T){
-        const privIndex = (priv as any) - 1;
-        this.#commands[privIndex].push(command);
-        this.#count[privIndex] += 1;
+    add(prio: CommandPriority, command: T){
+        const prioIndex = (prio as any) - 1;
+        this.#commands[prioIndex].push(command);
+        this.#count[prioIndex] += 1;
     }
     count(): number {
         return this.#count.reduce((a, b) => a + b);
