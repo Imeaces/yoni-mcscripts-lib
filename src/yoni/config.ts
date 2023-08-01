@@ -23,6 +23,17 @@ const loggingConfig = {
     outputToConsole: true,
 }
 
+const command = {
+    //在Command中使用runCommand()代替runCommandAsync()
+    //这可以大幅提升命令执行速度，但是可能会出现一些其他问题
+    useSyncExecutorOnAsyncExecute: true,
+};
+
+const scheduler = {
+    //允许的遗留任务数量，当遗留任务的数量超出此设置值时，会放弃执行
+    maxLegacyTaskCount: 30,
+};
+
 //如果为true，启用一些可能可以加快运行速度的代码
 //（可能不够稳定）
 export const useOptionalFasterCode = true;
@@ -53,6 +64,8 @@ export function setConfig(key: string, value: any){
 
 export const config = Config.createFromObject({
     debug,
+    scheduler,
+    command,
     "yoni-mcscripts-lib": { injectGlobal: false },
     enableScoreboardIdentityByNumberIdQuery,
     logging: loggingConfig

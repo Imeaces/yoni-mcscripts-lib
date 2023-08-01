@@ -1,6 +1,7 @@
 import { MinecraftSystem } from "./basis.js";
 import { Logger } from "./util/Logger.js";
 import { isDebugMode } from "./debug.js";
+import { config } from "./config.js";
 
 const logger = new Logger("Schedule");
 const scheduleCallbacks = new WeakMap();
@@ -334,32 +335,43 @@ function addScheduleToQueue(schedule: Schedule): boolean {
     }
 }
 
-MinecraftSystem.runInterval(doTickDelaySchedule, 1);
-MinecraftSystem.runInterval(doTimeDelaySchedule, 1);
-MinecraftSystem.runInterval(doTickCycleSchedule, 1);
-MinecraftSystem.runInterval(doTimeCycleSchedule, 1);
+MinecraftSystem.runInterval(executeTasks, 1);
 
-const doTickDelayScheduleTasks: Schedule[] = [];
-const doTimeDelayScheduleTasks: Schedule[] = [];
-const doTickCycleScheduleTasks: Schedule[] = [];
-const doTimeCycleScheduleTasks: Schedule[] = [];
-
-function executeTasks(tasks: Schedule[]){
-    for (const schedule of tasks) {
-        executeSchedule(tasks.pop() as Schedule);
+const taskList: Schedule[] = [];
+let legacyTasks: Schedule[] = [];
+function executeTasks(){
+    if (taskList.length > 0){
+        legacyTasks = taskList.concat(legacyTasks);
+        taskList.length = 0;
+    }
+    
+    if (config.getInt("scheduler.maxLegacyTaskCount", 0) < legacyTasks.length){
+        logger.warn("遗留任务过多，已跳过 {} 个遗留任务", legacyTasks.length);
+        legacyTasks.length = 0;
+    }
+    
+    for (let i = legacyTasks.length; i > 0; i--){
+        executeSchedule(legacyTasks.pop() as Schedule);
+    }
+    
+    addTimeCycleScheduleToTasks(taskList);
+    addTickCycleScheduleToTasks(taskList);
+    addTimeDelayScheduleToTasks(taskList);
+    addTickDelayScheduleToTasks(taskList);
+    
+    for (let i = taskList.length; i > 0; i--){
+        executeSchedule(taskList.pop() as Schedule);
     }
 }
 
 //处理只执行一次的tick任务 tickdelay
-function doTickDelaySchedule(){
+function addTickDelayScheduleToTasks(tasks: Schedule[]){
     let schedules = queueSchedulesTypedRecord[Schedule.tickDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
     const curTick = MinecraftSystem.currentTick;
 
-    const tasks: Schedule[] = doTickDelayScheduleTasks;
-    executeTasks(tasks); //处理可能的没有执行但是应该执行的任务
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         let lessTime = scheduleExecuteTimer.get(schedule) as number;
@@ -374,17 +386,14 @@ function doTickDelaySchedule(){
             scheduleExecuteTimer.set(schedule, lessTime);
         }
     }
-    executeTasks(tasks);
 }
 
 //处理只执行一次的time任务 timedelay
-function doTimeDelaySchedule() {
+function addTimeDelayScheduleToTasks(tasks: Schedule[]){
     let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    const tasks: Schedule[] = doTimeDelayScheduleTasks;
-    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         const time = Date.now();
@@ -397,19 +406,16 @@ function doTimeDelaySchedule() {
             removeScheduleFromQueue(schedule);
         }
     }
-    executeTasks(tasks);
 }
 
 //处理重复执行的tick任务 tickcycle
-function doTickCycleSchedule() {
+function addTickCycleScheduleToTasks(tasks: Schedule[]){
     let schedules = queueSchedulesTypedRecord[Schedule.tickCycleSchedule as unknown as string];
     if (schedules === undefined)
         return;
 
     const curTick = MinecraftSystem.currentTick;
     
-    const tasks: Schedule[] = doTickCycleScheduleTasks;
-    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         
@@ -430,17 +436,14 @@ function doTickCycleSchedule() {
             scheduleExecuteTimer.set(schedule, lessTime);
         }
     }
-    executeTasks(tasks);
 }
 
 //处理重复执行的time任务 timecycle
-function doTimeCycleSchedule() {
+function addTimeCycleScheduleToTasks(tasks: Schedule[]){
     let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
     if (schedules === undefined)
         return;
     
-    const tasks: Schedule[] = doTimeCycleScheduleTasks;
-    executeTasks(tasks);
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
         
@@ -464,7 +467,6 @@ function doTimeCycleSchedule() {
             scheduleAddToQueueTime.set(schedule, time);
         }
     }
-    executeTasks(tasks);
 }
 
 
