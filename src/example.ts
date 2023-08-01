@@ -22,14 +22,16 @@ YoniScheduler.runDelayTickTask(function doSome(){
     }
 
     objective0.setScore(onePlayer, -3987);
-
     YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 -3987
 
-    YoniUtils.say("现在重置他的分数");
-
-    objective0.resetScore(onePlayer);
-
+    YoniUtils.say("现在重置他的所有分数");
+    Scoreboard.resetScore(onePlayer);
     YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 undefined
+    YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective1.displayName} 上的分数为 ${objective1.getScore(onePlayer)}`); //分数为 undefined
+
+    YoniUtils.say("现在往他的记分项1上添加 233 分");
+    objective1.addScore(onePlayer, 233);
+    YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective1.displayName} 上的分数为 ${objective1.getScore(onePlayer)}`); //分数为 233
 
 }, 1200);
 //延迟一分钟再执行（1*60*20=1200）

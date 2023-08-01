@@ -1,6 +1,7 @@
 /@types
 /yoni/
 /yoni-mcscripts-lib.js
+/example.js
 
 # Logs
 logs
