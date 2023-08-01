@@ -116,7 +116,7 @@ export class Command {
     static addExecute(priority: CommandPriority, sender: AsyncCommandSender, command: string): Promise<CommandResult> {
         if (Command.config.getBoolean("useSyncExecutorOnAsyncExecute")){
             // @ts-ignore 特性，出问题别怪我
-            return Command.#addSyncExecute(priority, sender, command);
+            return Command.addSyncExecute(priority, sender, command);
         }
         
         let resolve: any, reject: any;
@@ -140,7 +140,7 @@ export class Command {
         return promise;
         throw new Error("Unknown command priority " + String(priority));
     }
-    static #addSyncExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
+    static addSyncExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
         let resolve: any, reject: any;
         let promise = new Promise((re, rj)=>{
             resolve = re;
@@ -271,94 +271,28 @@ export class Command {
         if (!overworld.runCommand){
             throw new Error("current version doesn't support 'Command.run' method, try 'Command.fetch' instead");
         }
-        let originalCommandResult: any;
-        let statusCode = StatusCode.success;
-        let successCount = 0;
-        let statusMessage = "command error";
-        try {
-            originalCommandResult = overworld.runCommand(command);
-            
-        } catch(cmderr) {
-            if (typeof cmderr === "string"){
-                try {
-                    originalCommandResult = JSON.parse(cmderr);
-                } catch {
-                    originalCommandResult = { statusMessage: cmderr };
-                }
-            } else {
-                originalCommandResult = cmderr;
-            }
-            statusCode = StatusCode.fail;
-        }
-        
-        if (originalCommandResult?.statusCode !== undefined){
-            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
-        }
-        
-        if (typeof originalCommandResult?.statusMessage === "string"){
-            statusMessage = originalCommandResult.statusMessage;
-        }
-        
-        if (typeof originalCommandResult?.successCount === "number"){
-            successCount = originalCommandResult.successCount;
-        }
-        
-        return Object.assign({
-            successCount,
-            statusCode,
-            statusMessage,
-        }, originalCommandResult);
-        
+        return Command.execute(overworld, command);
     }
     static execute(sender: CommandSender, command: string): CommandResult {
         if (!sender.runCommand){
             throw new Error("not a command sender or current version doesn't support 'Command.execute' method, try 'Command.fetchExecute' instead");
         }
         let originalCommandResult: any;
-        let statusCode = StatusCode.success;
-        let successCount = 0;
-        let statusMessage = "command error";
+        let isSuccess = false;
         try {
             originalCommandResult = sender.runCommand(command);
-            
+            isSuccess = true;
         } catch(cmderr) {
-            if (typeof cmderr === "string"){
-                try {
-                    originalCommandResult = JSON.parse(cmderr);
-                } catch {
-                    originalCommandResult = { statusMessage: cmderr };
-                }
-            } else {
-                originalCommandResult = cmderr;
-            }
-            statusCode = StatusCode.fail;
+            originalCommandResult = cmderr;
         }
-        
-        if (originalCommandResult?.statusCode !== undefined){
-            statusCode = originalCommandResult.statusCode as unknown as StatusCode;
-        }
-        
-        if (typeof originalCommandResult?.statusMessage === "string"){
-            statusMessage = originalCommandResult.statusMessage;
-        }
-        
-        if (typeof originalCommandResult?.successCount === "number"){
-            successCount = originalCommandResult.successCount;
-        }
-        
-        return Object.assign({
-            successCount,
-            statusCode,
-            statusMessage,
-        }, originalCommandResult);
-        
+        return Command.generateCommandResult(isSuccess, originalCommandResult);
     }
     static generateCommandResult(isSuccess: boolean, value: any): CommandResult {
         // 反正最后返回的是 CommandResult
         
         let statusCode = isSuccess ? StatusCode.success: StatusCode.fail;
         let successCount = 0;
-        let statusMessage = "";
+        let statusMessage = "command error";
         
         if (typeof value === "string"){
             try {
@@ -381,7 +315,7 @@ export class Command {
         
         if (value instanceof Error){
             statusCode = StatusCode.fail;
-            statusMessage = value.toString();
+            statusMessage = value.message;
         } else if (typeof value === "string"){
             statusMessage = value;
         } else if (typeof value === "number"){
