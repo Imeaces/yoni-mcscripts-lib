@@ -129,7 +129,7 @@ export class Player extends Entity {
     }
 }
 
-copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity");
+copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity", ["level"]);
 EntityClassRegistry.register(Player, Minecraft.Player);
 
 type BaseVanillaPlayerClass = Omit<

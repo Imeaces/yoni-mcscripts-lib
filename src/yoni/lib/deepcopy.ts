@@ -16,16 +16,18 @@ interface CopyFunction {
     isCopyableValue(value: any): boolean;
 }
 
+const DEFAULT_OPTIONS: DeepCopyOption = {
+    rootObject: undefined,
+    newObjectMaker: () => ({}),
+    dealCircular: ["ignore", "error"][1],
+    copyFunction: {
+        getCopiedValue,
+        isCopyableValue,
+    }
+};
+    
 export function deepcopy(value: {}, option: Partial<DeepCopyOption> = {}){
-    let applyOption = Object.assign({
-        rootObject: undefined,
-        newObjectMaker: () => ({}),
-        dealCircular: ["ignore", "error"][1],
-        copyFunction: {
-            getCopiedValue,
-            isCopyableValue,
-        }
-    }, option);
+    let applyOption = Object.assign({}, DEFAULT_OPTIONS, option);
     
     const { newObjectMaker, dealCircular } = applyOption;
     const { getCopiedValue, isCopyableValue } = applyOption.copyFunction;

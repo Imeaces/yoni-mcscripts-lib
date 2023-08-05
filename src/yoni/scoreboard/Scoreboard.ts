@@ -95,7 +95,7 @@ export class Scoreboard {
      * @throws 若准则不为 `"dummy"`，抛出错误。
      * @throws 若 `name` 指定的记分项已经存在，抛出错误。
      */
-    static addObjective(name: string, criteria: string = "dummy", displayName: string = name): Objective {
+    static addObjective(name: string, criteria: "dummy" = "dummy", displayName: string = name): Objective {
         if (!name || typeof name !== "string")
             throw new TypeError("Objective name not valid!");
         if (Scoreboard.getObjective(name) !== null)
@@ -148,13 +148,10 @@ export class Scoreboard {
      * @param {string|Minecraft.ScoreboardObjective} name - 可以代表记分项的值。
      * @param {boolean} autoCreateDummy - 如果为 `true` ，在未找到对应记分项时，创建新的记分项并返回。
      * @returns {Objective} 名称为 `name` 的记分项。
-     * 若不存在名称为 `name` 的记分项，且未设置 `autoCreateDummy` 为 `true`，返回 `null`。
      * 若不存在名称为 `name` 的记分项，且设置了 `autoCreateDummy` 为 `true`，创建名称为 `name` 的记分项，并返回其对象。
+     * @throws 若不存在名称为 `name` 的记分项，且未设置 `autoCreateDummy` 为 `true`，抛出错误`。
      */
-    static getObjective(name: string | Minecraft.ScoreboardObjective, autoCreateDummy: true): Objective;
-    static getObjective(name: string | Minecraft.ScoreboardObjective, autoCreateDummy: false): Objective | null;
-    static getObjective(name: string | Minecraft.ScoreboardObjective): Objective | null;
-    static getObjective(name: string|Minecraft.ScoreboardObjective, autoCreateDummy: boolean = false ): Objective | null {
+    static getObjective(name: string|Minecraft.ScoreboardObjective, autoCreateDummy: boolean = false): Objective {
         let vanillaObjective: Minecraft.ScoreboardObjective | undefined = undefined;
         let result: Objective | null = null;
         
@@ -165,26 +162,32 @@ export class Scoreboard {
                 try {
                     vanillaObjective = VanillaScoreboard.getObjective(name.id);
                 } catch {
-                }
-                if (vanillaObjective == null)
                     throw new ReferenceError("attempt to get an removed objective");
+                }
             }
             name = vanillaObjective.id;
         } else if (typeof name === "string"){
-            vanillaObjective = VanillaScoreboard.getObjective(name);
+            try {
+                vanillaObjective = VanillaScoreboard.getObjective(name);
+            } catch(e) {
+                if (!autoCreateDummy)
+                    throw e;
+            }
         }
-        if (vanillaObjective == null && autoCreateDummy){
-            vanillaObjective = VanillaScoreboard.addObjective(name, name);
+        if (vanillaObjective == null){
+            if (autoCreateDummy){
+                vanillaObjective = VanillaScoreboard.addObjective(name, name);
+            } else {
+                throw new ReferenceError("objective "+name+" didn't exist");
+            }
         }
         
-        if (vanillaObjective != null){
-            let record = Scoreboard.#objectives.get(name);
-            if (record === undefined || record.vanillaObjective !== vanillaObjective){
-                record = new Objective(Scoreboard, name, "dummy", vanillaObjective.displayName, vanillaObjective);
-                Scoreboard.#objectives.set(name, record);
-            }
-            result = record;
+        let record = Scoreboard.#objectives.get(name);
+        if (record === undefined || record.vanillaObjective !== vanillaObjective){
+            record = new Objective(Scoreboard, name, "dummy", vanillaObjective.displayName, vanillaObjective);
+            Scoreboard.#objectives.set(name, record);
         }
+        result = record;
         return result;
     }
     

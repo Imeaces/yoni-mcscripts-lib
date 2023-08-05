@@ -1,8 +1,8 @@
-import { MinecraftSystem, runTask } from "./basis.js";
+import { MinecraftSystem, runTask, overworld, isReadonlyMode } from "./basis.js";
 import { YoniScheduler } from "./schedule.js";
 
 class System {
-    run(callback: (...args: any[]) => void, ...args: any[]){
+    run(callback: (((...args: any[]) => void) | (() => void)), ...args: any[]){
         runTask(callback, ...args);
     }
     get beforeEvents(){
@@ -12,20 +12,33 @@ class System {
         return MinecraftSystem.afterEvents;
     }
     get currentTick(){
-        return MinecraftSystem.currentTick
+        return MinecraftSystem.currentTick;
+    }
+    isReadonlyMode(): boolean {
+        return isReadonlyMode();
+    }
+    async waitForRWMode(callback?: () => void): Promise<void> {
+        if (this.isReadonlyMode()){
+            let resolve: Function = () => {};
+            const promise = new Promise((re) => resolve = re);
+            YoniScheduler.runDelayTimerTask(resolve, 0);
+            await promise;
+        }
+        if (callback)
+            callback();
     }
     
     setInterval(callback: () => void, interval: number){
         return YoniScheduler.runCycleTimerTask(callback, interval, interval);
     }
-    setTimeout(callback: () => void, timeout: number = 0){
-        return YoniScheduler.runDelayTimerTask(callback, timeout);
+    setTimeout(callback: () => void, timeout?: number){
+        return YoniScheduler.runDelayTimerTask(callback, timeout ?? 0);
     }
     setIntervalTick(callback: () => void, intervalTick: number){
         return YoniScheduler.runCycleTickTask(callback, intervalTick, intervalTick);
     }
-    setTimeoutTick(callback: () => void, timeoutTick: number){
-        return YoniScheduler.runDelayTickTask(callback, timeoutTick);
+    setTimeoutTick(callback: () => void, timeoutTick?: number){
+        return YoniScheduler.runDelayTickTask(callback, timeoutTick ?? 0);
     }
     clearInterval(id: number){
         return YoniScheduler.removeSchedule(id);

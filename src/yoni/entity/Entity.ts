@@ -225,7 +225,7 @@ export class Entity extends EntityBase {
     }
 }
 
-copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "vanillaEntity");
+copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "vanillaEntity", ["getRotation", "getVelocity", "addEffect"]);
 
 EntityClassRegistry.register(Entity, Minecraft.Entity);
 

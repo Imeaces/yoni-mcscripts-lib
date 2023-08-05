@@ -36,6 +36,9 @@ export { Dimension } from "./dimension.js";
 export { Block } from "./block.js";
 export { Yoni } from "./Yoni.js";
 
+// lib exports
+export * as TimeoutLib from "./lib/Timeout.js";
+
 // class exports
 export { Schedule } from "./schedule.js";
 export { Logger } from "./util/Logger.js";

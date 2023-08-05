@@ -26,6 +26,15 @@ export function runTask(callback: (() => void) | ((...args: any[]) => void), ...
  */
 export const overworld = VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.overworld);
 
+export function isReadonlyMode(): boolean {
+    try {
+        overworld.runCommand("help");
+    } catch {
+        return true;
+    }
+    return false;
+}
+
 /**
  * a type contains a set of statusCode
  */

@@ -2,13 +2,7 @@ import Minecraft from "./minecraft.js";
 import { Dimension, YoniDimension } from "./dimension.js";
 import { Block, YoniBlock } from "./block.js";
 import { DimensionLikeValue, isDimensionValue } from "./dim.js";
-
-function getFiniteNumber(v: any): number {
-    v = Number(v);
-    if (!isFinite(v))
-        throw new Error("Number not finite");
-    return v;
-}
+import { getNumber as getFiniteNumber } from "./lib/getNumber.js";
 
 /**
  * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
