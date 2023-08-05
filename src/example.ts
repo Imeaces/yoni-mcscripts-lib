@@ -6,8 +6,13 @@ import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } fr
 // 访问 API 的重新封装，并添加了一些没有的方法。
 
 YoniScheduler.runDelayTickTask(function doSome(){
-    const objective0: Objective = Scoreboard.getObjective("objective_0")
-        ?? Scoreboard.addObjective("objective_0");
+    let objective0: Objective;
+    try {
+        //记分项不存在的话获取会出现错误
+        objective0 = Scoreboard.getObjective("objective_0");
+    } catch {
+        objective0 = Scoreboard.addObjective("objective_0");
+    }
 
     // 或者可以这样，传入第二个参数 true，表示在记分项不存在的时候
     // 使用 dummy 准则创建同名记分项。
