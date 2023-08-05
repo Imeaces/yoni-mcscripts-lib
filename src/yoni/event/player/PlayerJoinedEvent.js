@@ -1,4 +1,4 @@
-import { EventListener, EventSignal, EventTriggerBuilder } from "../../event.js";
+import { EventTypes, EventSignal, EventTriggerBuilder } from "../../event.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { VanillaWorld, Minecraft } from "../../basis.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
@@ -49,13 +49,16 @@ const trigger = new EventTriggerBuilder()
     .eventClass(PlayerJoinedEvent)
     .whenFirstSubscribe(()=>{
         YoniScheduler.addSchedule(schedule);
-        eventId = EventListener.register("minecraft:playerJoin", (event)=>{
-            joiningPlayers.add(event.playerName);
-        });
+        
+        EventTypes.get("minecraft:afterEvents.playerJoin").subscribe(onJoin);
     })
     .whenLastUnsubscribe(()=>{
         YoniScheduler.removeSchedule(schedule);
-        EventListener.unregister(eventId);
+        EventTypes.get("minecraft:afterEvents.playerJoin").unsubscribe(onJoin);
     })
     .build()
     .registerEvent();
+
+function onJoin(event){
+    joiningPlayers.add(event.playerName);
+}

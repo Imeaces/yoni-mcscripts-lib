@@ -18,5 +18,3 @@ export class PlayerEvent extends Event {
     }
     eventType = EntityTypes.get("minecraft:player");
 }
-
-export default PlayerEvent;

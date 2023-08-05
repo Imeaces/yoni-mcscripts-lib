@@ -1,9 +1,9 @@
-function copyPropertiesWithoutOverride(target: {}, src: {}, accessKey: string | symbol){
+function copyPropertiesWithoutOverride(target: {}, src: {}, accessKey: string | symbol, excludeKeys: (string | symbol)[] = []){
     if ((typeof accessKey !== "string" && typeof accessKey !== "symbol") || accessKey === ""){
         throw new TypeError("accessKey not valid");
     }
     for (let key of getOwnProperties(src)){
-        if (key in target || key === accessKey){
+        if (key in target || key === accessKey || excludeKeys.includes(key)){
             continue;
         }
         

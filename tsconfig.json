@@ -22,7 +22,8 @@
 
         "allowUnusedLabels": true,
         "allowUnreachableCode": true,
-
+        "experimentalDecorators": true,
+        
         "strict": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
@@ -30,13 +31,18 @@
         "allowJs": true,
         "checkJs": false,
 
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        
+        "incremental": true,
+        "tsBuildInfoFile": "./.tsbuildinfo"
     },
     "include": [
         "src/**/*.ts",
         "src/**/*.js"
     ],
     "exclude": [
+        "src/yoni/storage/**",
+        "src/yoni/event/v2/**",
         "node_modules"
     ]
 }

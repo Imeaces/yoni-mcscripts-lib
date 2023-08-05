@@ -5,7 +5,6 @@ import { EventListener } from "./event/Listener.js";
 import { EventTrigger } from "./event/Trigger.js";
 import { EventTriggerBuilder } from "./event/TriggerBuilder.js";
 
-export default EventTypes;
 export {
     Event,
     EventTypes,

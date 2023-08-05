@@ -1,15 +1,14 @@
 import { VanillaScoreboard, Minecraft, Gametest } from "../basis.js";
 import { EntityBase } from "../entity/EntityBase.js";
 import { EntityValue } from "../entity/EntityTypeDefs.js";
-import Entity from "../entity/Entity.js";
-import Player from "../entity/Player.js";
+import { YoniEntity } from "../entity/Entity.js";
 import { UnknownEntryError } from "./ScoreboardError.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 
 const { ScoreboardIdentityType } = Minecraft;
 
-import { debug, useOptionalFasterCode, enableScoreboardIdentityByNumberIdQuery } from "../config.js";
-import { system as System } from "../system.js";
+import { config, isDebug } from "../config.js";
+import { system } from "../system.js";
 
 /*
  存十万条就很卡了
@@ -17,27 +16,17 @@ import { system as System } from "../system.js";
 */
 
 let idRecords: Map<number, Entry>;
-if (enableScoreboardIdentityByNumberIdQuery){
+if (config.getBoolean("enableScoreboardIdentityByNumberIdQuery")){
     idRecords = new Map();
 }
-let nameRecords: Map<string, Entry> = new Map();
+
 let entityRecords: WeakMap<Minecraft.Entity, Entry> = new WeakMap();
 let scbidRecords: WeakMap<Minecraft.ScoreboardIdentity, Entry> = new WeakMap();
 
-if (debug){ // @ts-ignore 测试使用，将记录公开以便于查询
-    globalThis.EntryRecords = { idRecords, nameRecords, entityRecords, scbidRecords };
+if (isDebug()){ // @ts-ignore 测试使用，将记录公开以便于查询
+    globalThis.EntryRecords = { idRecords, entityRecords, scbidRecords };
 }
 
-/**
- * 一系列用于查询 Entry 的信息。
- * @interface
- * @typedef EntryQueryOptions
- * @property {string} [name]
- * @property {number} [id]
- * @property {Minecraft.ScoreboardIdentity} [scbid]
- * @property {EntityBase|Minecraft.Entity} [entity]
- * @property {EntryType} [type]
- */
 /**
  * 一系列用于查询记录的信息。
  */
@@ -92,6 +81,8 @@ class Entry {
     
     /**
      * 查找符合 `option` 中列出的条件的分数持有者对象。
+     *
+     * 对于虚拟玩家，不会保证未初始化前的一致性。
      * @param {EntryQueryOptions} option
      * @returns {Entry}
      */
@@ -116,14 +107,16 @@ class Entry {
             entry = scbidRecords.get(scbid);
         }
         
+        /*
         if (entry == null && name != null && type === EntryType.FAKE_PLAYER){
         
             entry = nameRecords.get(name);
         
         }
+        */
         
         if (entry == null
-        && enableScoreboardIdentityByNumberIdQuery
+        && config.getBoolean("enableScoreboardIdentityByNumberIdQuery")
         && id != null
         ){
             entry = idRecords.get(id);
@@ -154,15 +147,12 @@ class Entry {
             }
         }
         
-        if (enableScoreboardIdentityByNumberIdQuery
+        if (config.getBoolean("enableScoreboardIdentityByNumberIdQuery")
         && entry.id != null)
             idRecords.set(entry.id, entry);
         
         if (entry.vanillaScbid != null)
             scbidRecords.set(entry.vanillaScbid, entry);
-        
-        if (type === EntryType.FAKE_PLAYER)
-            nameRecords.set(entry.displayName, entry);
         
         return entry;
     }
@@ -173,7 +163,7 @@ class Entry {
      * @returns {Minecraft.ScoreboardIdentity[]}
      */
     static getVanillaScoreboardParticipants(): Readonly<Minecraft.ScoreboardIdentity[]> {
-        let currentTick = System.currentTick;
+        let currentTick = system.currentTick;
         if (currentTick !== Entry.#vanillaScbidsLastUpdateTime){
             let scbids = VanillaScoreboard.getParticipants();
             if (! Array.isArray(scbids)){
@@ -204,7 +194,7 @@ class Entry {
      * 分数持有者的类型。
      * @returns {EntryType}
      */
-    get type(){
+    get type(): EntryType {
         return this.#type;
     }
     
@@ -226,12 +216,12 @@ class Entry {
         if (this.vanillaScbid !== undefined){
             return this.vanillaScbid.displayName;
         }
+        if (this.#type === EntryType.FAKE_PLAYER)
+            return this.#name;
         if (this.#type === EntryType.PLAYER)
             return (this.#entity as unknown as Minecraft.Player).name; 
         if (this.#type === EntryType.ENTITY)
             return String(this.getEntity().id);
-        if (this.#type === EntryType.FAKE_PLAYER)
-            return this.#name;
         throw new Error("unknown name");
     }
     
@@ -247,11 +237,8 @@ class Entry {
     }
     
     static isScbidValidity(scbid: any){
-        try {
-            return Entry.checkScbidValidity(scbid);
-        } catch {
-            return false;
-        }
+        return (scbid instanceof Minecraft.ScoreboardIdentity)
+        && scbid.isValid();
     }
     
     /**
@@ -262,15 +249,8 @@ class Entry {
             throw new TypeError("不是分数持有者对象。");
         }
         
-        let desc = Object.getOwnPropertyDescriptor(Minecraft.ScoreboardIdentity.prototype, "id");
-        if (desc?.get){
-            try {
-                desc.get.call(scbid);
-            } catch {
-                throw new Error("指定的分数持有者对象已不可用");
-            }
-        } else {
-            throw new Error("出现了意料之外的情况，可能是当前版本尚未支持");
+        if (scbid.isValid()){
+            throw new Error("指定的分数持有者对象已不可用");
         }
         
         return true;
@@ -291,9 +271,9 @@ class Entry {
                     entry.#entity = null;
                 }
             } else if (entry.#entity !== null
-            && entry.#entity.scoreboard !== entry.#vanillaScbid
+            && entry.#entity.scoreboardIdentity !== entry.#vanillaScbid
             ){
-                let scbid = entry.#entity.scoreboard;
+                let scbid = entry.#entity.scoreboardIdentity;
                 if (scbid instanceof Minecraft.ScoreboardIdentity){
                     entry.#vanillaScbid = scbid;
                 } else {
@@ -309,7 +289,7 @@ class Entry {
             
             if (entry.#vanillaScbid === undefined){
                 let recordedScbid = Entry.findVanillaScoreboardParticipant((scbid: Minecraft.ScoreboardIdentity) => {
-                    return scbid.type === ScoreboardIdentityType.fakePlayer
+                    return scbid.type === ScoreboardIdentityType.FakePlayer
                         && scbid.displayName === entry.#name;
                 });
                 if (recordedScbid){
@@ -326,10 +306,10 @@ class Entry {
     
     /**
      * 如果此分数持有者不是虚拟玩家，返回此分数持有者对应实体的对象。
-     * @returns {Entity|null} 若为虚拟玩家类型的分数持有者，则返回 `null`。
+     * @returns {YoniEntity} 若为虚拟玩家类型的分数持有者，则返回 `null`。
      */
     getEntity(){
-        return EntityBase.from(this.getVanillaEntity()) as unknown as Entity;
+        return EntityBase.from(this.getVanillaEntity()) as unknown as YoniEntity;
     }
     
     /**
@@ -344,7 +324,6 @@ class Entry {
             throw new Error("此记分对象代表的不是实体");
         } else if (this.#type === EntryType.PLAYER
         || this.#type === EntryType.ENTITY){
-            
             if (this.#entity === null){
                 if (this.vanillaScbid === undefined){
                     throw new Error("此记分对象未关联任何一个实体，这可能是在创建记分对象的时候出现了逻辑错误。未能找到关联的实体对象或香草记分对象。");
@@ -387,31 +366,32 @@ class Entry {
             } else {
                 type = EntryType.ENTITY;
             }
-            vanillaScbid = vanillaEntity.scoreboard;
+            vanillaScbid = vanillaEntity.scoreboardIdentity;
             
             //若实体在计分板上所有记分项中都没有分数记录
             //其scbid为空
             id = vanillaScbid?.id;
             
         } else {
-            let condF: ((scbid: Minecraft.ScoreboardIdentity) => boolean) | null = null;
+            let condition: ((scbid: Minecraft.ScoreboardIdentity) => boolean) | null = null;
             
-            if (scbid == null
+            //不为fakeplayer查找其scbid以加快entry创建速度
+            /*if (scbid == null
             && type === EntryType.FAKE_PLAYER
             && name !== ""
             && name != null){
-                condF = (scbid) => {
+                condition = function conditionFakePlayer(scbid){
                     return (scbid.displayName === name && type === scbid.type);
                 }
             
-            } else if (scbid == null && id != null){
-                condF = (scbid) => {
+            } else */if (config.getBoolean("enableScoreboardIdentityByNumberIdQuery") && scbid == null && id != null){
+                condition = function conditionId(scbid){
                     return scbid.id === id;
                 }
             }
             
-            if (condF !== null){
-                vanillaScbid = Entry.findVanillaScoreboardParticipant(condF);
+            if (condition !== null){
+                vanillaScbid = Entry.findVanillaScoreboardParticipant(condition);
             }
             
             if (vanillaScbid != null){
@@ -450,46 +430,39 @@ class Entry {
 }
 
 export { Entry, EntryType };
-export default Entry;
 
-if (useOptionalFasterCode){
-    //等待下一次优化
-    
-    let YoniScheduler, console: any;
-
-    // 缓存分数持有者映射 //
-    import("../schedule.js")
-    .then(m => {
-        YoniScheduler = m.YoniScheduler
-        return import("../util/Logger.js");
-    })
-    .then(m => {
-        console = m.console;
-    })
-    .then(() => {
-        throw new Error("temp disable mapping caching");
-        YoniScheduler.runCycleTickTask(async ()=>{
-            console.trace("缓存分数持有者映射");
-            let count = 0;
-            for (let scbid of Array.from(VanillaScoreboard.getParticipants())){
-                //scbid为空
-                //可能是mojang抽风了
-                //不用担心，忽略就行
-                //就是可能会报错
-                //那个没办法
-                //存多了就会这样
-                //目前没法解决
-                if (!scbid)
-                    return;
-                await Entry.findEntry({ scbid: scbid, id: scbid.id, type: scbid.type }); //to cache entry result
-                count++;
-            }
-            if (debug){
-                console.trace("重新映射了{}位分数持有者的Entry", count);
-            }
-        }, 0, 600, true); //每600t运行一次任务，异步
-    });
-//接下来的想法是弄好原版scbid的信息缓存
-//但比较麻烦的是小概率事件
+if (config.getBoolean("useOptionalFasterCode")){
+    optionalFasterCode();
 }
 
+async function optionalFasterCode(){
+    const { YoniScheduler } = await import("../schedule.js");
+    const { Logger } = await import("../util/Logger.js");
+    
+    const logger = new Logger("ScoreboardEntryCacher");
+    
+    // 每600刻运行一次
+    YoniScheduler.runCycleTickTask(update, 600, 600, true);
+    
+    //接下来的想法是弄好原版scbid的信息缓存
+    //但比较麻烦的是小概率事件
+    
+    async function update(){
+        logger.trace("缓存分数持有者映射");
+        let count = 0;
+        for (let scbid of VanillaScoreboard.getParticipants()){
+             // 测试发现数量太多的时候偶尔会出现空值，在这里排除掉
+             if (!(scbid && scbid.isValid()))
+                 return;
+                 
+             //to cache entry result
+             let entry = await Entry.findEntry({ scbid: scbid, id: scbid.id, type: scbid.type });
+             if (entry.type === EntryType.FAKE_PLAYER){
+                 entry.update();
+             }
+             
+             count++;
+         }
+         logger.trace("重新映射了 {} 位分数持有者的 Entry", count);
+    }
+}

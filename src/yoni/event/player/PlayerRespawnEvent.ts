@@ -1,10 +1,11 @@
 import { Player } from "../../entity.js";
-import { EventListener, EventSignal, EventTriggerBuilder } from "../../event.js";
+import { EventTypes, EventSignal, EventTriggerBuilder } from "../../event.js";
 import { PlayerEvent } from "./PlayerEvent";
 import { YoniScheduler, Schedule } from "../../schedule.js";
 import { Location } from "../../Location.js";
 import { PlayerDeadEvent } from "./PlayerDeadEvent.js";
-import { World } from "../../world.js";
+import { world as World } from "../../world.js";
+import "./PlayerDeadEvent.js";
 
 export class PlayerRespawnEventSignal extends EventSignal {}
 export class PlayerRespawnEvent extends PlayerEvent {
@@ -50,19 +51,21 @@ const schedule = new Schedule({
 });;
 
 function start(){
-    eventId0 = EventListener.register("yoni:playerDead", (event: PlayerDeadEvent) => {
-        let player = event.player;
-        let location = player.location;
-        DeadPlayers.add(player);
-        DeadPlayerLocationRecords.set(player, location);
-        if (!schedule.isQueue()){
-            YoniScheduler.addSchedule(schedule);
-        }
-    });
+    EventTypes.get("yoni:playerDead").subscribe(onDead);
+}
+
+function onDead(event: PlayerDeadEvent){
+    let player = event.player;
+    let location = player.location;
+    DeadPlayers.add(player);
+    DeadPlayerLocationRecords.set(player, location);
+    if (!schedule.isQueue()){
+        YoniScheduler.addSchedule(schedule);
+    }
 }
 
 function stop(){
-    EventListener.unregister(eventId0);
+    EventTypes.get("yoni:playerDead").unsubscribe(onDead);
     YoniScheduler.removeSchedule(schedule);
 }
 

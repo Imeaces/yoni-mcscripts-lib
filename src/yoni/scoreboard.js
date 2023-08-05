@@ -1,9 +1,8 @@
 export * from "./scoreboard/Objective.js";
 export * from "./scoreboard/Entry.js";
-export * from "./scoreboard/ScoreboardError.js"
-export * from "./scoreboard/SimpleScoreboard.js";
+export * from "./scoreboard/ScoreboardError.js";
+export * from "./scoreboard/Scoreboard.js";
 
-import { SimpleScoreboard } from "./scoreboard/SimpleScoreboard.js";
-
-export default SimpleScoreboard;
-export { SimpleScoreboard as Scoreboard };
+//兼容
+import { Scoreboard } from "./scoreboard/Scoreboard.js";
+export { Scoreboard as SimpleScoreboard };

@@ -1,4 +1,4 @@
-import { EventListener, EventTriggerBuilder, EventSignal, Event } from "../../../event.js";
+import { EventTypes, EventTriggerBuilder, EventSignal, Event } from "../../../event.js";
 import { EntityBase } from "../../../entity.js";
 
 class RaidEventTriggerEvent extends Event {
@@ -27,14 +27,12 @@ function start(){
     }
     options.entityTypes = ["minecraft:player"];
     options.eventTypes = ["minecraft:trigger_raid"];
-    eventId = EventListener.register("minecraft:dataDrivenEntityTriggerEvent", (event)=>{
-        if (event.entity.typeId === "minecraft:player")
-            trigger.fireEvent(EntityBase.from(event.entity));
-        
-    }, options);
+    EventTypes.get("minecraft:dataDrivenEntityTriggerEvent")
+        .subscribe(onEntityEvent, options);
 }
 function stop(){
-    EventListener.unregister(eventId);
+    EventTypes.get("minecraft:dataDrivenEntityTriggerEvent")
+        .unsubscribe(onEntityEvent);
 }
 
 let trigger = new EventTriggerBuilder("yoni:raidEventTrigger")
@@ -44,3 +42,8 @@ let trigger = new EventTriggerBuilder("yoni:raidEventTrigger")
     .whenLastUnsubscribe(stop)
     .build()
     .registerEvent();
+
+function onEntityEvent(event){
+    if (event.entity.typeId === "minecraft:player")
+         trigger.fireEvent(EntityBase.from(event.entity));
+}

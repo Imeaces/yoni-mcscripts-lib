@@ -1,20 +1,17 @@
 import { Minecraft } from "./modules/Minecraft.js";
 export { Minecraft }
 
-export { MinecraftGui } from "./modules/MinecraftGui.js";
 export { Gametest } from "./modules/Gametest.js";
 
 export const VanillaWorld: Minecraft.World = Minecraft.world;
-export const VanillaEvents: Minecraft.Events = VanillaWorld.events;
 export const VanillaScoreboard: Minecraft.Scoreboard = VanillaWorld.scoreboard;
 export const MinecraftSystem: Minecraft.System = Minecraft.system;
-export const SystemEvents: Minecraft.SystemEvents = MinecraftSystem.events;
 
 /**
  * @param {(...args: any[]) => void} callback 
  * @param {...any} args
  */
-export function runTask(callback: (...args: any[]) => void, ...args: any[]){
+export function runTask(callback: (() => void) | ((...args: any[]) => void), ...args: any[]){
     if (args.length === 0)
         MinecraftSystem.run(callback);
     else
@@ -28,6 +25,15 @@ export function runTask(callback: (...args: any[]) => void, ...args: any[]){
  * @type {Minecraft.Dimension}
  */
 export const overworld = VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.overworld);
+
+export function isReadonlyMode(): boolean {
+    try {
+        overworld.runCommand("help");
+    } catch {
+        return true;
+    }
+    return false;
+}
 
 /**
  * a type contains a set of statusCode

@@ -1,18 +1,35 @@
 import { EventSignal, EventTriggerBuilder } from "../../event.js";
 import { EntityEvent } from "./EntityEvent.js";
-import { EntityValue } from "../../entity/EntityTypeDefs.js";
-import { EntityBase } from "../../entity.js";
-import { YoniEntity } from "../../entity.js";
+import { EntityValue, EntityBase, YoniEntity } from "../../entity.js";
 import { Location } from "../../Location.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
-import { World } from "../../world.js";
+import { world } from "../../world.js";
+import { logger } from "../logger.js";
 
 export class EntityMovementEventSignal extends EventSignal {
+    static warnEventAbuse = (function (){
+        let hasBeenWarned = false;
+        return function warnEventAbuse(){
+            if (hasBeenWarned)
+                return;
+            
+            hasBeenWarned = true;
+            logger.warning("[EntityMovementEventSignal] 不加筛选的监听所有实体的移动可能带来严重的性能问题");
+        }
+    })();
     subscribe(callback: (arg: EntityMovementEvent) => void, options?: EntityMovementEventOption){
         super.subscribe(callback, options);
-        if (options != null){
-            filtersList.push(options);
+        if (options == null){
+            EntityMovementEventSignal.warnEventAbuse();
         }
+        
+        filters.set(callback, options ?? null);
+        
+        return callback;
+    }
+    unsubscribe(callback: (arg: EntityMovementEvent) => void){
+        super.unsubscribe(callback);
+        filters.delete(callback);
         return callback;
     }
 }
@@ -57,7 +74,7 @@ export class EntityMovementEvent extends EntityEvent {
 
 let entityLocationRecords = new WeakMap<YoniEntity, Location>();
 
-const filtersList: EntityMovementEventOption[] = [];
+const filters: Map<any, null | EntityMovementEventOption> = new Map();
 
 type MovementKey = "dimension" | "x" | "y" | "z" | "location" | "rx" | "ry" | "rotation";
 interface EntityMovementEventOption {
@@ -66,36 +83,47 @@ interface EntityMovementEventOption {
     movementKeys?: MovementKey[];
 }
 
-function getTargetEntities(): YoniEntity[] {
-    if (filtersList.length === 0){
-        return World.getLoadedEntities();
+function getFilters(){
+    return new Set(filters.values());
+}
+
+function getTargetEntities(): Iterable<YoniEntity> {
+    const filters = getFilters();
+    if (filters.size === 0
+    || filters.has(null)){
+        return world.getLoadedEntities();
     }
-    const selectedEntities: YoniEntity[] = [];
-    const allEntities = World.getLoadedEntities();
-    filtersList.forEach(filter => {
+    
+    const targets: YoniEntity[] = [];
+    const typedEntities: Map<string, YoniEntity[]> = new Map();
+    
+    
+    for (const filter of filters){
+        if (!filter) continue; // impossible unless you are cheating
+        
         if (filter.entities){
-            filter.entities.map(entity => EntityBase.getYoniEntity(entity))
-                .forEach(entity => {
-                    selectedEntities.push(entity);
-                });
+            targets.push(
+                ...Array.from(filter.entities)
+                    .map(function toYoniEntity(entity){
+                        return EntityBase.from(filter.entities);
+                    })
+                    .filter(v => v != null) as YoniEntity[]
+            );
         }
         if (filter.entityTypes){
-            allEntities
-                .filter(oneEntity => {
-                    return (filter.entityTypes as Array<string>).includes(oneEntity.typeId);
-                })
-                .forEach(oneEntity => {
-                    selectedEntities.push(oneEntity);
-                });
+            for (const entityType of Array.from(filter.entityTypes)){
+                if (typedEntities.has(entityType))
+                    continue;
+                typedEntities.set(entityType, Array.from(
+                    world.selectEntities({
+                        type: entityType
+                    })
+                ));
+            }
         }
-    });
-    return Array.from(
-        new Set(
-            selectedEntities.map(e =>
-                EntityBase.getYoniEntity(e)
-            )
-        )
-    );
+    }
+    
+    return new Set(targets.concat(Array.from(typedEntities.values()).flat())); //as unknown as Iterable<YoniEntity>;
 }
 
 const schedule = new Schedule ({
@@ -103,79 +131,95 @@ const schedule = new Schedule ({
     type: Schedule.tickCycleSchedule,
     period: 1,
     delay: 0
-}, ()=>{
+}, function compareTargetsLocation(){
     for (const entity of getTargetEntities()){
+        
+        // not location record, save and continue next
         let oldLoc = entityLocationRecords.get(entity);
         if (oldLoc === undefined){
             entityLocationRecords.set(entity, entity.location);
             continue;
         }
+        
         let newLoc = entity.location;
-        if (newLoc.equals(oldLoc)){
-            continue;
-        }
+        
+        // generate movement status keys
         let movementKeys: MovementKey[] = [];
-        if (newLoc.x !== oldLoc.x){
-            movementKeys.push("x", "location");
-        }
-        if (newLoc.y !== oldLoc.y){
-            movementKeys.push("y", "location");
-        }
-        if (newLoc.z !== oldLoc.z){
-            movementKeys.push("z", "location");
-        }
-        if (newLoc.rx !== oldLoc.rx){
-            movementKeys.push("rx", "rotation");
-        }
-        if (newLoc.ry !== oldLoc.ry){
-            movementKeys.push("ry", "rotation");
-        }
         if (newLoc.dimension !== oldLoc.dimension){
             movementKeys.push("x", "y", "z", "rx", "ry", "dimension", "location", "rotation");
+        } else {
+            if (newLoc.x !== oldLoc.x){
+                movementKeys.push("x", "location");
+            }
+            if (newLoc.y !== oldLoc.y){
+                movementKeys.push("y", "location");
+            }
+            if (newLoc.z !== oldLoc.z){
+                movementKeys.push("z", "location");
+            }
+            if (newLoc.rx !== oldLoc.rx){
+                movementKeys.push("rx", "rotation");
+            }
+            if (newLoc.ry !== oldLoc.ry){
+                movementKeys.push("ry", "rotation");
+            }
         }
         
+        // no difference, continue next
+        if (movementKeys.length === 0){
+            continue;
+        }
+        
+        // save new location
+        entityLocationRecords.set(entity, newLoc);
+        
+        // remove duplication
         movementKeys = Array.from(new Set(movementKeys));
         
+        // trigger event
         trigger.triggerEvent(entity, oldLoc, newLoc, movementKeys);
     }
 });
+
+function resolveFilter(
+    values: [YoniEntity, Location, Location, MovementKey[]],
+    filterValues: EntityMovementEventOption): boolean
+{
+    const [entity, from, to, movementKeys] = values;
+    
+    if (filterValues.movementKeys != null){
+        for (const key of filterValues.movementKeys){
+            if ( ! movementKeys.includes(key)){
+                return false;
+            }
+        }
+    }
+    
+    if (filterValues.entities != null){
+        let found = false;
+        for (let filterEntity of filterValues.entities){
+            if (EntityBase.isSameEntity(filterEntity, entity)){
+                found = true;
+                break;
+            }
+        }
+        if (!found){
+            return false;
+        }
+    }
+    
+    if (filterValues.entityTypes != null){
+        return filterValues.entityTypes.includes(entity.typeId);
+    }
+    
+    return true;
+}
 
 const trigger = new EventTriggerBuilder()
     .id("yoni:entityMovement")
     .eventSignalClass(EntityMovementEventSignal)
     .eventClass(EntityMovementEvent)
-    .filterResolver((values: [YoniEntity, Location, Location, MovementKey[]],
-        filterValues: EntityMovementEventOption)=>{
-        
-        const [entity, from, to, movementKeys] = values;
-        
-        if (filterValues.movementKeys != null){
-            for (const key of filterValues.movementKeys){
-                if ( ! movementKeys.includes(key)){
-                    return false;
-                }
-            }
-        }
-        
-        if (filterValues.entities != null){
-            let found = false;
-            for (let filterEntity of filterValues.entities){
-                if (EntityBase.isSameEntity(filterEntity, entity)){
-                    found = true;
-                    break;
-                }
-            }
-            if (!found){
-                return false;
-            }
-        }
-        
-        if (filterValues.entityTypes != null){
-            return filterValues.entityTypes.includes(entity.typeId);
-        }
-        
-        return true;
-    })
+    .filterResolver(resolveFilter)
     .whenFirstSubscribe(()=>{
         YoniScheduler.addSchedule(schedule);
     })

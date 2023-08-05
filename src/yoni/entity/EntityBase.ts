@@ -4,18 +4,16 @@ import {
     VanillaWorld,
 } from "../basis.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
-import { DimensionLike } from "../Location.js";
 import { Dimension } from "../dimension.js";
 import { EntityValue } from "./EntityTypeDefs.js";
+import { DimensionLikeValue } from "../dim.js";
 
-import YoniEntity from "./Entity.js";
-
-import YoniPlayer from "./Player.js";
+import { YoniPlayer, YoniEntity, YoniSimulatedPlayer } from "../entity.js";
 
 /**
  * 代表一个实体
  */
-abstract class EntityBase {
+export abstract class EntityBase {
     
     /**
      * @type {Minecraft.Entity}
@@ -27,7 +25,7 @@ abstract class EntityBase {
      * @hideconstructor
      * @param {Minecraft.Entity} entity
      */
-    constructor(entity: Minecraft.Entity){
+    protected constructor(entity: Minecraft.Entity){
     
         if (!EntityClassRegistry.includesInSrcPrototype(Object.getPrototypeOf(entity)))
             throw new TypeError("no mapping for the object proto");
@@ -70,7 +68,7 @@ abstract class EntityBase {
      * @returns {boolean}
      * @throws 当参数不是实体时抛出错误
      */
-    static entityIsPlayer(entity: EntityValue): entity is (Minecraft.Player | YoniPlayer ) {
+    static entityIsPlayer(entity: EntityValue): entity is (Minecraft.Player | YoniPlayer) {
         entity = EntityBase.getMinecraftEntity(entity);
         if (entity instanceof Minecraft.Player)
             return true;
@@ -102,8 +100,29 @@ abstract class EntityBase {
      * @returns {Minecraft.InventoryComponentContainer}
      */
     static getInventory(entity: EntityValue): Minecraft.Container {
+        if (EntityBase.#inventoryCache.has(entity))
+            return EntityBase.#inventoryCache.get(entity) as Minecraft.Container;
+        
         EntityBase.checkIsEntity(entity);
-        return (<Minecraft.EntityInventoryComponent>entity.getComponent("minecraft:inventory")).container;
+        
+        const comp = entity.getComponent("minecraft:inventory") as unknown as Minecraft.EntityInventoryComponent;
+        
+        const inv = comp.container;
+        
+        EntityBase.#inventoryCache.set(entity, inv);
+        
+        return inv;
+    }
+    static #inventoryCache = new WeakMap<Object, Minecraft.Container>();
+    
+    static getItemInMainHand(entity: EntityValue): Minecraft.ItemStack | undefined {
+        //@ts-ignore
+        return EntityBase.getInventory(entity).getItem(entity.selectedSlot);
+    }
+    
+    static setItemInMainHand(entity: EntityValue, item?: Minecraft.ItemStack): void {
+        //@ts-ignore
+        EntityBase.getInventory(entity).setItem(entity.selectedSlot, item);
     }
     
     /**
@@ -113,14 +132,10 @@ abstract class EntityBase {
      */
     static getCurrentHealth(entity: EntityValue): number {
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.current;
+        return (component === undefined) ? 0 : component.currentValue;
     }
     
-    /**
-     * @param {import('../Location.js').DimensionLike} dimension
-     * @param {Minecraft.EntityQueryOptions} [options]
-     */
-    static getDimensionEntities(dimension?: DimensionLike, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity> {
+    static getDimensionEntities(dimension?: DimensionLikeValue, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity> {
         if (!dimension){
             let ents = Object
                 .getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
@@ -135,16 +150,12 @@ abstract class EntityBase {
         }
         
         if (!options){
-            return Dimension.dim(dimension).vanillaDimension.getEntities();
+            return Dimension.toDimension(dimension).vanillaDimension.getEntities();
         }
         
-        return Dimension.dim(dimension).vanillaDimension.getEntities(options);
+        return Dimension.toDimension(dimension).vanillaDimension.getEntities(options);
     }
     
-    /**
-     * @param {import('.../Location.js').DimensionLike}
-     * @param {Minecraft.EntityQueryOptions} [options]
-     */
     static getWorldPlayers(options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Player> {
         if (!options){
             return VanillaWorld.getPlayers();
@@ -175,7 +186,7 @@ abstract class EntityBase {
      */
     static getMaxHealth(entity: EntityValue){
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.value;
+        return (component === undefined) ? 0 : component.effectiveMax;
     }
     
     /**
@@ -285,7 +296,7 @@ abstract class EntityBase {
         let comp = entity.getComponent("minecraft:health");
         if (comp == null)
             return false;
-        if ((<Minecraft.EntityHealthComponent>comp).current > 0)
+        if ((<Minecraft.EntityHealthComponent>comp).currentValue > 0)
             return true;
         return false;
     }
@@ -347,9 +358,7 @@ abstract class EntityBase {
         if (!component){
             throw new Error("No health component for this entity");
         }
-        component.setCurrent(val);
+        component.setCurrentValue(val);
     }
     
 }
-
-export { EntityBase };

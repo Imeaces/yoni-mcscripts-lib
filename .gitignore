@@ -1,10 +1,8 @@
-.txt
-*.diff
-
 /@types
 /yoni/
 /yoni-mcscripts-lib.js
-/wd/
+/example.js
+/package-lock.json
 
 # Logs
 logs

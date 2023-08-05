@@ -1,14 +1,13 @@
 import { VanillaWorld, Minecraft } from "./basis.js";
 import { getAllDims } from "./dim.js";
 import { EntityBase } from "./entity.js";
-import Scoreboard from "./scoreboard.js";
+import { Scoreboard } from "./scoreboard.js";
 import { Dimension } from "./dimension.js";
 import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
-import { YoniEntity } from "./entity/Entity.js";
-import { YoniPlayer } from "./entity/Player.js";
+import { YoniEntity, YoniPlayer } from "./entity.js";
 
-class World {
+export class World {
     static isWorld(object: any){
         return object instanceof Minecraft.World || object instanceof World;
     }
@@ -34,7 +33,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniPlayer}
      */
-    * selectPlayers<YoniPlayer>(options: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
+    * selectPlayers(options: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         for (let pl of VanillaWorld.getPlayers(options)){
             yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
@@ -44,7 +43,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} [option]
      * @yields {YoniPlayer}
      */
-    * getPlayers<YoniPlayer>(option?: Minecraft.EntityQueryOptions){
+    * getPlayers(option?: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
         for (let pl of VanillaWorld.getPlayers(option)){
             yield EntityBase.from(pl) as unknown as YoniPlayer;
         }
@@ -57,7 +56,7 @@ class World {
      */
     getDimension(dimid: string|number){
         //@ts-ignore
-        return Dimension.dim(dimid);
+        return Dimension.toDimension(dimid);
     }
     
     /**
@@ -82,7 +81,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniEntity}
      */
-    * selectEntities<YoniEntity>(option: Minecraft.EntityQueryOptions) {
+    * selectEntities(option: Minecraft.EntityQueryOptions): Generator<YoniEntity> {
         for (let d of getAllDims()){
             for (let entity of d.getEntities(option)){
                 yield EntityBase.from(entity) as unknown as YoniEntity;
@@ -97,9 +96,6 @@ class World {
 
 copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanillaWorld");
 
-type YoniWorld = World & Minecraft.World;
+export type YoniWorld = World & Omit<Minecraft.World, keyof World>;
 
-const world = new World(VanillaWorld) as unknown as YoniWorld;
-
-export { world as World, YoniWorld };
-export default World;
+export const world = new World(VanillaWorld) as unknown as YoniWorld;

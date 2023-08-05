@@ -1,18 +1,23 @@
+import { PlayerGameModeValue } from "../player/PlayerGameModeValue.js";
+
 import {
     Minecraft,
     VanillaWorld, 
     StatusCode } from "../basis.js";
-import { dealWithCmd } from "../lib/utils.js";
+
+import { dealWithCmd } from "../lib/commandutils.js";
 import { Command } from "../command.js";
+
 import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 import { getNumber } from "../lib/getNumber.js";
-import { Entity } from "./Entity.js";
+
+import { Entity, YoniEntity } from "./Entity.js";
 import { EntityBase } from "./EntityBase.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
 
 const { MinecraftEntityTypes } = Minecraft;
 
-class Player extends Entity {
+export class Player extends Entity {
     
     get vanillaPlayer(): Minecraft.Player {
         return this.vanillaEntity as unknown as Minecraft.Player;
@@ -22,14 +27,9 @@ class Player extends Entity {
         return MinecraftEntityTypes.player;
     }
     
-    get inventory(){
-        return EntityBase.getInventory(this);
-    }
-    
     get [Symbol.toStringTag](){
-        let player = <YoniPlayer><unknown>this;
-        if (player instanceof Player)
-            return `Player: { type: ${player.typeId}, name: ${player.name} }`;
+        if (this instanceof Player)
+            return `Player: { type: ${this.vanillaPlayer.typeId}, name: ${this.vanillaPlayer.name} }`;
         return "Object (Player)";
     }
     
@@ -38,19 +38,25 @@ class Player extends Entity {
      * @type {number}
      */
     get experienceLevel(){
-        let player = <YoniPlayer><unknown>this;
-        return player.level;
+        return this.vanillaPlayer.level;
     }
     
+    getItemInMainHand(): Minecraft.ItemStack | undefined {
+        return EntityBase.getItemInMainHand(this.vanillaPlayer);
+    }
+
+    setItemInMainHand(item?: Minecraft.ItemStack): void {
+        return EntityBase.setItemInMainHand(this.vanillaPlayer, item);
+    }
+
     /**
      * 设置玩家的经验等级。
      * @param {number} level
      */
-    setExperienceLevel(level: number){
+    setExperienceLevel(this: YoniPlayer, level: number){
         level = getNumber(level);
-        let player = <YoniPlayer><unknown>this;
-        if (player.level !== level)
-            player.addLevels(level - player.level);
+        if (this.vanillaPlayer.level !== level)
+            this.addLevels(level - this.experienceLevel);
     }
     
     /**
@@ -58,81 +64,83 @@ class Player extends Entity {
      * @param {string} [msg] - 踢出玩家时显示的消息。
      * @throws 若未能成功将玩家踢出游戏，抛出错误。
      */
-    async kick(msg?: string){
-        let player = <YoniPlayer><unknown>this;
-        let rt;
+    async kick(this: YoniPlayer, msg?: string){
+        let rt: any = null;
+        
         if (msg)
-            rt = await Command.addParams(Command.PRIORITY_HIGHEST, "kick", player.name, msg);
+            rt = await Command.addParams(Command.PRIORITY_HIGHEST, "kick", this.name, msg);
         else
-            rt = await Command.addParams(Command.PRIORITY_HIGHEST, "kick", player.name);
-        if (rt.statusCode !== StatusCode.success){
+            rt = await Command.addParams(Command.PRIORITY_HIGHEST, "kick", this.name);
+        
+        if (rt?.statusCode !== StatusCode.success){
             throw new Error(rt.statusMessage);
         }
     }
     
-    sendChatMessage(msg: string){
+    sendChatMessage(this: YoniPlayer, msg: string){
         let rawtext = JSON.stringify({rawtext:[{text: msg}]}, dealWithCmd);
         Command.addExecute(Command.PRIORITY_HIGH, this.vanillaPlayer, `tellraw @s ${rawtext}`);
     }
     
     get gamemode(): Minecraft.GameMode {
-        let player = <YoniPlayer><unknown>this;
         // @ts-ignore
         for (let gm of Object.getOwnPropertyNames(Minecraft.GameMode).map(k=>Minecraft.GameMode[k])){
             for (let splayer of VanillaWorld.getPlayers({gameMode: gm})){
-                if (EntityBase.isSameEntity(splayer, player)){
+                if (EntityBase.isSameEntity(splayer, this)){
                     return gm;
                 }
             }
         }
         throw new Error("unknown gamemode");
     }
-    setGamemode(v: PlayerGameModeValue){
-        let player = <YoniPlayer><unknown>this;
-        let command = `gamemode ${<string>v} @s`;
-        Command.addExecute(Command.PRIORITY_HIGHEST, player, command);
+    setGamemode(this: YoniPlayer, gamemode: PlayerGameModeValue){
+        let command = `gamemode ${gamemode as {}} @s`;
+        Command.addExecute(Command.PRIORITY_HIGHEST, this, command);
     }
-    removeXp(xpCount: number){
-        let player = <YoniPlayer><unknown>this;
-        
-        if (player.xpEarnedAtCurrentLevel >= xpCount){
-            player.addExperience(-xpCount);
+    
+    removeXp(this: YoniPlayer, xpCount: number){
+        if (this.xpEarnedAtCurrentLevel >= xpCount){
+            this.addExperience(-xpCount);
             return;
         }
   
-        let v0 = player.xpEarnedAtCurrentLevel;
+        let v0 = this.xpEarnedAtCurrentLevel;
         xpCount -= v0;
-        player.addExperience(-v0);
+        this.addExperience(-v0);
   
-        while (xpCount > 0 && player.level > 0){
-            player.addLevels(-1);
-            xpCount -= player.totalXpNeededForNextLevel;
+        while (xpCount > 0 && this.vanillaPlayer.level > 0){
+            this.addLevels(-1);
+            xpCount -= this.totalXpNeededForNextLevel;
         }
   
         if (xpCount < 0)
-            player.addExperience(xpCount);
+            this.addExperience(xpCount);
     }
-    applyImpulse(vector: Minecraft.Vector3){
+    applyImpulse(this: YoniPlayer, vector: Minecraft.Vector3){
         try {
-            super.applyImpulse(vector);
+            this.applyImpulse(vector);
         } catch (e){
-            //@ts-ignore
-            throw new Error(e);
+            if (e instanceof Error)
+                throw e;
+            else
+                //@ts-ignore
+                throw new Error(e);
         }
     }
 }
 
-type PlayerGameModeValue = Minecraft.GameMode | PlayerGameModeCode | PlayerGameModeId | "default";
-type PlayerGameModeCode = 0 | 1 | 2
-type PlayerGameModeId = "creative"|"survival"|"adventure"|"spectator";
-
-/* 修补 */
-copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity");
-/*修复结束*/
-
+copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity", ["level"]);
 EntityClassRegistry.register(Player, Minecraft.Player);
 
-type YoniPlayer = Player & Minecraft.Player;
+type BaseVanillaPlayerClass = Omit<
+    Omit<
+        Omit<
+            Minecraft.Player,
+            keyof Minecraft.Entity
+        >,
+        "level"
+    >,
+    keyof Player
+>;
 
-export default YoniPlayer;
-export { YoniPlayer, Player };
+export type YoniPlayer = Player & YoniEntity & BaseVanillaPlayerClass;

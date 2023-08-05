@@ -2,7 +2,7 @@
 
 基本上是对原有API的一些 wrapper，除此之外还提供了一些便捷的小工具。
 
-当前支持的游戏版本为 正式版**1.19.80**。
+当前支持的游戏版本为 正式版**1.20.10**。
 
 ## 使用
 
@@ -26,41 +26,47 @@
 
 一段简单的示例代码
 
-```js
+```ts
 // 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
-//import { Scoreboard, Utils, YoniScheduler } from "yoni/index.js";
-import { Scoreboard, Utils, YoniScheduler } from "yoni-mcscripts-lib";
+//import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni/index.js";
+import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
 
-// 部分函数为异步函数，故需要在异步函数内用 await 调用
 // 简单示范了 Scoreboard 的用法，这个类是对原版的记分板
 // 访问 API 的重新封装，并添加了一些没有的方法。
-YoniScheduler.runTask(async function (){
 
-  const objective0 = Scoreboard.getObjective("objective_0")
-    ?? Scoreboard.addObjective("objective_0");
+YoniScheduler.runDelayTickTask(function doSome(){
+    let objective0: Objective;
+    try {
+        //记分项不存在的话获取会出现错误
+        objective0 = Scoreboard.getObjective("objective_0");
+    } catch {
+        objective0 = Scoreboard.addObjective("objective_0");
+    }
 
-  // 或者可以这样，传入第二个参数 true，表示在记分项不存在的时候
-  // 使用 dummy 准则创建同名记分项。
-  const objective1 = Scoreboard.getObjective("objective_1", true);
+    // 或者可以这样，传入第二个参数 true，表示在记分项不存在的时候
+    // 使用 dummy 准则创建同名记分项。
+    const objective1: Objective = Scoreboard.getObjective("objective_1", true);
 
-  const onePlayer = World.getPlayers()[0];
+    //只适合单人的获取玩家的方法
+    const onePlayer: YoniPlayer = world.getAllPlayers()[0];
 
-  if (onePlayer == null){
-    Utils.say("怎么就一个玩家都没有的？");
-    return;
-  }
+    if (onePlayer == null){
+        YoniUtils.say("怎么就一个玩家都没有的？");
+        return;
+    }
 
-  await objective0.postSetScore(onePlayer, -3987);
+    objective0.setScore(onePlayer, -3987);
 
-  Utils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 -3987
+    YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 -3987
 
-  Utils.say("现在重置他的分数");
+    YoniUtils.say("现在重置他的分数");
 
-  await objective0.postResetScore(onePlayer);
+    objective0.resetScore(onePlayer);
 
-  Utils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 undefined
+    YoniUtils.say(`玩家 ${onePlayer.name} 在 ${objective0.displayName} 上的分数为 ${objective0.getScore(onePlayer)}`); //分数为 undefined
 
-}, true);
+}, 1200);
+//延迟一分钟再执行（1*60*20=1200）
 
 ```
 
