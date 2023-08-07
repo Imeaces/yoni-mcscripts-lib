@@ -42,7 +42,6 @@
     ],
     "exclude": [
         "src/yoni/storage/**",
-        "src/yoni/event/v2/**",
         "node_modules"
     ]
 }
