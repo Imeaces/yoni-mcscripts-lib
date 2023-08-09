@@ -3,10 +3,10 @@ import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 import { Player, YoniPlayer } from "./Player.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
 
-export class SimulatedPlayer extends Player {
+class SimulatedPlayer extends Player {
     get [Symbol.toStringTag](): string {
         if (this instanceof SimulatedPlayer)
-            return `SimulatedPlayer: { type: ${(this as unknown as YoniSimulatedPlayer).typeId} }`;
+            return `SimulatedPlayer: { type: ${this.typeId} }`;
         return "Object (SimulatedPlayer)";
     }
 }
@@ -17,6 +17,14 @@ copyPropertiesWithoutOverride(SimulatedPlayer.prototype, Gametest.SimulatedPlaye
 
 EntityClassRegistry.register(SimulatedPlayer, Gametest.SimulatedPlayer);
 
-type BaseVanillaSimulatedPlayerClass = Omit<Omit<Gametest.SimulatedPlayer, keyof Minecraft.Player>, keyof SimulatedPlayer>;
+type RemovedKeys = never
+type OverridedKeys = never
+type BaseVanillaSimulatedPlayerClass = 
+    Omit<
+        Omit<Gametest.SimulatedPlayer, keyof Minecraft.Entity | keyof Minecraft.Player>,
+        RemovedKeys | OverridedKeys
+    >;
+interface SimulatedPlayer extends BaseVanillaSimulatedPlayerClass {
+}
 
-export type YoniSimulatedPlayer = SimulatedPlayer & YoniPlayer & BaseVanillaSimulatedPlayerClass;
+export { SimulatedPlayer, SimulatedPlayer as YoniSimulatedPlayer };

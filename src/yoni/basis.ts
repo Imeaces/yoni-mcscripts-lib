@@ -8,10 +8,9 @@ export const VanillaScoreboard: Minecraft.Scoreboard = VanillaWorld.scoreboard;
 export const MinecraftSystem: Minecraft.System = Minecraft.system;
 
 /**
- * @param {(...args: any[]) => void} callback 
- * @param {...any} args
+ * 在游戏刻的固定时机运行函数。
  */
-export function runTask(callback: (() => void) | ((...args: any[]) => void), ...args: any[]){
+export function runTask<P extends any[]>(callback: (...args: P) => any, ...args: P){
     if (args.length === 0)
         MinecraftSystem.run(callback);
     else
@@ -26,6 +25,9 @@ export function runTask(callback: (() => void) | ((...args: any[]) => void), ...
  */
 export const overworld = VanillaWorld.getDimension(Minecraft.MinecraftDimensionTypes.overworld);
 
+/**
+ * 返回当前是否为只读模式上下文（通常在before事件的回调执行时出现）。
+ */
 export function isReadonlyMode(): boolean {
     try {
         overworld.runCommand("help");
@@ -33,6 +35,18 @@ export function isReadonlyMode(): boolean {
         return true;
     }
     return false;
+}
+
+/**
+ * 在上下文清空后立即运行函数。
+ */
+export function runImmediate<P extends any[]>(func: (...args: P) => any, ...args: P): void {
+    runImmediate.run(func, args);
+}
+
+runImmediate.run = async function run<P extends any[]>(func: (...args: P) => any, args: P){
+    await void 0; //pause func
+    func(...args);
 }
 
 /**

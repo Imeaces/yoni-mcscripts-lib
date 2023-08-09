@@ -17,7 +17,7 @@ import { EntityClassRegistry } from "./EntityClassRegistry.js";
 
 const { MinecraftEntityTypes } = Minecraft;
 
-export class Player extends Entity {
+class Player extends Entity {
     
     get vanillaPlayer(): Minecraft.Player {
         return this.vanillaEntity as unknown as Minecraft.Player;
@@ -53,7 +53,7 @@ export class Player extends Entity {
      * 设置玩家的经验等级。
      * @param {number} level
      */
-    setExperienceLevel(this: YoniPlayer, level: number){
+    setExperienceLevel(level: number){
         level = getNumber(level);
         if (this.vanillaPlayer.level !== level)
             this.addLevels(level - this.experienceLevel);
@@ -64,7 +64,7 @@ export class Player extends Entity {
      * @param {string} [msg] - 踢出玩家时显示的消息。
      * @throws 若未能成功将玩家踢出游戏，抛出错误。
      */
-    async kick(this: YoniPlayer, msg?: string){
+    async kick(msg?: string){
         let rt: any = null;
         
         if (msg)
@@ -77,7 +77,7 @@ export class Player extends Entity {
         }
     }
     
-    sendChatMessage(this: YoniPlayer, msg: string){
+    sendChatMessage(msg: string){
         let rawtext = JSON.stringify({rawtext:[{text: msg}]}, dealWithCmd);
         Command.addExecute(Command.PRIORITY_HIGH, this.vanillaPlayer, `tellraw @s ${rawtext}`);
     }
@@ -93,12 +93,12 @@ export class Player extends Entity {
         }
         throw new Error("unknown gamemode");
     }
-    setGamemode(this: YoniPlayer, gamemode: PlayerGameModeValue){
+    setGamemode(gamemode: PlayerGameModeValue){
         let command = `gamemode ${gamemode as {}} @s`;
         Command.addExecute(Command.PRIORITY_HIGHEST, this, command);
     }
     
-    removeXp(this: YoniPlayer, xpCount: number){
+    removeXp(xpCount: number){
         if (this.xpEarnedAtCurrentLevel >= xpCount){
             this.addExperience(-xpCount);
             return;
@@ -116,31 +116,19 @@ export class Player extends Entity {
         if (xpCount < 0)
             this.addExperience(xpCount);
     }
-    applyImpulse(this: YoniPlayer, vector: Minecraft.Vector3){
-        try {
-            this.applyImpulse(vector);
-        } catch (e){
-            if (e instanceof Error)
-                throw e;
-            else
-                //@ts-ignore
-                throw new Error(e);
-        }
-    }
 }
 
 copyPropertiesWithoutOverride(Player.prototype, Minecraft.Player.prototype, "vanillaEntity", ["level"]);
 EntityClassRegistry.register(Player, Minecraft.Player);
 
-type BaseVanillaPlayerClass = Omit<
+type RemovedKeys = "level"
+type OverridedKeys = never
+type BaseVanillaPlayerClass = 
     Omit<
-        Omit<
-            Minecraft.Player,
-            keyof Minecraft.Entity
-        >,
-        "level"
-    >,
-    keyof Player
->;
+        Omit<Minecraft.Player, keyof Minecraft.Entity>,
+        RemovedKeys | OverridedKeys
+    >;
+interface Player extends BaseVanillaPlayerClass {
+}
 
-export type YoniPlayer = Player & YoniEntity & BaseVanillaPlayerClass;
+export { Player, Player as YoniPlayer };

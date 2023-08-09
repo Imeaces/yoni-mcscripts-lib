@@ -13,7 +13,7 @@ const { EntityTypes } = Minecraft;
 /**
  * 代表一个实体
  */
-export class Entity extends EntityBase {
+class Entity extends EntityBase {
     
     get [Symbol.toStringTag](){
         if (this instanceof Entity)
@@ -30,7 +30,7 @@ export class Entity extends EntityBase {
     }
     
     get entityType() {
-        return EntityTypes.get((this as unknown as YoniEntity).typeId);
+        return EntityTypes.get(this.typeId);
     }
     
     get dimension(): Dimension {
@@ -141,8 +141,8 @@ export class Entity extends EntityBase {
      * @returns 目标不存在时返回 `undefined`。
      * @throws This property can throw when used.
      */
-    get target(): YoniEntity {
-        return (EntityBase.from(this.vanillaEntity.target) ?? undefined) as unknown as YoniEntity;
+    get target(): Entity {
+        return (EntityBase.from(this.vanillaEntity.target) ?? undefined) as unknown as Entity;
     }
     
     addEffect(effectType: string | Minecraft.EffectType, duration: number, amplifier: number, showParticle: boolean): void;
@@ -229,5 +229,15 @@ copyPropertiesWithoutOverride(Entity.prototype, Minecraft.Entity.prototype, "van
 
 EntityClassRegistry.register(Entity, Minecraft.Entity);
 
-type BaseVanillaEntityClass = Omit<Omit<Minecraft.Entity, "getRotation" | "getVelocity" | "addEffect">, keyof Entity>;
-export type YoniEntity = Entity & BaseVanillaEntityClass;
+
+type RemovedKeys = "getRotation" | "getVelocity"
+type OverridedKeys = "target" | "tryTeleport" | "teleport" | "addEffect" | "dimension"
+type BaseVanillaEntityClass = 
+    Omit<
+        Minecraft.Entity,
+        RemovedKeys | OverridedKeys
+    >;
+interface Entity extends BaseVanillaEntityClass {
+}
+
+export { Entity, Entity as YoniEntity };

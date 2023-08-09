@@ -1,15 +1,15 @@
 import Minecraft from "./minecraft.js";
-import { Location } from "./Location.js";
+import { Location, Vector3 } from "./Location.js";
 import { YoniDimension } from "./dimension.js";
 
 class Block {
-    static isBlock(object: any): object is (Minecraft.Block | YoniBlock) {
+    static isBlock(object: any): object is (Minecraft.Block | Block) {
         return object instanceof Minecraft.Block || object instanceof Block;
     }
-    static from(block: Minecraft.Block): YoniBlock {
+    static from(block: Minecraft.Block): Block {
         if (block == null)
             throw new TypeError("null object");
-        return new Block(block) as unknown as YoniBlock;
+        return new Block(block) as unknown as Block;
     }
     
     // @ts-ignore
@@ -83,7 +83,14 @@ class Block {
     }
 }
 
-export { Block };
+type RemovedKeys = never
+type OverridedKeys = keyof Vector3 | "dimension" | "location"
+type BaseVanillaBlockClass = 
+    Omit<
+        Minecraft.Block,
+        RemovedKeys | OverridedKeys
+    >;
+interface Block extends BaseVanillaBlockClass {
+}
 
-type BaseVanillaBlockClass = Omit<Minecraft.Block, keyof Block>;
-export type YoniBlock = Block & BaseVanillaBlockClass;
+export { Block, Block as YoniBlock };
