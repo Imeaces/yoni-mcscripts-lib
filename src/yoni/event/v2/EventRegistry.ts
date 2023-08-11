@@ -1,9 +1,9 @@
 import EventListeningAdapter from "./interfaces/EventListeningAdapter";
 import IEventHandler from "./interfaces/EventHandler";
 import { manager } from "./EventManager.js";
-import { defaultOptionResolver } from "./defaultOptionResolver.js";
+import { defaultOptionResolver } from "./lib/defaultOptionResolver.js";
 import { EventPriority, EventPriorityIds } from "./EventPriority.js";
-import { getExtendedClassesInList } from "./getExtendedClassesInList.js";
+import { getExtendedClassesInList } from "./lib/getExtendedClassesInList.js";
 
 export class EventRegistry<TEvent extends Function> {
     eventClass: TEvent;
