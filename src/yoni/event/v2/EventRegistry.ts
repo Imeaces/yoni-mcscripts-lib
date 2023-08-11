@@ -6,6 +6,10 @@ import { EventPriority, EventPriorityIds } from "./EventPriority.js";
 import { getExtendedClassesInList } from "./lib/getExtendedClassesInList.js";
 
 export class EventRegistry<TEvent extends Function> {
+    #displayName?: string | undefined;
+    get eventName(){
+        return this.#displayName ?? this.eventClass.name;
+    }
     eventClass: TEvent;
     noExtends: boolean = true;
     extraOption: boolean = false;
@@ -57,6 +61,7 @@ export class EventRegistry<TEvent extends Function> {
             this.extraOption = option.extraOption ?? this.extraOption;
             this.extraOptionResolver = option.extraOptionResolver ?? defaultOptionResolver;
             this.listeningAdapter = option.listeningAdapter ?? this.listeningAdapter;
+            this.#displayName = option.displayName ?? undefined;
         }
     }
     addHandler(handler: IEventHandler<TEvent>, priority: EventPriority){
@@ -134,6 +139,7 @@ export interface EventRegisterOptions<TEvent extends Function> {
     extraOption?: boolean
     extraOptionResolver?: ExtraOptionResolver<TEvent>
     listeningAdapter?: EventListeningAdapter<TEvent>
+    displayName?: string
 }
 
 export type ExtraOptionResolver<TEvent extends Function> = <TP extends {}>(event: TEvent["prototype"], option: TP) => boolean
