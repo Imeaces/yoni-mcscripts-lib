@@ -6,14 +6,14 @@ import { EventTrigger } from "./event/Trigger.js";
 import { EventTriggerBuilder } from "./event/TriggerBuilder.js";
 
 export {
-    Event,
-    EventTypes,
-    EventSignal,
-    EventTrigger,
-    EventTriggerBuilder,
-    EventRegisterListener,
-    EventListener,
-    events
+    Event as LegacyEvent,
+    EventTypes as LegacyEventTypes,
+    EventSignal as LegacyEventSignal,
+    EventTrigger as LegacyEventTrigger,
+    EventTriggerBuilder as LegacyEventTriggerBuilder,
+    EventRegisterListener as LegacyEventRegisterListener,
+    EventListener as LegacyEventListener,
+    events as legacyEvents,
 };
 
 import("./event/_loadEvents.js");

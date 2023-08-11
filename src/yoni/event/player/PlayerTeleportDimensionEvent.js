@@ -1,4 +1,4 @@
-import { EventSignal, EventTriggerBuilder } from "../../event.js";
+import { LegacyEventSignal as EventSignal, LegacyEventTriggerBuilder as EventTriggerBuilder } from "../../legacy_event.js";
 import { YoniScheduler, Schedule } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
 import { world as World } from "../../world.js";

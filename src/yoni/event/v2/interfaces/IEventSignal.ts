@@ -1,4 +1,4 @@
-export interface IEventSignal {
+export default interface IEventSignal {
     
     /**
      * 为事件添加指定的回调函数，并传入可选的过滤器

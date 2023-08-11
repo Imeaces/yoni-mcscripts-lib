@@ -1,7 +1,7 @@
 import { world as World } from "../../world.js";
 import { YoniScheduler } from "../../schedule.js";
 import { PlayerEvent } from "./PlayerEvent.js";
-import { EventTriggerBuilder, EventTypes, EventSignal } from "../../event.js";
+import { LegacyEventTriggerBuilder as EventTriggerBuilder, LegacyEventTypes as EventTypes, LegacyEventSignal as EventSignal } from "../../legacy_event.js";
 import { Player } from "yoni/entity.js";
 import "./PlayerJoinedEvent.js";
 

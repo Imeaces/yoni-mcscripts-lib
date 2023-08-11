@@ -8,6 +8,7 @@ const VanillaAfterEvents = world.afterEvents;
 const SystemBeforeEvents = system.beforeEvents;
 const SystemAfterEvents = system.afterEvents;
 
+export function registerMinecraftNativeEvents(){
 const eventSignals = {
     "VanillaEvents": new Set(),
     "SystemEvents": new Set(),
@@ -74,4 +75,5 @@ for (const info of mappedEventInfos){
         listeningAdapter: adapter
     };
     EventRegistry.register(eventClass, options);
+}
 }

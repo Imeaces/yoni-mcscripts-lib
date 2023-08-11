@@ -1,5 +1,5 @@
 // @ts-nocheck
-import { EventTypes, Event, EventSignal } from "../../event.js";
+import { LegacyEventTypes as EventTypes, LegacyEvent as Event, LegacyEventSignal as EventSignal } from "../../legacy_event.js";
 import { EntityBase } from "../../entity.js";
 import { getKeys } from "../../lib/ObjectUtils.js";
 import { Minecraft } from "../../basis.js";

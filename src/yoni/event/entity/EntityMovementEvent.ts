@@ -1,4 +1,4 @@
-import { EventSignal, EventTriggerBuilder } from "../../event.js";
+import { LegacyEventSignal as EventSignal, LegacyEventTriggerBuilder as EventTriggerBuilder } from "../../legacy_event.js";
 import { EntityEvent } from "./EntityEvent.js";
 import { EntityValue, EntityBase, YoniEntity } from "../../entity.js";
 import { Location } from "../../Location.js";

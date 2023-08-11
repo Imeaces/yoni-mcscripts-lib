@@ -1,5 +1,5 @@
 import { runTask, MinecraftSystem } from "../../basis.js";
-import { EventSignal, Event, EventTriggerBuilder } from "../../event.js";
+import { LegacyEventSignal as EventSignal, LegacyEvent as Event, LegacyEventTriggerBuilder as EventTriggerBuilder } from "../../legacy_event.js";
 
 export class TickEventSignal extends EventSignal {}
 

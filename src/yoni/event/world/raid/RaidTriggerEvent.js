@@ -1,4 +1,4 @@
-import { EventTypes, EventTriggerBuilder, EventSignal, Event } from "../../../event.js";
+import { LegacyEventTypes as EventTypes, LegacyEventTriggerBuilder as EventTriggerBuilder, LegacyEventSignal as EventSignal, LegacyEvent as Event } from "../../../legacy_event.js";
 import { EntityBase } from "../../../entity.js";
 
 class RaidEventTriggerEvent extends Event {

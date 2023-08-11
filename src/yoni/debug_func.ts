@@ -2,7 +2,7 @@ import { ChatCommand } from "./command/ChatCommand.js";
 import { Command } from "./command.js";
 import { EntityBase, YoniPlayer } from "./entity.js";
 import { Logger } from "./util/Logger.js";
-import { EventListener } from "./event.js";
+import { LegacyEventListener as EventListener } from "./legacy_event.js";
 import { getErrorMsg } from "./lib/console.js";
 import { config } from "./config.js";
 import { runTask, Minecraft } from "./basis.js";

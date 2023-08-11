@@ -1,4 +1,4 @@
-import { Event } from "../../event.js";
+import { LegacyEvent as Event } from "../../legacy_event.js";
 import { Minecraft } from "../../basis.js";
 import { EntityBase, Player } from "../../entity.js";
 

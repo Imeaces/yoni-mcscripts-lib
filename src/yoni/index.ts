@@ -68,18 +68,10 @@ export { YoniBlock } from "./block.js";
 export { EntryType } from "./scoreboard.js";
 export { CommandPriority } from "./command/CommandPriority.js";
 
+export * from "./legacy_event.js";
 
-//legacy event
-export {
-    Event,
-    EventTypes,
-    EventSignal,
-    EventTrigger,
-    EventTriggerBuilder,
-    EventRegisterListener,
-    EventListener,
-    events
-} from "./event.js";
+//event
+export * from "./event.js";
 
 // entity class
 import {

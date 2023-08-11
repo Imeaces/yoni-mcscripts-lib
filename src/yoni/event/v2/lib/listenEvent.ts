@@ -79,3 +79,5 @@ export function listenAsyncEvent<TFunction extends Function>(event: TFunction, c
 }
 
 type EventCallback<TEvent extends Function, E extends {} = TEvent["prototype"]> = (event: E) => void
+
+export { listenEvent };
