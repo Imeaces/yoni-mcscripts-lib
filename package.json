@@ -8,7 +8,7 @@
   },
   "name": "yoni-mcscripts-lib",
   "description": "对Vanilla Scripts API进行了一定程度的重新封装，且仍在不断添加",
-  "version": "1.0.0-alpha",
+  "version": "1.0.0-alpha.2",
   "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
