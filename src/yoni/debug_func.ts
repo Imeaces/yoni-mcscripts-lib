@@ -55,7 +55,7 @@ async function initEvalFunction(){
     
     let generateFunction = new Function(generateFunctionCodeLines.join("\n"));
     
-    logger.info(generateFunctionCodeLines.join("\n"));
+    //logger.info(generateFunctionCodeLines.join("\n"));
     
     doEval = generateFunction(yonilib, ObjectUtils, timeoutlib, s, logger);
 }

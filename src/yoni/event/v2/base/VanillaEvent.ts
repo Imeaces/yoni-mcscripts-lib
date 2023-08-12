@@ -1,5 +1,6 @@
 import Minecraft from "../../../minecraft.js";
 import { hasInstance } from "../../../lib/hasInstance.js";
+import { Event } from "./Event.js";
 
 export class VanillaEvent extends Event {
     static [Symbol.hasInstance](value: any){

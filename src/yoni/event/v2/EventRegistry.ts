@@ -18,10 +18,13 @@ export class EventRegistry<TEvent extends Function> {
     #adapterEnabled: boolean = false;
     #adapter(action: "enable" | "disable"): boolean {
         if (!this.listeningAdapter)
-            return false;;
+            return false;
         
         if (action === "enable" && !this.#adapterEnabled){
-            this.listeningAdapter.listen((event: TEvent) => { manager.callEvent(this, event); });
+            const eventRegistry = this;
+            this.listeningAdapter.listen(function receiveOuterEvent(event: TEvent){
+                manager.callEvent(eventRegistry, event);
+            });
             this.#adapterEnabled = true;
         } else if (action === "disable" && this.#adapterEnabled){
             if (this.listeningAdapter.remove()){

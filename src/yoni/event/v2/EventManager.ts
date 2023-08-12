@@ -47,7 +47,7 @@ export class EventManager {
                 try { //捕获事件处理错误，并输出日志
                     handler.onEvent(event);
                 } catch(e){
-                    logger.error("处理事件时发生以下错误:", e);
+                    logger.error("处理事件 {} 时发生以下错误:", eventRegistry.eventName, e);
                 }
             }
         } catch(e){ //捕获事件执行错误，应该抛出（不过我也不知道这里能捕获到什么错误）

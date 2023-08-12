@@ -108,7 +108,7 @@ class Types {
             } catch (err){
                 throw new Error("未能注册事件，可能指定的命名空间不可修改事件\n以下是错误信息: "+String(err));
             }
-            logger.trace("注册了事件 {}", idInfo.id);
+            //logger.trace("注册了事件 {}", idInfo.id);
         } else {
             throw new Error("在eventType上必须有一个subscribe属性才可以注册事件");
         }
@@ -125,7 +125,7 @@ class Types {
         }
         if ("get" in namespaceEventTypes){
             registeredEventTypes.set(namespace, namespaceEventTypes);
-            logger.trace("注册了事件命名空间 {}", namespace);
+            //logger.trace("注册了事件命名空间 {}", namespace);
         }
     }
     /**
