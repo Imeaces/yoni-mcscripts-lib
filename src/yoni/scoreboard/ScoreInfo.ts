@@ -1,9 +1,8 @@
-import { Entry } from "./Entry.js";
+import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { Objective } from "./Objective.js";
 
 /**
  * 一个对象，包含了分数持有者，以及其在某一记分项上的分数。
- * @deprecated 无法保证某些属性可以正常工作。
  */
 export class ScoreInfo {
     #entry;
@@ -11,14 +10,10 @@ export class ScoreInfo {
     
     /**
      * @param {Objective} obj
-     * @param {Entry} entry
+     * @param {ScoreboardEntry} entry
      */
-    constructor(obj: Objective, entry: Entry){
-        if (!(obj instanceof Objective))
-            throw new TypeError("Not an Objective type");
-        if (!(entry instanceof Entry))
-            throw new TypeError("Not an Entry type");
-        this.#objective = obj;
+    constructor(objective: Objective, entry: ScoreboardEntry){
+        this.#objective = objective;
         this.#entry = entry;
     }
     

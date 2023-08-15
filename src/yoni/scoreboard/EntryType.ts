@@ -1,12 +1,12 @@
-import { Entry } from "./Entry.js";
+import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { Minecraft } from "../basis.js";
 import { EntityValue } from "../entity/EntityTypeDefs";
 
 /**
  * 可以被作为分数持有者的类型。
- * 这包括原版的实体对象，yoni的实体对象，原版的scbid，yoni的Entry，以及虚拟玩家名称，或是scbid的数字形式。
+ * 这包括原版的实体对象，yoni的实体对象，原版的scbid，yoni的Entry，以及虚拟玩家名称。
  */
-export type EntryValueType = Entry | Minecraft.ScoreboardIdentity | EntityValue | string | number;
+export type EntryValueType = ScoreboardEntry | Minecraft.ScoreboardIdentity | EntityValue | string;
 
 export enum EntryType {
     /**

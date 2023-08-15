@@ -2,7 +2,7 @@ import { MinecraftSystem, runTask, overworld, isReadonlyMode } from "./basis.js"
 import { YoniScheduler } from "./schedule.js";
 
 class System {
-    run(callback: (((...args: any[]) => void) | (() => void)), ...args: any[]){
+    run<P extends any[]>(callback: (...args: P) => void, ...args: P){
         runTask(callback, ...args);
     }
     get beforeEvents(){

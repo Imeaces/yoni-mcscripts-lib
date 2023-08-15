@@ -7,7 +7,7 @@ import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
 import { YoniEntity, YoniPlayer } from "./entity.js";
 
-export class World {
+class World {
     static isWorld(object: any){
         return object instanceof Minecraft.World || object instanceof World;
     }
@@ -29,6 +29,7 @@ export class World {
         });
     }
     /**
+     * @deprecated 自从返回结果改为数组之后，这方法就没有意义了。
      * 查找游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniPlayer}
@@ -39,14 +40,12 @@ export class World {
         }
     }
     /**
-     * 查找游戏中符合特定条件的玩家。
+     * 获取游戏中符合特定条件的玩家。
      * @param {Minecraft.EntityQueryOptions} [option]
      * @yields {YoniPlayer}
      */
-    * getPlayers(option?: Minecraft.EntityQueryOptions): Generator<YoniPlayer> {
-        for (let pl of VanillaWorld.getPlayers(option)){
-            yield EntityBase.from(pl) as unknown as YoniPlayer;
-        }
+    getPlayers(option?: Minecraft.EntityQueryOptions): Array<YoniPlayer> {
+        return EntityBase.getWorldVanillaPlayers(option).map(EntityBase.from) as Array<YoniPlayer>;
     }
     
     /**
@@ -71,12 +70,11 @@ export class World {
      * 获取一个包含了当前世界中已经加载的所有实体的对象的数组。
      */
     getLoadedEntities(): YoniEntity[] {
-        return getAllDims()
-            .map(dim => Array.from(dim.getEntities()))
-            .flat()
-            .map(ent => EntityBase.from(ent) as unknown as YoniEntity);
+        return EntityBase.getLoadedVanillaEntities()
+        .map(ent => EntityBase.from(ent) as unknown as YoniEntity);
     }
     /**
+     * @deprecated 自从返回结果改为数组之后，这方法就没有意义了。
      * 查找游戏中符合特定条件的实体。
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniEntity}
@@ -88,14 +86,26 @@ export class World {
             }
         }
     }
-    getAliveEntities(){
+    /**
+     * 获取所有生物实体。
+     */
+    getLivingEntities(){
         return this.getLoadedEntities()
-            .filter((ent) => ent.isAlive());
+            .filter((ent) => ent.isLivingEntity());
     }
 }
-
 copyPropertiesWithoutOverride(World.prototype, Minecraft.World.prototype, "vanillaWorld");
 
-export type YoniWorld = World & Omit<Minecraft.World, keyof World>;
+type RemovedKeys = never
+type OverridedKeys = "getDimension" | "getAllPlayers" | "scoreboard" | "getPlayers" | "getEntities"
+type BaseVanillaWorldClass = 
+    Omit<
+        Minecraft.World,
+        RemovedKeys | OverridedKeys
+    >;
+interface World extends BaseVanillaWorldClass {
+}
 
-export const world = new World(VanillaWorld) as unknown as YoniWorld;
+export { World, World as YoniWorld };
+
+export const world = new World(VanillaWorld);

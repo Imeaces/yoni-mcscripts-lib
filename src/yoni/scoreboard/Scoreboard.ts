@@ -8,8 +8,8 @@ import {
     // UnknownEntryError,
 } from "./ScoreboardError.js"
 import { Objective } from "./Objective.js";
-import { Entry, EntryType } from "./Entry.js";
-import { EntryValueType } from "./EntryType.js";
+import { ScoreboardEntry } from "./ScoreboardEntry.js";
+import { EntryValueType, EntryType } from "./EntryType.js";
 
 import { EntityBase } from "../entity.js";
 
@@ -98,20 +98,19 @@ export class Scoreboard {
     static addObjective(name: string, criteria: "dummy" = "dummy", displayName: string = name): Objective {
         if (!name || typeof name !== "string")
             throw new TypeError("Objective name not valid!");
-        if (Scoreboard.getObjective(name) !== null)
+        else if (Scoreboard.tryGetObjective(name) !== false)
             throw new Error("Objective "+name+" existed!");
-        if (criteria !== "dummy")
+        else if (criteria !== "dummy")
             throw new Error("Unsupported criteria: " + criteria);
-        if (typeof name !== "string" || name.length === 0)
+        else if (typeof name !== "string" || name.length === 0)
             throw new TypeError("Objective display name not valid!");
         
         let vanillaObjective = VanillaScoreboard.addObjective(name, displayName);
         
-        let newObjective = new Objective({
-            scoreboard: Scoreboard,
+        let newObjective = new Objective(Scoreboard,
             name, criteria, displayName,
-            vanillaObjective
-        });
+            { vanillaObjective }
+        );
         Scoreboard.#objectives.set(name, newObjective);
         
         return newObjective;
@@ -122,14 +121,14 @@ export class Scoreboard {
      * @param {string|Objective|Minecraft.ScoreboardObjective} nameOrObjective - 要移除的记分项，可以直接指定记分项的名称。
      * @returns {boolean} 是否成功移除了记分项。
      */
-    static removeObjective(nameOrObjective: string|Objective|Minecraft.ScoreboardObjective): boolean {
+    static removeObjective(objective: string|Objective|Minecraft.ScoreboardObjective): boolean {
         let objectiveId;
-        if (nameOrObjective instanceof Objective || nameOrObjective instanceof Minecraft.ScoreboardObjective){
-            objectiveId = nameOrObjective.id;
+        if (objective instanceof Objective || objective instanceof Minecraft.ScoreboardObjective){
+            objectiveId = objective.id;
         } else {
-            objectiveId = nameOrObjective;
+            objectiveId = objective;
         }
-        if (objectiveId && typeof objectiveId === "string"){
+        if (typeof objectiveId === "string"){
             if (Scoreboard.#objectives.has(objectiveId)){
                 Scoreboard.#objectives.delete(objectiveId);
             }
@@ -139,56 +138,84 @@ export class Scoreboard {
                 return false;
             }
         } else {
-            throw new TypeError("unknown error while removing objective");
+            return false;
+            //throw new TypeError("could not determine what objective to remove");
         }
     }
     
     /**
-     * 获取名称为 `name` 的记分项对象。
-     * @param {string|Minecraft.ScoreboardObjective} name - 可以代表记分项的值。
-     * @param {boolean} autoCreateDummy - 如果为 `true` ，在未找到对应记分项时，创建新的记分项并返回。
-     * @returns {Objective} 名称为 `name` 的记分项。
-     * 若不存在名称为 `name` 的记分项，且设置了 `autoCreateDummy` 为 `true`，创建名称为 `name` 的记分项，并返回其对象。
-     * @throws 若不存在名称为 `name` 的记分项，且未设置 `autoCreateDummy` 为 `true`，抛出错误`。
+     * 尝试获取名称为 `name` 的记分项对象。
+     * @param {string} name - 记分项的 ID。
+     * @returns {Objective} 名称为 `name` 的记分项，或者 `false`。
      */
-    static getObjective(name: string|Minecraft.ScoreboardObjective, autoCreateDummy: boolean = false): Objective {
-        let vanillaObjective: Minecraft.ScoreboardObjective | undefined = undefined;
-        let result: Objective | null = null;
-        
-        if (name instanceof Minecraft.ScoreboardObjective){
-            if (name.isValid()){
-                vanillaObjective = name;
-            } else {
-                try {
-                    vanillaObjective = VanillaScoreboard.getObjective(name.id);
-                } catch {
-                    throw new ReferenceError("attempt to get an removed objective");
-                }
-            }
-            name = vanillaObjective.id;
-        } else if (typeof name === "string"){
-            try {
-                vanillaObjective = VanillaScoreboard.getObjective(name);
-            } catch(e) {
-                if (!autoCreateDummy)
-                    throw e;
-            }
+    static tryGetObjective(name: string): Objective | false {
+        let objective = Scoreboard.#objectives.get(name);
+        if (objective?.vanillaObjective.isValid()){
+            return objective;
+        } else if (Scoreboard.#objectives.has(name)){
+            Scoreboard.#objectives.delete(name);
+        }
+        let vanillaObjective: Minecraft.ScoreboardObjective | null = null;
+        try {
+            vanillaObjective = VanillaScoreboard.getObjective(name);
+        } catch {
+            return false;
         }
         if (vanillaObjective == null){
-            if (autoCreateDummy){
-                vanillaObjective = VanillaScoreboard.addObjective(name, name);
+            return false;
+        }
+        objective = new Objective(Scoreboard,
+            vanillaObjective.id,
+            "dummy",
+            vanillaObjective.displayName,
+            { vanillaObjective }
+        );
+        Scoreboard.#objectives.set(name, objective);
+        return objective;
+    }
+
+    /**
+     * 获取记分项。
+     * @param {string | Minecraft.ScoreboardObjective} objectiveId - 代表一个记分项的值，可以为它的 ID 或原版记分项对象。
+     * @param {boolean} autoCreateDummy - 如果为 `true` ，在未找到对应记分项时，创建新的记分项并返回。
+     * @returns {Objective} `objectiveId` 所对应的的记分项。
+     * @throws 若 `objectiveId` 为记分项ID，且未设置 `autoCreateDummy` 为 `true`，抛出 ReferenceError `记分项不存在`。
+     * @throws 若 `objectiveId` 为原版记分项对象，且未设置 `autoCreateDummy` 为 `true` 或无法读取记分项信息，抛出 ReferenceError `尝试获取/读取无法使用的记分项对象`。
+     */
+    static getObjective(objectiveId: string | Minecraft.ScoreboardObjective, autoCreateDummy?: boolean): Objective {
+        let objective: Objective | null | undefined = null;
+        let name: string | null | undefined = null;
+        
+        if (objectiveId instanceof Minecraft.ScoreboardObjective){
+            let vanillaObjective = objectiveId;
+            if (vanillaObjective.isValid()){
+                name = vanillaObjective.id;
+            } else if (autoCreateDummy){
+                try {
+                    name = vanillaObjective.id;
+                } catch {
+                    throw new ReferenceError("attempt to create a removed objective");
+                }
             } else {
-                throw new ReferenceError("objective "+name+" didn't exist");
+                throw new ReferenceError("attempt to get a removed objective");
+            }
+        } else {
+            name = objectiveId;
+        }
+        
+        if (name){
+            objective = Scoreboard.tryGetObjective(name) || null;
+
+            if (!objective && autoCreateDummy){
+                VanillaScoreboard.addObjective(name, name);
+                objective = Scoreboard.tryGetObjective(name) as Objective;
             }
         }
         
-        let record = Scoreboard.#objectives.get(name);
-        if (record === undefined || record.vanillaObjective !== vanillaObjective){
-            record = new Objective(Scoreboard, name, "dummy", vanillaObjective.displayName, vanillaObjective);
-            Scoreboard.#objectives.set(name, record);
-        }
-        result = record;
-        return result;
+        if (!objective)
+            throw new ReferenceError("objective "+name+" didn't exist");
+        
+        return objective;
     }
     
     /** 
@@ -196,8 +223,11 @@ export class Scoreboard {
      * @returns {Objective[]} 包含了所有记分项对象的数组。
      */
     static getObjectives(): Objective[]{
-        return Array.from(VanillaScoreboard.getObjectives())
-            .map(obj => Scoreboard.getObjective(obj.id) as Objective);
+        const objectives: Objective[] = [];
+        for (const vanillaObjective of VanillaScoreboard.getObjectives()){
+            objectives.push(Scoreboard.tryGetObjective(vanillaObjective.id) as Objective);
+        }
+        return objectives;
     }
     
     /**
@@ -290,14 +320,15 @@ export class Scoreboard {
     
     /**
      * 获取记分板上记录的所有分数持有者。
-     * @returns {Entry[]}
+     * @returns {ScoreboardEntry[]}
      */
-    static getEntries(): Entry[]{
-        let arr = VanillaScoreboard.getParticipants();
-        if (!Array.isArray(arr)){
-            arr = Array.from(arr);
+    static getEntries(): ScoreboardEntry[]{
+        const entries: ScoreboardEntry[] = [];
+        for (const identify of VanillaScoreboard.getParticipants()){
+            const entry = ScoreboardEntry.getEntry(identify.type as unknown as EntryType, identify);
+            entries.push(entry);
         }
-        return arr.map(scbid => Entry.findEntry({ scbid, type: scbid.type }));
+        return entries;
     }
     
     /**
@@ -327,105 +358,12 @@ export class Scoreboard {
      * @throws 未能在世界上找到分数持有者的实体对象时，抛出错误。
      */
     static resetScore(one: EntryValueType){
-        let entry: Entry;
-        if (one instanceof Entry)
-            entry = one;
-        else
-            entry = Entry.guessEntry(one);
-        
-        let oneValue;
-        
-        if (entry.vanillaScbid){
-            oneValue = entry.vanillaScbid;
-        } else if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
-            oneValue = entry.getVanillaEntity();
-            if (oneValue == null){
-                throw new Error("Could not find the entity");
-            }
-        } else {
-            oneValue = entry.displayName;
-        }
+        let identify = ScoreboardEntry.guessEntry(one).getIdentity();
         
         for (const objective of VanillaScoreboard.getObjectives()){
-            if (objective.hasParticipant(oneValue)){
-                objective.removeParticipant(oneValue);
+            if (objective.hasParticipant(identify)){
+                objective.removeParticipant(identify);
             }
-        }
-    }
-
-    /**
-     * 以异步方式重置分数持有者的分数。
-     * @deprecated 不再推荐使用，建议使用{@link Scoreboard.getEntries}并过滤特定条目后
-     使用{@link Scoreboard.resetScore}移除，或使用{@link Scoreboard.resetAllScores}。
-     * @param {(entry: Entry) => boolean} [filter] - 可选的过滤器函数，
-     * 将所有分数持有者的 `Entry` 对象依次传入，若得到 `true` ，则重置
-     * 此分数持有者的分数，否则将不会重置。
-     * @returns {Promise<number>} 重置了多少分数持有者的分数。
-     */
-    static async postResetAllScores(filter?: (entry: Entry) => boolean): Promise<number>{
-        if (arguments.length === 0){
-            let rt = await Command.add(Command.PRIORITY_HIGHEST, "scoreboard players reset *");
-            if (rt.statusCode !== StatusCode.success){
-                throw new Error(rt.statusMessage);
-            } else {
-                return rt.successCount as unknown as number;
-            }
-        }
-        let resolve: (v?: any) => void;
-        let promise = new Promise((re)=>{
-            resolve = re;
-        });
-        let entries = Scoreboard.getEntries();
-        let successCount = 0;
-        let doneCount = 0;
-        let successCountAdder = ()=>{
-            successCount++;
-        };
-        let resolveIfDone = ()=>{
-            if (++doneCount === entries.length){
-                resolve(successCount);
-            }
-        };
-        // @ts-ignore 能用，忽略类型问题。
-        entries.filter(filter).forEach((id)=>{
-            Scoreboard.postResetScore(id)
-                .then(successCountAdder)
-                .finally(resolveIfDone);
-        });
-        return promise as Promise<number>;
-    }
-    
-    /**
-     * 重置记分板上指定分数持有者的所有分数记录。
-     * @deprecated 建议使用其同步版本 {@link Scoreboard.resetScore}
-     * @param {EntryValueType} one - 可能对应分数持有者的值。
-     * @throws 当分数持有者为虚拟玩家，并且世界上存在与其名字相同的玩家时，抛出 `NameConflictError`。
-     * @throws 未能在世界上找到分数持有者的实体对象时，抛出错误。
-     */
-    static async postResetScore(one: EntryValueType){
-        let entry: Entry;
-        if (one instanceof Entry)
-            entry = one;
-        else
-            entry = Entry.guessEntry(one);
-            
-        if (entry.type === EntryType.PLAYER || entry.type === EntryType.ENTITY){
-            let ent = entry.getEntity();
-            if (ent == null){
-                throw new Error("Could not find the entity");
-            }
-            let rt = await Command.addExecuteParams(Command.PRIORITY_HIGHEST, ent, "scoreboard", "players", "reset", "@s");
-            if (rt.statusCode != StatusCode.success){
-                throw new Error("Could not set score, maybe entity or player disappeared?");
-            }
-        } else if ([...VanillaWorld.getPlayers({name: entry.displayName})].length === 0){
-            let rt = await Command.add(Command.PRIORITY_HIGHEST,
-                Command.getCommandMoreStrict("scoreboard", "players", "reset", entry.displayName));
-            if (rt.statusCode !== StatusCode.success){
-                throw new Error(rt.statusMessage);
-            }
-        } else {
-            throw new NameConflictError(entry.displayName);
         }
     }
 }

@@ -13,6 +13,8 @@ export { system } from "./system.js";
 export {
   runTask,
   dim,
+  runImmediate,
+  isReadonlyMode,
   VanillaWorld,
   VanillaScoreboard,
   MinecraftSystem,
@@ -57,7 +59,7 @@ export {
 } from "./Location.js";
 export { DimensionLikeValue } from "./dim.js";
 export {
-  Entry,
+  ScoreboardEntry,
   Objective,
 } from "./scoreboard.js";
 export { YoniWorld } from "./world.js";

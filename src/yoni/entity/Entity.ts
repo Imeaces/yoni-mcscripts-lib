@@ -1,7 +1,8 @@
 import { Minecraft } from "../basis.js";
 import { EntityBase } from "./EntityBase.js";
 import { EntityClassRegistry } from "./EntityClassRegistry.js";
-import { Entry } from "../scoreboard/Entry.js";
+import { EntryType } from "../scoreboard/EntryType.js";
+import { ScoreboardEntry } from "../scoreboard/ScoreboardEntry.js";
 import { Dimension } from "../dimension.js";
 import { DimensionLikeValue } from "../dim.js";
 import { Location, Vector2, Vector3 } from "../Location.js";
@@ -45,15 +46,8 @@ class Entity extends EntityBase {
         return location;
     }
     
-    get scoreboard(): Entry {
-        return Entry.findEntry({entity: this.vanillaEntity});
-    }
-    
-    /**
-     * 返回实体是否为活体。
-     */
-    isAliveEntity(){
-        return EntityBase.isAliveEntity(this.vanillaEntity);
+    get scoreboard(): ScoreboardEntry {
+        return ScoreboardEntry.getEntry(EntryType.ENTITY, this.vanillaEntity);
     }
     
     /**
@@ -61,8 +55,15 @@ class Entity extends EntityBase {
      *
      * 返回实体是否可用（即此对象对应的实体是否处于活动状态（即实体处于世界的已加载区域（即已经读取到内存的地图）
      */
-    isAlive(){
-        return EntityBase.isAlive(this.vanillaEntity);
+    isAliveEntity(){
+        return EntityBase.isAliveEntity(this.vanillaEntity);
+    }
+    
+    /**
+     * 返回实体是否为活体。
+     */
+    isLivingEntity(){
+        return EntityBase.isLivingEntity(this.vanillaEntity);
     }
     
     /**

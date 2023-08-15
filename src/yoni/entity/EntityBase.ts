@@ -11,11 +11,12 @@ import { DimensionLikeValue } from "../dim.js";
 import { YoniPlayer, YoniEntity, YoniSimulatedPlayer } from "../entity.js";
 
 /**
- * 代表一个实体
+ * Yoni实体的基类，同时也含有一些用于处理实体的静态方法。
  */
 export abstract class EntityBase {
     
     /**
+     * 这个属性映射了一个原版中的实体对象。
      * @type {Minecraft.Entity}
      */
     // @ts-ignore
@@ -39,7 +40,7 @@ export abstract class EntityBase {
     }
     
     abstract isAliveEntity(): boolean;
-    abstract isAlive(): boolean;
+    abstract isLivingEntity(): boolean;
     
     /**
      * 检查一个东西是否为实体
@@ -52,9 +53,9 @@ export abstract class EntityBase {
     }
     
     /**
-     * 由实体对象创建对应的 YoniEntity 实体对象，这个方法确保了实体对象的唯一。
+     * 由实体对象创建对应的 YoniEntity 实体对象，这个方法确保了实体对象的唯一，并且此过程中不会进行太多的检查。
      * 
-     * 如果要确保一定能获取到 YoniEntity 对象，请使用 {@link EntityBase.getYoniEntity}
+     * 一般情况下你不应该使用此方法，而是使用 {@link EntityBase.getYoniEntity}。
      * @param {any} entity - 可以被认为是实体的东西，出于代码便利，允许传入任何值。实际上只有实体类型的对象才有效果。
      * @return {YoniEntity} 如果 `entity` 不为实体类型，则返回 `null`。
      */
@@ -75,13 +76,28 @@ export abstract class EntityBase {
         return false;
     }
     
+    static getAliveEntity(entity: EntityValue): YoniEntity {
+        return EntityBase.from(EntityBase.getAliveVanillaEntity(entity)) as YoniEntity;
+    }
+    
+    static getAliveVanillaEntity(entity: EntityValue): Minecraft.Entity {
+        if (entity.isValid())
+            return EntityBase.getMinecraftEntity(entity);
+        
+        const result = VanillaWorld.getEntity(entity.id);
+        if (result){
+            return result;
+        }
+        throw new ReferenceError("no entity found");
+    }
+    
     /**
      * 获取所有存活的实体
      * @param {Minecraft.EntityQueryOptions} option
      * @return {YoniEntity[]}
      */
     static getAliveEntities(option: Minecraft.EntityQueryOptions): YoniEntity[] {
-        return Array.from(EntityBase.getDimensionEntities()).map(EntityBase.from) as unknown as YoniEntity[];
+        return Array.from(EntityBase.getDimensionVanillaEntities()).map(EntityBase.from) as unknown as YoniEntity[];
     }
     
     /**
@@ -135,32 +151,22 @@ export abstract class EntityBase {
         return (component === undefined) ? 0 : component.currentValue;
     }
     
-    static getDimensionEntities(dimension?: DimensionLikeValue, options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Entity> {
-        if (!dimension){
-            let ents = Object
-                .getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
-                .map(k => VanillaWorld.getDimension(k))
-                .map(dim => dim.getEntities());
-            let generator = function * (){
-                for (let es of ents){
-                    yield* es;
-                }
-            }
-            return generator();
-        }
+    static getDimensionVanillaEntities(options?: Minecraft.EntityQueryOptions) {
+        const dimensionArrays = Object.getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
+            .map(key => Dimension.toDimension((Minecraft.MinecraftDimensionTypes as any)[key] as DimensionLikeValue).vanillaDimension);
         
+        let entitiesArrays: Minecraft.Entity[][];
         if (!options){
-            return Dimension.toDimension(dimension).vanillaDimension.getEntities();
+            entitiesArrays = dimensionArrays.map(dim => dim.getEntities());
+        } else {
+            entitiesArrays = dimensionArrays.map(dim => dim.getEntities(options));
         }
         
-        return Dimension.toDimension(dimension).vanillaDimension.getEntities(options);
+        return ([] as Minecraft.Entity[]).concat(...entitiesArrays);
+    
     }
     
-    static getWorldPlayers(options?: Minecraft.EntityQueryOptions): Iterable<Minecraft.Player> {
-        if (!options){
-            return VanillaWorld.getPlayers();
-        }
-        
+    static getWorldVanillaPlayers(options?: Minecraft.EntityQueryOptions): Array<Minecraft.Player> {
         return VanillaWorld.getPlayers(options);
     }
     
@@ -168,15 +174,11 @@ export abstract class EntityBase {
      * 获取所有存在的实体（包括死亡的玩家）
      * @returns {EntityValue[]}
      */
-    static getLoadedEntities(): Minecraft.Entity[] {
-        let entities = new Set<Minecraft.Entity>();
-        for (let e of EntityBase.getDimensionEntities()){
-            entities.add(e);
-        }
-        for (let p of EntityBase.getWorldPlayers()){
-            entities.add(p);
-        }
-        return Array.from(entities);
+    static getLoadedVanillaEntities(): Minecraft.Entity[] {
+        return ([] as Minecraft.Entity[]).concat(
+            EntityBase.getDimensionVanillaEntities({excludeTypes: ["minecraft:player"]}),
+            EntityBase.getWorldVanillaPlayers()
+        );
     }
     
     /**
@@ -215,7 +217,7 @@ export abstract class EntityBase {
     }
     
     /**
-     * 检测一个实体是否有指定的所有种族
+     * 检测实体是否有所有指定的家族。
      * @param {EntityValue} entity
      * @param {...string} families
      * @returns {boolean}
@@ -223,9 +225,9 @@ export abstract class EntityBase {
     static hasFamilies(entity: EntityValue, ...families: string[]){
         entity = EntityBase.getMinecraftEntity(entity);
         const dimension = entity.dimension;
-        const tryEntities = EntityBase.getDimensionEntities(dimension, {
-                type: entity.typeId,
-                families: families
+        const tryEntities = dimension.getEntities({
+            type: entity.typeId,
+            families: families
         });
         for (const cEntity of tryEntities){
             if (entity === cEntity){
@@ -236,30 +238,34 @@ export abstract class EntityBase {
     }
     
     /**
-     * 检测一个实体是否任一指定的种族
+     * 检测实体是否有任一指定的家族。
      * @param {EntityValue} entity
      * @param {...string} families
      * @returns {boolean}
      */
     static hasAnyFamily(entity: EntityValue, ...families: string[]){
         entity = EntityBase.getMinecraftEntity(entity);
+        
         const dimension = entity.dimension;
+        
         for (const family of families){
-            const tryEntities = EntityBase.getDimensionEntities(dimension, {
+            const tryEntities = dimension.getEntities({
                 type: entity.typeId,
                 families: Array.of(family)
             });
+            
             for (const cEntity of tryEntities){
                 if (entity === cEntity){
                     return true;
                 }
             }
         }
+        
         return false;
     }
     
     /**
-     * 检测一个实体是否有某个种族
+     * 检测实体是否含有指定家族。
      * @param {EntityValue} entity
      * @param {string} family
      * @returns {boolean}
@@ -274,31 +280,25 @@ export abstract class EntityBase {
      * @returns {boolean}
      */
     static isAliveEntity(entity: EntityValue){
-        entity = EntityBase.getMinecraftEntity(entity);
-        for (let e of EntityBase.getDimensionEntities()){
-            if (e === entity) return true;
-        }
-        for (let p of EntityBase.getWorldPlayers()){
-            if (p === entity) return true;
-        }
-        return false;
+        return entity.isValid();
     }
     
     /**
-     * 检测一个实体是否活着
-     * 物品、箭、烟花等不是活的
-     * 死了的实体也不是活的
+     * 检测一个实体是否活着。
+     *
+     * 例如；物品、箭、烟花不是生物实体。
      * @param {EntityValue} entity
      * @returns {boolean}
      */
-    static isAlive(entity: EntityValue){
+    static isLivingEntity(entity: EntityValue){
         EntityBase.checkIsEntity(entity);
-        let comp = entity.getComponent("minecraft:health");
+        
+        const comp = entity.getComponent("minecraft:health") as Minecraft.EntityHealthComponent;
+        
         if (comp == null)
             return false;
-        if ((<Minecraft.EntityHealthComponent>comp).currentValue > 0)
-            return true;
-        return false;
+        
+        return comp.currentValue > 0;
     }
     
     /**
@@ -328,15 +328,11 @@ export abstract class EntityBase {
     
     /**
      * 检测两个参数是否为同一实体
-     * @param {any} ent1
-     * @param {any} ent2
      */
-    static isSameEntity(ent1: any, ent2: any){
-        if (EntityBase.isYoniEntity(ent1))
-            ent1 = ent1.vanillaEntity;
-        if (EntityBase.isYoniEntity(ent2))
-            ent2 = ent2.vanillaEntity;
-        return ent1 === ent2;
+    static isSameEntity(entity1: any, entity2: any){
+        return EntityBase.isEntity(entity1)
+        && EntityBase.isEntity(entity2)
+        && entity1.id === entity2.id;
     }
 
     /**

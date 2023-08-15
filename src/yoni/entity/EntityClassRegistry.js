@@ -1,3 +1,4 @@
+import { console } from "../util/Logger.js";
 import { EntityBase } from "./EntityBase.js";
 
 export class EntityClassRegistry {
@@ -52,7 +53,7 @@ export class EntityClassRegistry {
         
     }
     static register(entityClass, originalEntityClass){
-        console.info("register entity class {}, ori: {}", entityClass.name, originalEntityClass.name);
+        console.trace("register entity class {}, ori: {}", entityClass.name, originalEntityClass.name);
         
         if (! (entityClass.prototype instanceof EntityBase))
             throw new TypeError("the entityClass has not implemented EntityBase");

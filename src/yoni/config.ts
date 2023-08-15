@@ -14,8 +14,8 @@ const loggingConfig = {
     showTimeStringOnConsoleOutput: true,
     
     //日志输出等级
-    //0: none, 1: fatal, 2: error, 3: warn, 4: debug, 5: trace
-    logLevel: 5,
+    //-1: none, 0: fatal, 1: error, 2: info, 3: warn, 4: debug, 5: trace
+    logLevel: 3,
     
     uniqueFontSize: true,
     
