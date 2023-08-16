@@ -7,6 +7,10 @@ import { UnknownEntryError } from "./ScoreboardError.js";
 
 /**
  * 代表一个可以在记分板上持有分数的分数持有者。
+ * 
+ * 对于运行时的实体与玩家，这个对象是唯一的。
+ * 
+ * 对于虚拟玩家，不能保证对应的对象的唯一性。
  */
 export class ScoreboardEntry {
     static #entityMap = new WeakMap<Minecraft.Entity, ScoreboardEntry>;

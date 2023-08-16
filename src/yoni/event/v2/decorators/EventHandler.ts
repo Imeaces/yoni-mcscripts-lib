@@ -1,12 +1,13 @@
 import { sEventListenerData } from "./EventListener.js";
 import { EventPriority } from "../EventPriority.js";
 import IEventListener from "../interfaces/EventListener";
+import { EventOptionType } from "../GetEventOptions";
 
-interface EventHandlerOptions<TEvent> {
+interface EventHandlerOptions<TEvent extends Function> {
     event: TEvent,
     priority?: EventPriority
     ignoreCancelled?: boolean
-    options?: any,
+    options?: EventOptionType<TEvent["prototype"]>,
 }
 
 export function EventHandler<
@@ -49,3 +50,4 @@ type TypedObjectMethod<
 > = {
     [k in K]: (...args: P) => R
 }
+

@@ -4,6 +4,7 @@ import { manager } from "./EventManager.js";
 import { defaultOptionResolver } from "./lib/defaultOptionResolver.js";
 import { EventPriority, EventPriorityIds } from "./EventPriority.js";
 import { getExtendedClassesInList } from "./lib/getExtendedClassesInList.js";
+import { EventOptionType } from "./GetEventOptions";
 
 export class EventRegistry<TEvent extends Function> {
     #displayName?: string | undefined;
@@ -145,6 +146,6 @@ export interface EventRegisterOptions<TEvent extends Function> {
     displayName?: string
 }
 
-export type ExtraOptionResolver<TEvent extends Function> = <TP extends {}>(event: TEvent["prototype"], option: TP) => boolean
+export type ExtraOptionResolver<TEvent extends Function> = (event: TEvent["prototype"], option: EventOptionType<TEvent["prototype"]>) => boolean
 
 type Prototype<TFunction extends Function> = TFunction["prototype"];

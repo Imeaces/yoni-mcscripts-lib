@@ -21,3 +21,5 @@ export { EventListener } from "./event/v2/decorators/EventListener.js";
 
 export { EventSignalListeningAdapter } from "./event/v2/adapter/EventSignalListeningAdapter.js";
 
+export { EventOptionType, EventOptionDefinitions } from "./event/v2/GetEventOptions"
+

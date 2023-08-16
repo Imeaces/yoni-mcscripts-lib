@@ -1,6 +1,6 @@
 // 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
 //import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni/index.js";
-import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
+import { EventHandler, Minecraft, Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
 
 // 简单示范了 Scoreboard 的用法，这个类是对原版的记分板
 // 访问 API 的重新封装，并添加了一些没有的方法。
@@ -41,3 +41,9 @@ YoniScheduler.runDelayTickTask(function doSome(){
 }, 1200);
 //延迟一分钟再执行（1*60*20=1200）
 
+class MainClass{
+
+    @EventHandler({event: Minecraft.EntityHealthChangedAfterEvent, options: {}})
+    onEvent(event: Minecraft.EntityHealthChangedAfterEvent){
+    }
+}
