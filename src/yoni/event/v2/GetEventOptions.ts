@@ -19,15 +19,12 @@ interface MinecraftEventsOptions {
 interface InnerEventsOptions {
 }
 
-type AllEventOptionsEntries = UnionToTuple<DumpTupleRecordEntriesToUnion<EventOptionDefinitions>>;
+export type _EventOptionType2<EventType> = {
+  [id in keyof EventOptionDefinitions]-?: EventOptionDefinitions[id] extends [infer Event, infer EventOpt]
+      ? Equals<EventType, Event> extends true
+          ? EventOpt
+          : never
+      : never
+}[keyof EventOptionDefinitions]
 
-type _GetEventOptionsOfEvent<Event, EventOptionsEntries> = 
-    EventOptionsEntries extends [infer FirstSelection, ...infer LessSelections]
-        ? FirstSelection extends [infer SelectedEvent, infer SelectedOptions]
-            ? Equals<SelectedEvent, Event> extends true
-                ? SelectedOptions
-                : _GetEventOptionsOfEvent<Event, LessSelections>
-            : _GetEventOptionsOfEvent<Event, LessSelections>
-        : any
-
-export type EventOptionType<Event> = _GetEventOptionsOfEvent<Event, AllEventOptionsEntries>;
+export type EventOptionType<EventType> = [_EventOptionType2<EventType>] extends [never] ? any : _EventOptionType2<EventType>

@@ -5,6 +5,7 @@ import { logger } from "../logger.js";
 import { EventError } from "./EventError.js";
 import { EventRegistry } from "./EventRegistry.js";
 import { isDebug, config } from "../../config.js";
+import { listenEvent, EventCallback, ListenEventOptions, SingleHandlerEventListener } from "./lib/listenEvent.js";
 
 export class EventManager {
     static checkExtraOption<T extends EventRegistry<TEvent>, TEvent extends Function = T["eventClass"]>(eventRegistry: T, handler: IEventHandler<TEvent>): boolean {
@@ -96,6 +97,19 @@ export class EventManager {
         }
         
         return true;
+    }
+    listenEvent<TEvent extends Function>(
+        listenOptions: ListenEventOptions<TEvent>,
+        callback: EventCallback<TEvent>
+    ): SingleHandlerEventListener<TEvent>;
+    listenEvent<TEvent extends Function>(
+        event: TEvent,
+        callback: EventCallback<TEvent>
+    ): SingleHandlerEventListener<TEvent>;
+    //@ts-ignore
+    listenEvent<TEvent extends Function>(...args: [ListenEventOptions<TEvent> | TEvent, EventCallback<TEvent>]){
+        //@ts-ignore
+        return listenEvent(...args);
     }
 }
 
