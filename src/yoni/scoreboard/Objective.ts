@@ -148,7 +148,7 @@ class Objective {
      */
     getScore(one: EntryValueType): number | undefined {
         try {
-            return this.vanillaObjective.getScore(ScoreboardEntry.guessEntry(one).getIdentity());
+            return this.vanillaObjective.getScore(ScoreboardEntry.getIdentity(one));
         } catch {
             this.checkUnregistered();
             return undefined;
@@ -210,7 +210,7 @@ class Objective {
     setScore(one: EntryValueType, score: number){
         checkScoreIsInRange(score);
         
-        let identify = ScoreboardEntry.guessEntry(one).getIdentity();
+        let identify = ScoreboardEntry.getIdentity(one);
         
         this.vanillaObjective.setScore(identify, score);
     }
@@ -263,7 +263,7 @@ class Objective {
      * @param {EntryValueType} one - 分数持有者。
      */
     resetScore(one: EntryValueType){
-        let identify = ScoreboardEntry.guessEntry(one).getIdentity();
+        let identify = ScoreboardEntry.getIdentity(one);
         if (this.vanillaObjective.hasParticipant(identify))
              this.vanillaObjective.removeParticipant(identify);
     }

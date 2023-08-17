@@ -20,7 +20,7 @@ export class ScoreboardEntry {
     /**
      * 寻找指定对象在记分板上使用的分数持有者对象。
      * @param {EntryValueType} one - 可能为分数持有者的值。
-     * @returns {Entry} 与 `one` 对应的分数持有者对象。
+     * @returns {ScoreboardEntry} 与 `one` 对应的分数持有者对象。
      * @throws 若未能根据值得到可能的分数持有者对象，抛出 `UnknownEntryError`。
      */
     static guessEntry(one: EntryValueType): ScoreboardEntry {
@@ -35,6 +35,21 @@ export class ScoreboardEntry {
                 return ScoreboardEntry.getEntry(EntryType.ENTITY, EntityBase.getMinecraftEntity(one));
         else if (typeof one === "string")
             return ScoreboardEntry.getEntry(EntryType.FAKE_PLAYER, one);
+        throw new UnknownEntryError();
+    }
+    /**
+     * 获取对象可以作为分数持有者对象的值。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @returns {Minecraft.ScoreboardIdentity | string | Minecraft.Entity} 与 `one` 对应的分数持有者对象。
+     * @throws 若未能根据值得到可能的分数持有者对象，抛出 `UnknownEntryError`。
+     */
+    static getIdentity(one: EntryValueType): Minecraft.ScoreboardIdentity | string | Minecraft.Entity {
+        if (typeof one === "string" || one instanceof Minecraft.ScoreboardIdentity)
+            return one;
+        else if (one instanceof ScoreboardEntry)
+            return one.getIdentity();
+        else if (EntityBase.isEntity(one))
+            return EntityBase.getMinecraftEntity(one);
         throw new UnknownEntryError();
     }
     static getEntry(type: EntryType, identify: Minecraft.ScoreboardIdentity | string | Minecraft.Entity){

@@ -358,7 +358,7 @@ export class Scoreboard {
      * @throws 未能在世界上找到分数持有者的实体对象时，抛出错误。
      */
     static resetScore(one: EntryValueType){
-        let identify = ScoreboardEntry.guessEntry(one).getIdentity();
+        let identify = ScoreboardEntry.getIdentity(one);
         
         for (const objective of VanillaScoreboard.getObjectives()){
             if (objective.hasParticipant(identify)){
