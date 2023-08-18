@@ -1,4 +1,4 @@
-import { sEventListenerData } from "./EventListener.js";
+import { sEventListenerData, getListenerData } from "./EventListener.js";
 import { EventPriority } from "../EventPriority.js";
 import IEventListener from "../interfaces/EventListener";
 import { EventOptionType } from "../GetEventOptions";
@@ -21,7 +21,7 @@ export function EventHandler<
     >
     (target: T, propKey: K, desc: PropertyDescriptor): void {
         const onEvent = target[propKey];
-        const data = (target as unknown as IEventListener<T>)[sEventListenerData];
+        const data = getListenerData(target);
         const listeners = data.registeredListeners;
         
         if (!data)
@@ -50,4 +50,3 @@ type TypedObjectMethod<
 > = {
     [k in K]: (...args: P) => R
 }
-

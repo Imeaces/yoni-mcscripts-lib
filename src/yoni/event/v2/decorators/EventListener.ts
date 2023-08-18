@@ -1,6 +1,7 @@
 import { EventPriority } from "../EventPriority.js";
 import { manager as eventManager } from "../EventManager.js";
 import EventHandler from "../interfaces/EventHandler";
+import IEventListener from "../interfaces/EventListener";
 
 export class EventListenerData<T> {
     isStaticListener = false;
@@ -42,7 +43,7 @@ function EventListenerClassAndStaticDecorator<TFunction extends Function>(target
 }
  
 function EventListenerClassDecorator<TFunction extends Function>(target: TFunction): void {
-    const data = new EventListenerData<TFunction["prototype"]>();
+    const data = getListenerData(target.prototype);
     Object.defineProperty(target.prototype, sEventListenerData, {
         configurable: true,
         get(){
@@ -54,7 +55,7 @@ function EventListenerClassDecorator<TFunction extends Function>(target: TFuncti
 }
 
 function EventListenerClassStaticDecorator<TFunction extends Function>(target: TFunction): void {
-    const data = new EventListenerData<TFunction>();
+    const data = getListenerData(target);
     Object.defineProperty(target, sEventListenerData, {
         configurable: true,
         writable: false,
@@ -65,3 +66,10 @@ function EventListenerClassStaticDecorator<TFunction extends Function>(target: T
 
 export { EventListener };
 
+const listenerDataRecord = new WeakMap<Object, EventListenerData<any>>();
+export function getListenerData<T extends {}>(target: T): EventListenerData<T> {
+    if (!(target as unknown as IEventListener<T>)[sEventListenerData])
+        (target as unknown as IEventListener<T>)[sEventListenerData] = new EventListenerData<T>();
+    
+    return (target as unknown as IEventListener<T>)[sEventListenerData];
+}
