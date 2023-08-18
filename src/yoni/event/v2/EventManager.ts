@@ -8,18 +8,29 @@ import { isDebug, config } from "../../config.js";
 import { listenEvent, EventCallback, ListenEventOptions, SingleHandlerEventListener } from "./lib/listenEvent.js";
 
 export class EventManager {
-    static checkExtraOption<T extends EventRegistry<TEvent>, TEvent extends Function = T["eventClass"]>(eventRegistry: T, handler: IEventHandler<TEvent>): boolean {
+    static checkExtraOption<
+        T extends EventRegistry<TEvent>,
+        TEvent extends Function = T["eventClass"],
+        Event extends {} = TEvent["prototype"]
+    >(
+        eventRegistry: T,
+        handler: IEventHandler<TEvent>,
+        event: Event
+    ): boolean {
+    
         if (!eventRegistry.extraOption
         || !handler.options
         || !eventRegistry.extraOptionResolver){
             return true;
         }
+    
         try {
             return eventRegistry.extraOptionResolver(event, handler.options);
         } catch(e){
             if (isDebug() || config.getConfig("eventManager.showErrorOfEventFilter"))
                 logger.warn("处理事件过滤器时发生以下错误:", e);
         }
+        
         return false;
     }
     callEvent<T extends EventRegistry<TEvent>, TEvent extends Function = T["eventClass"], E extends {} = TEvent["prototype"]>(eventRegistry: T, event: E, noExtendsAlways: boolean = false){
@@ -41,7 +52,7 @@ export class EventManager {
                     continue; //跳过，由于处理器不接受已取消事件
                 }
                 
-                if (!EventManager.checkExtraOption(eventRegistry, handler)){
+                if (!EventManager.checkExtraOption(eventRegistry, handler, event)){
                     continue;
                 }
                 

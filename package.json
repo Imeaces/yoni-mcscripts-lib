@@ -35,8 +35,10 @@
     "@types/",
     "yoni-mcscripts-lib.js",
     "example.js",
+    "tests.js",
     "src/",
     "yoni/",
+    "test/",
     "tsconfig.json"
   ]
 }

@@ -138,7 +138,7 @@ export class Command {
         Command.#asyncCommandExecutor.commandList.add(priority, queue);
         
         return promise;
-        throw new Error("Unknown command priority " + String(priority));
+        //throw new Error("Unknown command priority " + String(priority));
     }
     static addSyncExecute(priority: CommandPriority, sender: CommandSender, command: string): Promise<CommandResult> {
         let resolve: any, reject: any;

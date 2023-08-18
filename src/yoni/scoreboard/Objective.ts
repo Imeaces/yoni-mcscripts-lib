@@ -250,12 +250,13 @@ class Objective {
      * @returns {number} 随机得到的新分数。
      * @throws 若分数不在可用的范围，抛出 `ScoreRangeError`。
      */
-    randomScore(one: EntryValueType, min: number = -2147483647, max: number = 2147483647){
+    randomScore(one: EntryValueType, min: number = -2147483647, max: number = 2147483647): number {
         checkScoreIsInRange(min, max);
         let vals = max - min;
         let randomScore = vals * Math.random();
         let result = Math.round(randomScore + min);
-        return this.setScore(one, result);
+        this.setScore(one, result);
+        return result;
     }
     
     /**

@@ -12,9 +12,9 @@ export class EventListenerData<T> {
 export const sEventListenerData: unique symbol = Symbol("EventListenerHandlerEntries");
 
 interface EventListenerOptions {
-    /** 注册静态处理器 */
+    /** 注册静态事件处理器 */
     static?: boolean
-    /** 注册实例处理器 */
+    /** 注册实例事件处理器 */
     instance?: boolean
 }
 

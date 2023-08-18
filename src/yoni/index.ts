@@ -67,7 +67,7 @@ export { YoniDimension } from "./dimension.js";
 export { YoniBlock } from "./block.js";
 
 // enum
-export { EntryType } from "./scoreboard.js";
+export { EntryType, DisplaySlot, ObjectiveSortOrder } from "./scoreboard.js";
 export { CommandPriority } from "./command/CommandPriority.js";
 
 export * from "./legacy_event.js";
