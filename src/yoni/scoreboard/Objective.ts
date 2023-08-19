@@ -1,4 +1,4 @@
-import { Minecraft, VanillaWorld, StatusCode, VanillaScoreboard, overworld } from "../basis.js";
+import { Gametest, Minecraft, VanillaWorld, StatusCode, VanillaScoreboard, overworld } from "../basis.js";
  
 import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { EntryValueType, EntryType } from "./EntryType.js";
@@ -147,8 +147,16 @@ class Objective {
      * @returns {number} 此分数持有者在记分项上的分数。若未设定，返回 `undefined`。
      */
     getScore(one: EntryValueType): number | undefined {
+        let identity = ScoreboardEntry.getIdentity(one);
+        
+        if (identity instanceof Gametest.SimulatedPlayer){
+            identity = ScoreboardEntry.guessEntry(one).vanillaScoreboardIdentity as Minecraft.ScoreboardIdentity;
+            if (identity === undefined)
+                return undefined;
+        }
+        
         try {
-            return this.vanillaObjective.getScore(ScoreboardEntry.getIdentity(one));
+            return this.vanillaObjective.getScore(identity);
         } catch {
             this.checkUnregistered();
             return undefined;
@@ -162,8 +170,8 @@ class Objective {
     getEntries(): ScoreboardEntry[] {
         this.checkUnregistered();
         const entries: ScoreboardEntry[] = [];
-        for (const identify of this.vanillaObjective.getParticipants()){
-            const entry = ScoreboardEntry.getEntry(identify.type as unknown as EntryType, identify);
+        for (const identity of this.vanillaObjective.getParticipants()){
+            const entry = ScoreboardEntry.getEntry(identity.type as unknown as EntryType, identity);
             entries.push(entry);
         }
         return entries;
@@ -210,9 +218,15 @@ class Objective {
     setScore(one: EntryValueType, score: number){
         checkScoreIsInRange(score);
         
-        let identify = ScoreboardEntry.getIdentity(one);
+        let identity = ScoreboardEntry.getIdentity(one);
         
-        this.vanillaObjective.setScore(identify, score);
+        //目前Gametest.SimulatedPlayer无法传入，故使用兼容代码
+        if (identity instanceof Gametest.SimulatedPlayer){
+            Objective.playerCommand(this, "set", identity, score);
+            return;
+        }
+        
+        this.vanillaObjective.setScore(identity, score);
     }
     
     /**
@@ -264,9 +278,16 @@ class Objective {
      * @param {EntryValueType} one - 分数持有者。
      */
     resetScore(one: EntryValueType){
-        let identify = ScoreboardEntry.getIdentity(one);
-        if (this.vanillaObjective.hasParticipant(identify))
-             this.vanillaObjective.removeParticipant(identify);
+        let identity = ScoreboardEntry.getIdentity(one);
+        
+        //目前Gametest.SimulatedPlayer无法传入，故使用兼容代码
+        if (identity instanceof Gametest.SimulatedPlayer){
+            Objective.playerCommand(this, "reset", identity);
+            return;
+        }
+        
+        if (this.vanillaObjective.hasParticipant(identity))
+             this.vanillaObjective.removeParticipant(identity);
     }
     
     /**
@@ -276,6 +297,100 @@ class Objective {
         for (const part of this.vanillaObjective.getParticipants()){
             this.vanillaObjective.removeParticipant(part);
         }
+    }
+
+    /**
+     * 为分数持有者在记分项上执行特定的操作（通过命令）。
+     * @param {string} option - 操作类型。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     * @param {...any} args - 操作所需要的参数。
+     * @throws 未知的命令错误。
+     * @throws 若尝试为虚拟玩家设置分数，且世界中有相同名字的玩家时，抛出 `NameConflictError`。
+     */
+    static playerCommand(objective: Objective, option: string, one: EntryValueType, ...args: any[]){
+        let { entity, name, type } = Objective.findCommandRequirement(one);
+        
+        console.log("objective playerCommand");
+        
+        if (type === EntryType.PLAYER || type === EntryType.ENTITY){
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", objective.#id);
+            let result = Command.execute(entity as EntityValue, Command.getCommand(cmd, ...args));
+            
+            if (result.statusCode === StatusCode.success
+            && (result.successCount ?? 0) > 0){
+                return true;
+            }
+            objective.checkUnregistered();
+           //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+            throw new Error(`Could not ${option} score, `
+                + "maybe entity or player disappeared?"
+                + "\n  cause by: "
+                + result.statusMessage);
+        } else if (name){
+            let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, objective.#id);
+            let result = Command.run(Command.getCommand(cmd, ...args));
+            if (result.statusCode === StatusCode.success
+            && (result.successCount ?? 0) > 0){
+                return true;
+            }
+            objective.checkUnregistered();
+            if (VanillaWorld.getPlayers({name}).length !== 0)
+                throw new NameConflictError(name as string);
+                
+            //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
+            throw new Error(`Could not ${option} score, `
+                + "maybe entity or player disappeared?"
+                + "\n  cause by: "
+                + result.statusMessage);
+        } else {
+            throw new Error("unknown error");
+        }
+    }
+    /**
+     * 寻找用于在记分项上执行特定的操作的与分数持有者有关的信息。
+     * @param {EntryValueType} one - 可能为分数持有者的值。
+     */
+    static findCommandRequirement(one: EntryValueType): {
+        name?: string,
+        type: EntryType,
+        entity?: EntityValue,
+        scbid?: Minecraft.ScoreboardIdentity,
+        entry?: ScoreboardEntry
+    }{
+        let name: string | undefined = undefined;
+        let type: EntryType | Minecraft.ScoreboardIdentityType;
+        let entity: EntityValue | undefined = undefined;
+        let scbid = (one instanceof Minecraft.ScoreboardIdentity) ? one : undefined;
+        let entry = (one instanceof ScoreboardEntry) ? one : undefined;
+        
+        if (scbid != null || entry != null){
+            one = one as (Minecraft.ScoreboardIdentity | ScoreboardEntry)
+            type = one.type;
+            if (type === EntryType.ENTITY || type === EntryType.PLAYER){
+                try {
+                    entity = one.getEntity();
+                } catch {
+                }
+                if (entity == null)
+                    throw new Error("Could not find the entity");
+            } else {
+                name = one.displayName;
+                type = EntryType.FAKE_PLAYER;
+            }
+        } else if (EntityBase.isEntity(one)){
+            if (EntityBase.entityIsPlayer(one))
+                type = EntryType.PLAYER;
+            else
+                type = EntryType.ENTITY;
+            entity = one;
+        } else if (typeof one === "string"){
+            type = EntryType.FAKE_PLAYER;
+            name = one;
+        } else {
+            throw new UnknownEntryError();
+        }
+        
+        return { type, entity, name, scbid, entry };
     }
 }
 
