@@ -1,6 +1,6 @@
 # yoni-mcscripts-lib
 
-为部分接口创建了 wrapper，并提供事件管理器、任务管理器和其他的一些小工具。
+为 Minecraft Script API 中的部分接口创建了 wrapper，并提供事件管理器、任务管理器和其他的一些小工具。
 
 当前支持的游戏版本为 正式版**1.20.10**。
 
