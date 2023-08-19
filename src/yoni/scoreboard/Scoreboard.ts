@@ -76,11 +76,11 @@ export interface DisplayOptionsDefinition {
 }
 
 /**
- * 记分板。
+ * 代表了记录着记分对象在记分项上的分数的记分板。
  */
 export class Scoreboard {
     /**
-     * 存储记分项对象。
+     * 存储原始记分项对象。
      * @type {Map<string, Objective>}
      */
     static #objectives: Map<string, Objective> = new Map();
@@ -180,7 +180,7 @@ export class Scoreboard {
      * @param {boolean} autoCreateDummy - 如果为 `true` ，在未找到对应记分项时，创建新的记分项并返回。
      * @returns {Objective} `objectiveId` 所对应的的记分项。
      * @throws 若 `objectiveId` 为记分项ID，且未设置 `autoCreateDummy` 为 `true`，抛出 ReferenceError `记分项不存在`。
-     * @throws 若 `objectiveId` 为原版记分项对象，且未设置 `autoCreateDummy` 为 `true` 或无法读取记分项信息，抛出 ReferenceError `尝试获取/读取无法使用的记分项对象`。
+     * @throws 若 `objectiveId` 为原版记分项对象，且无法读取记分项信息，抛出 ReferenceError `尝试获取/读取无法使用的记分项对象`。
      */
     static getObjective(objectiveId: string | Minecraft.ScoreboardObjective, autoCreateDummy?: boolean): Objective {
         let objective: Objective | null | undefined = null;
@@ -235,15 +235,12 @@ export class Scoreboard {
      * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
      * @returns {DisplayOptions} - 显示位上显示的内容。
      */
-    static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions{
-        let rt = VanillaScoreboard.getObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
-        let result: DisplayOptions = {
-            objective: rt.objective ?
-                Scoreboard.getObjective(rt.objective.id) :
-                null
-        };
-        if ("sortOrder" in rt){
-            result.sortOrder = rt.sortOrder as unknown as ObjectiveSortOrder;
+    static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions {
+        const vanillaResult = VanillaScoreboard.getObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
+        const objective = Scoreboard.tryGetObjective(vanillaResult.objective?.id) || null;
+        const result: DisplayOptions = { objective };
+        if (vanillaResult.sortOrder != null){
+            result.sortOrder = vanillaResult.sortOrder as unknown as ObjectiveSortOrder;
         }
         return result;
     }
@@ -265,34 +262,18 @@ export class Scoreboard {
      * @returns {Objective} 显示位先前显示的记分项的对象，若先前未显示任何记分项，返回 `undefined` 。
      */
     static setDisplayAtSlot(slot: DisplaySlot|Minecraft.DisplaySlotId, settings: DisplayOptionsDefinition){
-        let objective = Scoreboard.getObjective(Scoreboard.#getIdOfObjective(settings?.objective));
+        const objective = Scoreboard.getObjective(Scoreboard.#getIdOfObjective(settings?.objective));
         
-        if (objective == null){
-            throw new Error("Unknown objective in settings");
-        }
-        
-        let settingArg: Minecraft.ScoreboardObjectiveDisplayOptions;
-        try { //兼容旧版
-            if ("sortOrder" in settings){
-                // @ts-ignore 旧版兼容，忽略类型不存在的问题。
-                settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
-                    objective.vanillaObjective,
-                    settings.sortOrder
-                );
+        let settingArg: Minecraft.ScoreboardObjectiveDisplayOptions = {
+            objective: objective.vanillaObjective
+        };
+        if (settings.sortOrder != null){
+            if (settingArg.sortOrder === ObjectiveSortOrder.ascending){
+                settings.sortOrder = Minecraft.ObjectiveSortOrder.Ascending;
+            } else if (settingArg.sortOrder === ObjectiveSortOrder.desscending){
+                settings.sortOrder =  Minecraft.ObjectiveSortOrder.Descending;
             } else {
-                // @ts-ignore 旧版兼容，忽略类型不存在的问题。
-                settingArg = new Minecraft.ScoreboardObjectiveDisplayOptions(
-                    objective.vanillaObjective
-                );
-            }
-        } catch { //新版本修改为接口
-            settingArg = {
-                objective: objective.vanillaObjective
-            };
-            if ("sortOrder" in settings){
-                settingArg.sortOrder = settings.sortOrder === "ascending"
-                    ? Minecraft.ObjectiveSortOrder.Ascending
-                    : Minecraft.ObjectiveSortOrder.Descending;
+                throw new Error("unknown ObjectiveSortOrder");
             }
         }
         let lastDisplayingObjective = VanillaScoreboard.setObjectiveAtDisplaySlot(
