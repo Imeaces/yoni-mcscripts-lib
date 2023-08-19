@@ -122,7 +122,7 @@ export class Scoreboard {
      * @returns {boolean} 是否成功移除了记分项。
      */
     static removeObjective(objective: string|Objective|Minecraft.ScoreboardObjective): boolean {
-        let objectiveId;
+        let objectiveId: string;
         if (objective instanceof Objective || objective instanceof Minecraft.ScoreboardObjective){
             objectiveId = objective.id;
         } else {
