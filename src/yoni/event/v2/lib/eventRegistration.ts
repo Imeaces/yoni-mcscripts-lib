@@ -2,7 +2,7 @@ import { Minecraft } from "../../../basis.js";
 import { EventRegistry } from "../EventRegistry.js";
 import { EventSignalListeningAdapter } from "../adapting/EventSignalListeningAdapter.js";
 import IEventSignal from "../interfaces/IEventSignal";
-import { logger } from "../../logger.js";
+import { logger } from "./../logger.js";
 
 const { world, system } = Minecraft;
 const VanillaBeforeEvents = world.beforeEvents;

@@ -1,7 +1,7 @@
 import { sEventListenerData } from "./decorators/EventListener.js";
 import IEventHandler from "./interfaces/EventHandler";
 import IEventListener from "./interfaces/EventListener";
-import { logger } from "../logger.js";
+import { logger } from "./logger.js";
 import { EventError } from "./EventError.js";
 import { EventRegistry } from "./EventRegistry.js";
 import { isDebug, config } from "../../config.js";
