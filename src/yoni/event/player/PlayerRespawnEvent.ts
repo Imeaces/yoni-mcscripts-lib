@@ -28,7 +28,7 @@ let eventId0: number;
 
 const schedule = new Schedule({
     async: false,
-    type: Schedule.tickCycleSchedule,
+    type: Schedule.cycleTickSchedule,
     delay: 0,
     period: 1
 }, ()=>{

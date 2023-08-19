@@ -21,7 +21,7 @@ class System {
         if (this.isReadonlyMode()){
             let resolve: Function = () => {};
             const promise = new Promise((re) => resolve = re);
-            YoniScheduler.runDelayTimerTask(resolve, 0);
+            YoniScheduler.runDelayTimerTask(resolve as () => void, 0);
             await promise;
         }
         if (callback)

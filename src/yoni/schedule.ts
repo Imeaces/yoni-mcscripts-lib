@@ -10,24 +10,24 @@ export enum ScheduleType {
     /**
      * 以真实时间为间隔重复运行的任务。
      */
-    timeCycleSchedule = "Schedule.timeCycleSchedule",
+    cycleTimerSchedule = "0",
     /**
      * 以真实时间为延迟运行的任务。
      */
-    timeDelaySchedule = "Schedule.timeDelaySchedule",
+    delayTimerSchedule = "1",
     /**
      * 以游戏刻为间隔重复运行的任务。
      */
-    tickCycleSchedule = "Schedule.tickCycleSchedule",
+    cycleTickSchedule = "2",
     /**
      * 以游戏刻为延迟运行的任务。
      */
-    tickDelaySchedule = "Schedule.tickDelaySchedule",
+    delayTickSchedule = "3",
 }
 
 function isCycleScheduleType(type: ScheduleType): boolean {
-    return type === Schedule.tickCycleSchedule
-    || type === Schedule.timeCycleSchedule;
+    return type === Schedule.cycleTickSchedule
+    || type === Schedule.cycleTimerSchedule;
 }
 
 export interface ScheduleOptions {
@@ -57,19 +57,19 @@ export class Schedule {
     /**
      * 以真实时间为间隔重复运行的任务。
      */
-    static timeCycleSchedule = ScheduleType.timeCycleSchedule;
+    static cycleTimerSchedule = ScheduleType.cycleTimerSchedule;
     /**
      * 以真实时间为延迟运行的任务。
      */
-    static timeDelaySchedule = ScheduleType.timeDelaySchedule;
+    static delayTimerSchedule = ScheduleType.delayTimerSchedule;
     /**
      * 以游戏刻为间隔重复运行的任务。
      */
-    static tickCycleSchedule = ScheduleType.tickCycleSchedule;
+    static cycleTickSchedule = ScheduleType.cycleTickSchedule;
     /**
      * 以游戏刻为延迟运行的任务。
      */
-    static tickDelaySchedule = ScheduleType.tickDelaySchedule;
+    static delayTickSchedule = ScheduleType.delayTickSchedule;
     
     static #scheduleCurrentIndex = 0;
     
@@ -148,7 +148,7 @@ export class Schedule {
     get lastExecuteTime() {
         return getLastExecute(this) ?? -1;
     }
-    constructor(props: ScheduleOptions, callback: Function){
+    constructor(props: ScheduleOptions, callback: () => void){
         let { async, period, delay, type } = props;
         
         this.async = (!!async) ? true : false;
@@ -173,11 +173,11 @@ export class Schedule {
         Object.freeze(this);
     }
     run(){
-        const fn = scheduleCallbacks.get(this) as Function;
+        const fn = scheduleCallbacks.get(this) as () => void;
         fn();
     }
     async runAsync(){
-        const fn = scheduleCallbacks.get(this) as Function;
+        const fn = scheduleCallbacks.get(this) as () => void;
         await fn();
     }
 }
@@ -366,7 +366,7 @@ function executeTasks(){
 
 //处理只执行一次的tick任务 tickdelay
 function addTickDelayScheduleToTasks(tasks: Schedule[]){
-    let schedules = queueSchedulesTypedRecord[Schedule.tickDelaySchedule as unknown as string];
+    let schedules = queueSchedulesTypedRecord[Schedule.delayTickSchedule as unknown as string];
     if (schedules === undefined)
         return;
     
@@ -390,7 +390,7 @@ function addTickDelayScheduleToTasks(tasks: Schedule[]){
 
 //处理只执行一次的time任务 timedelay
 function addTimeDelayScheduleToTasks(tasks: Schedule[]){
-    let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
+    let schedules = queueSchedulesTypedRecord[Schedule.delayTimerSchedule as unknown as string];
     if (schedules === undefined)
         return;
     
@@ -410,7 +410,7 @@ function addTimeDelayScheduleToTasks(tasks: Schedule[]){
 
 //处理重复执行的tick任务 tickcycle
 function addTickCycleScheduleToTasks(tasks: Schedule[]){
-    let schedules = queueSchedulesTypedRecord[Schedule.tickCycleSchedule as unknown as string];
+    let schedules = queueSchedulesTypedRecord[Schedule.cycleTickSchedule as unknown as string];
     if (schedules === undefined)
         return;
 
@@ -440,7 +440,7 @@ function addTickCycleScheduleToTasks(tasks: Schedule[]){
 
 //处理重复执行的time任务 timecycle
 function addTimeCycleScheduleToTasks(tasks: Schedule[]){
-    let schedules = queueSchedulesTypedRecord[Schedule.timeDelaySchedule as unknown as string];
+    let schedules = queueSchedulesTypedRecord[Schedule.cycleTimerSchedule as unknown as string];
     if (schedules === undefined)
         return;
     
@@ -521,11 +521,11 @@ export class YoniScheduler {
      * @param async 是否异步执行。
      * @returns scheduleId
      */
-    static runTask(callback: Function, async: boolean = false): number {
+    static runTask(callback: () => void, async: boolean = false): number {
         let schedule = new Schedule({
             async,
             delay: 0,
-            type: Schedule.tickDelaySchedule
+            type: Schedule.delayTickSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -537,10 +537,10 @@ export class YoniScheduler {
      * @param async 是否异步执行。
      * @returns scheduleId
      */
-    static runDelayTimerTask(callback: Function, delay: number, async = false): number {
+    static runDelayTimerTask(callback: () => void, delay: number, async = false): number {
         let schedule = new Schedule({
             async, delay,
-            type: Schedule.timeDelaySchedule
+            type: Schedule.delayTimerSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -552,11 +552,11 @@ export class YoniScheduler {
      * @param async 是否异步执行。
      * @returns scheduleId
      */
-    static runDelayTickTask(callback: Function, delay: number, async: boolean = false) {
+    static runDelayTickTask(callback: () => void, delay: number, async: boolean = false) {
         let schedule = new Schedule({
             async,
             delay,
-            type: Schedule.tickDelaySchedule
+            type: Schedule.delayTickSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -569,12 +569,12 @@ export class YoniScheduler {
      * @param async 是否异步执行。
      * @returns scheduleId
      */
-    static runCycleTimerTask(callback: Function, delay: number, period: number, async: boolean = false): number {
+    static runCycleTimerTask(callback: () => void, delay: number, period: number, async: boolean = false): number {
         let schedule = new Schedule({
             async,
             delay,
             period,
-            type: Schedule.timeCycleSchedule
+            type: Schedule.cycleTimerSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;
@@ -588,12 +588,12 @@ export class YoniScheduler {
      * @param async 是否异步执行。
      * @returns scheduleId
      */
-    static runCycleTickTask(callback: Function, delay: number, period: number, async: boolean = false): number {
+    static runCycleTickTask(callback: () => void, delay: number, period: number, async: boolean = false): number {
         let schedule = new Schedule({
             async,
             delay,
             period,
-            type: Schedule.tickCycleSchedule
+            type: Schedule.cycleTickSchedule
         }, callback);
         YoniScheduler.addSchedule(schedule);
         return schedule.id;

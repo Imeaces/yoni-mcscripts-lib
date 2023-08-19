@@ -15,7 +15,7 @@ async function scheulderTest(test: Test){
     
     let internal = lastCallRealTime - taskAddTime;
     
-    ley timeBetween = internal - 8628;
+    let timeBetween = internal - 8628;
     
     if (internal > -100 && internal < 100){
         test.succeed();

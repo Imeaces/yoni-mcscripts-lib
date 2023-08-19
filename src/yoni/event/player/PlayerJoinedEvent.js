@@ -23,7 +23,7 @@ const joiningPlayers = new Set();
 let eventId = null;
 
 const schedule = new Schedule({
-    type: Schedule.tickCycleSchedule,
+    type: Schedule.cycleTickSchedule,
     async: false,
     delay: 0,
     period: 0

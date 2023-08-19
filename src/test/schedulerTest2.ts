@@ -6,7 +6,7 @@ async function scheulderTest(test: Test){
     const { YoniScheduler, Schedule } = await import("yoni-mcscripts-lib");
     
     const schedule = new Schedule({
-        type: Schedule.tickCycleSchedule,
+        type: Schedule.cycleTickSchedule,
         delay: 20, period: 7
     }, () => {
         callTimes += 1;

@@ -128,7 +128,7 @@ function getTargetEntities(): Iterable<YoniEntity> {
 
 const schedule = new Schedule ({
     async: false,
-    type: Schedule.tickCycleSchedule,
+    type: Schedule.cycleTickSchedule,
     period: 1,
     delay: 0
 }, function compareTargetsLocation(){
