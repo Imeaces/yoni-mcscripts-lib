@@ -2,12 +2,6 @@ import { MinecraftSystem, VanillaWorld } from "../basis.js";
 import { debug } from "../config.js";
 import { Logger } from "../util/Logger.js";
 
-/**
- * 事件管理
- * 不建议移除事件，由于移除事件的机制为设空回调，导致移除事件并不是真正的移除，大量移除事件导致事件遗留，可能影响性能
- * 可能会在以后优化
- */
-
 const logger = new Logger("Event");
 
 /* 与事件有关的一些函数 */
@@ -87,7 +81,7 @@ function getNamespaceEventTypesMap(namespace){
 }
 
 /**
- * @deprecated 废弃，等待重写
+ * @deprecated 废弃，不再使用，请使用新的 {@link import("./v2/EventRegistry").EventRegistry}。另外，如果你使用了此LegacyEvent中的自定义事件，webpack打包或者类似的操作将无法完成。
  */
 class Types {
     static register(identifier, eventType){

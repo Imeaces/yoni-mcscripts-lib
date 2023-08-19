@@ -268,10 +268,10 @@ export class Scoreboard {
             objective: objective.vanillaObjective
         };
         if (settings.sortOrder != null){
-            if (settingArg.sortOrder === ObjectiveSortOrder.ascending){
-                settings.sortOrder = Minecraft.ObjectiveSortOrder.Ascending;
-            } else if (settingArg.sortOrder === ObjectiveSortOrder.desscending){
-                settings.sortOrder =  Minecraft.ObjectiveSortOrder.Descending;
+            if (settings.sortOrder === ObjectiveSortOrder.ascending){
+                settingArg.sortOrder = Minecraft.ObjectiveSortOrder.Ascending;
+            } else if (settings.sortOrder === ObjectiveSortOrder.descending){
+                settingArg.sortOrder =  Minecraft.ObjectiveSortOrder.Descending;
             } else {
                 throw new Error("unknown ObjectiveSortOrder");
             }

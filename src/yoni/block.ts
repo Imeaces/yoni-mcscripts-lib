@@ -2,6 +2,9 @@ import { Minecraft } from "./basis.js";
 import { Location, Vector3 } from "./Location.js";
 import { YoniDimension } from "./dimension.js";
 
+/**
+ * 见 {@link Minecraft.Block}，此类为其映射类型。
+ */
 class Block {
     static isBlock(object: any): object is (Minecraft.Block | Block) {
         return object instanceof Minecraft.Block || object instanceof Block;

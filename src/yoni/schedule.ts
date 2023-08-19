@@ -6,6 +6,9 @@ import { config } from "./config.js";
 const logger = new Logger("Schedule");
 const scheduleCallbacks = new WeakMap();
 
+/**
+ * 任务类型。
+ */
 export enum ScheduleType {
     /**
      * 以真实时间为间隔重复运行的任务。
@@ -30,6 +33,9 @@ function isCycleScheduleType(type: ScheduleType): boolean {
     || type === Schedule.cycleTimerSchedule;
 }
 
+/**
+ * 创建新的任务所需要的参数。
+ */
 export interface ScheduleOptions {
     /**
      * 任务类型。
@@ -51,7 +57,7 @@ export interface ScheduleOptions {
 }
 
 /**
- * 任务类
+ * 任务类。
  */
 export class Schedule {
     /**

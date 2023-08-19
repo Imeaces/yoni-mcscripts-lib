@@ -4,7 +4,11 @@ import { dealWithCmd } from "./lib/commandutils.js";
 
 export { log } from "./util/Logger.js";
 
-export async function say(msg = "", displayNameOrSender="commands.origin.script"){
+/**
+ * 向所有玩家以脚本引擎的身份发送一条消息。
+ * （通常这用于向所有玩家广播脚本的运行状态）
+ */
+export function say(msg = "", displayNameOrSender="commands.origin.script"){
     let runner;
     let senderDisplayName;
     
@@ -26,11 +30,18 @@ export async function say(msg = "", displayNameOrSender="commands.origin.script"
             }
         }
     ]
-    return await Command.fetchExecute(runner, `tellraw @a ${JSON.stringify({rawtext})}`);
+    Command.addExecute(Command.PRIORITY_HIGH, runner, `tellraw @a ${JSON.stringify({rawtext})}`);
 }
 
-export async function send(receiver, message){
-    if (receiver.sendMessage){ return receiver.sendMessage(dealWithCmd(message, message)); };
+/**
+ * 向指定玩家发送一条普通消息。
+ * @param receiver 接收者，应该是玩家。
+ * @param message 接收者，应该是玩家。
+ */
+export function send(receiver, message){
+    if (receiver.sendMessage){
+        return receiver.sendMessage(dealWithCmd(message, message));
+    }
     let rawtext = JSON.stringify({rawtext:[{text: message}]}, dealWithCmd);
-    await Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
+    Command.addExecute(Command.PRIORITY_HIGH, receiver, `tellraw @s ${rawtext}`);
 }

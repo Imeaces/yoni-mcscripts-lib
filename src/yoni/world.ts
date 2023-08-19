@@ -7,6 +7,9 @@ import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
 import { YoniEntity, YoniPlayer } from "./entity.js";
 
+/**
+ * 代表由一系列维度与其环境组成的世界。
+ */
 class World {
     static isWorld(object: any){
         return object instanceof Minecraft.World || object instanceof World;

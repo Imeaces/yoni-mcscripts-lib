@@ -5,7 +5,7 @@ import { DimensionLikeValue, isDimensionValue } from "./dim.js";
 import { getNumber as getFiniteNumber } from "./lib/getNumber.js";
 
 /**
- * 代表Minecraft中的特定位置，包含维度，坐标，旋转角。
+ * 代表Minecraft中的特定位置，其中包含维度，坐标，旋转角。
  */
 export class Location {
 

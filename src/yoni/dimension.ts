@@ -13,6 +13,9 @@ import { Command } from "./command.js";
 
 import { DimensionValues } from "./dim.js";
 
+/**
+ * 代表维度，一种世界内的空间。
+ */
 class Dimension {
     static #dimensionMappings = new Map<any, Dimension>();
     

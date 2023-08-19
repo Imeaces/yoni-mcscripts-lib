@@ -9,7 +9,7 @@ async function callAsyncFunction(func, ...args){
 }
 
 /**
- * @deprecated 废弃，等待重写
+ * @deprecated 废弃，不再使用，请使用新的 {@link import("./v2/EventRegistry").EventRegistry}。另外，如果你使用了此LegacyEvent中的自定义事件，webpack打包或者类似的操作将无法完成。
  */
 class Trigger {
     

@@ -87,6 +87,9 @@ export const EntityClass = {
     SimulatedPlayer
 };
 
+/**
+ * 加载用于debug的$eval命令，可以执行js代码（使用{#link eval}）
+ */
 export async function initializeDebugFunc(){
     await import("./debug_func.js");
 }

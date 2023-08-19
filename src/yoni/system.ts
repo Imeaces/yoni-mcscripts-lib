@@ -1,6 +1,9 @@
-import { MinecraftSystem, runTask, overworld, isReadonlyMode } from "./basis.js";
+import { Minecraft, MinecraftSystem, runTask, overworld, isReadonlyMode } from "./basis.js";
 import { YoniScheduler } from "./schedule.js";
 
+/**
+ * 对 {@link Minecraft.System} 的模仿，提供系统级事件与函数的支持。
+ */
 class System {
     run<P extends any[]>(callback: (...args: P) => void, ...args: P){
         runTask(callback, ...args);

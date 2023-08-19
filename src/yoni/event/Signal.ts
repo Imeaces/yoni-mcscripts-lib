@@ -6,7 +6,7 @@ import { Trigger } from "./Trigger.js";
 import { EventCallbacks } from "./Event.js";
 
 /**
- * @deprecated 废弃，等待重写
+ * @deprecated 废弃，不再使用，请使用新的 {@link import("./v2/EventManager"). manager}。另外，如果你使用了此LegacyEvent中的自定义事件，webpack打包或者类似的操作将无法完成。
  */
 class Signal implements IEventSignal {
     #trigger: IEventTrigger | Trigger;
