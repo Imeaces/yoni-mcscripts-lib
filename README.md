@@ -1,6 +1,6 @@
 # yoni-mcscripts-lib
 
-基本上是对原有API的一些 wrapper，除此之外还提供了一些便捷的小工具。
+为部分接口创建了 wrapper，并提供事件管理器、任务管理器和其他的一些小工具。
 
 当前支持的游戏版本为 正式版**1.20.10**。
 
@@ -18,17 +18,16 @@
 
 正在转到 Typescript，目前将近一半的代码已经使用 Typescript 编写。
 
-尝试支持 Webpack 打包（尚未开始）。
+尝试支持 Webpack 打包（正在进行）。
 
 个人水平不足，基本上这只是给我自己用的。但是在有补全的情况下，你或许可以根据命名来猜测用法。我会尽快添加更多文档的。
 
 ## 示例
 
-一段简单的示例代码
+一段简单的示例代码，另外，你还可以查看测试中的代码（位于[src/test/](./src/test/)）。
 
 ```ts
 // 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
-//import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni/index.js";
 import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
 
 // 简单示范了 Scoreboard 的用法，这个类是对原版的记分板

@@ -17,10 +17,10 @@ async function scheulderTest(test: Test){
     
     let timeBetween = internal - 8628;
     
-    if (internal > -100 && internal < 100){
+    if (timeBetween > -100 && timeBetween < 100){
         test.succeed();
     } else {
-        test.fail("测试长任务延时失败，最终时间差："+internal);
+        test.fail("测试长任务延时失败，最终时间差："+timeBetween);
     }
 }
 

@@ -310,8 +310,6 @@ class Objective {
     static playerCommand(objective: Objective, option: string, one: EntryValueType, ...args: any[]){
         let { entity, name, type } = Objective.findCommandRequirement(one);
         
-        console.log("objective playerCommand");
-        
         if (type === EntryType.PLAYER || type === EntryType.ENTITY){
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, "@s", objective.#id);
             let result = Command.execute(entity as EntityValue, Command.getCommand(cmd, ...args));

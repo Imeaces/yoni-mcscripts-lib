@@ -1,6 +1,4 @@
-// 实际上类似于这样，并且还要求文件的位置位于 scripts/ 目录下。
-//import { Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni/index.js";
-import { EventListener, EventHandler, Minecraft, Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world } from "yoni-mcscripts-lib";
+import { EventListener, EventHandler, Minecraft, Scoreboard, Objective, YoniUtils, YoniScheduler, YoniPlayer, world, Logger } from "yoni-mcscripts-lib";
 
 // 简单示范了 Scoreboard 的用法，这个类是对原版的记分板
 // 访问 API 的重新封装，并添加了一些没有的方法。
@@ -41,6 +39,8 @@ YoniScheduler.runDelayTickTask(function doSome(){
 }, 1200);
 //延迟一分钟再执行（1*60*20=1200）
 
+
+//未经过测试
 @EventListener({static: true})
 class MainClass{
 
@@ -48,3 +48,13 @@ class MainClass{
     static onEvent(event: Minecraft.EntityHealthChangedAfterEvent){
     }
 }
+
+//Logger使用
+
+const logger = new Logger("yoni-mcscripts-lib");
+
+logger.info("加载！");
+logger.error("报错", new Error());
+logger.warn("警告");
+logger.debug("可能需要手动启用");
+logger.trace("一般这个等级的日志都是无用的信息");

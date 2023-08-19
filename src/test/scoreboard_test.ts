@@ -79,4 +79,6 @@ async function scoreboard_test(test: Test){
     await test.idle(200);
     
     test.succeed();
+    
+    Scoreboard.removeObjective(obj);
 }
