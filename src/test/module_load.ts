@@ -4,6 +4,10 @@ import { getErrorMsg } from "./lib/getErrorMsg.js";
 async function loadTest(test: Test){
     await import("yoni-mcscripts-lib");
     test.succeed();
+    
+    const { initializeDebugFunc } = await import("yoni-mcscripts-lib");
+    
+    initializeDebugFunc();
 }
 
 registerAsync("yonimcscriptslib", "module_load", loadTest)
