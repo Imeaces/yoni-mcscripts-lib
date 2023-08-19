@@ -7,14 +7,17 @@ async function scheulderTest(test: Test){
     
     YoniScheduler.runDelayTimerTask(() => {
         lastCallRealTime = Date.now();
-    }, 4800);
+    }, 8628);
     let lastCallRealTime = 0;
+    let taskAddTime = Date.now();
     
-    await test.idle(4800/20 + 1);
+    await test.idle(8628/20 + 200);
     
-    let internal = Date.now() - lastCallRealTime;
+    let internal = lastCallRealTime - taskAddTime;
     
-    if (internal > 0 && internal < 100){
+    ley timeBetween = internal - 8628;
+    
+    if (internal > -100 && internal < 100){
         test.succeed();
     } else {
         test.fail("测试长任务延时失败，最终时间差："+internal);

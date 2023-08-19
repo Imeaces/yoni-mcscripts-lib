@@ -10,18 +10,18 @@ registerAsync("yonimcscriptslib", "scoreboard_test", scoreboard_test)
 
 async function scoreboard_test(test: Test){
     const { VanillaWorld, Scoreboard, ScoreboardEntry, DisplaySlot, world } = await import("yoni-mcscripts-lib");
-    //测试过程中发现模拟玩家不能传
-    //let onePlayer = test.spawnSimulatedPlayer({x:0,y:0,z:0},randomName(), GameMode.creative);
+    //测试过程中发现模拟玩家不能传 //更新：已兼容
+    let onePlayer = test.spawnSimulatedPlayer({x:0,y:0,z:0},randomName(), GameMode.creative);
     
-    let onePlayer = world.getAllPlayers()[0];
-    test.assert(onePlayer != null, "记分板测试需要有一个在线的玩家");
+    //let onePlayer = world.getAllPlayers()[0];
+    //test.assert(onePlayer != null, "记分板测试需要有一个在线的玩家");
     
     let obj = Scoreboard.getObjective(randomName(), true);
 
     let oneScoreInfo = obj.getScoreInfo(onePlayer);
 
     obj.setScore(onePlayer, 2344);
-    test.assert(obj.getScore(onePlayer) === 2344, "分数设置不成功");
+    test.assert(obj.getScore(onePlayer) === 2344, `分数设置不成功 ${obj.getScore(onePlayer)} !== 2344`);
     
     obj.getScoreInfos();
     
@@ -35,12 +35,24 @@ async function scoreboard_test(test: Test){
     obj.addScore(onePlayer, 2333);
     test.assert(obj.getScore(onePlayer) === 2333 + a0_r, "分数添加出现未知错误");
 
-    obj.removeScore(onePlayer, 2333);
-    test.assert(oneScoreInfo.score === 2333 - 8651 + a0_r, "分数移除出现未知错误");
+    obj.removeScore(onePlayer, 8651);
+    test.assert(oneScoreInfo.score === 2333 - 8651 + a0_r, "分数移除出现未知错误（读取途径ScoreInfo） "
+        + oneScoreInfo.score 
+        + " !== "
+        + (2333 - 8651 + a0_r));
 
-    Scoreboard.removeObjective(obj);
-    
+    test.assert(Scoreboard.removeObjective(obj), "记分项移除失败");
+
     let hasError = false;
+    try {
+        Scoreboard.getObjective(obj.id);
+    } catch (e) {
+        hasError = true;
+    }
+    
+    test.assert(hasError, "记分项移除后尝试获取时没有出现报错");
+
+    hasError = false;
     try {
         obj.removeScore(onePlayer, -8651);
     } catch (e) {
