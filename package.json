@@ -8,7 +8,7 @@
   },
   "name": "yoni-mcscripts-lib",
   "description": "为 Minecraft Script API 中的部分接口创建了 wrapper，并提供事件管理器、任务管理器和其他的一些小工具。",
-  "version": "1.0.2+mc.1.20.10",
+  "version": "1.0.2-stable+mc.1.20.10",
   "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "main": "yoni-mcscripts-lib.js",
   "scripts": {
