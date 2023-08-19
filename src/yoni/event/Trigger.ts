@@ -11,7 +11,7 @@ async function callAsyncFunction(func, ...args){
 /**
  * @deprecated 废弃，等待重写
  */
-class Trigger implements IEventTrigger {
+class Trigger {
     
     constructor(identifier: string, signal = null){
         this.#identifier = getIdentifierInfo(identifier).id;

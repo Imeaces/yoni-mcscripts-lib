@@ -5,7 +5,7 @@ const taskMap = new Map();
 /**
  * @param {()=>void} func
  * @param {number} delay
- * @param {...any} [args]
+ * @param {...any} args
  * @returns {number} timeoutId
  */
 export function setTimeout(func, delay=0, ...args){
@@ -27,7 +27,7 @@ export function clearTimeout(timeoutId){
 /**
  * @param {()=>void} func
  * @param {number} delay
- * @param {...any} [args]
+ * @param {...any} args
  * @returns {number} intervalId
  */
 export function setInterval(func, delay=4, ...args){

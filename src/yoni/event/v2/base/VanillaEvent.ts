@@ -1,4 +1,4 @@
-import Minecraft from "../../../minecraft.js";
+import { Minecraft } from "../../../basis.js";
 import { hasInstance } from "../../../lib/hasInstance.js";
 import { Event } from "./Event.js";
 

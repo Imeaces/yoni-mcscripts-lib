@@ -1,4 +1,4 @@
-import Minecraft from "./minecraft.js";
+import { Minecraft } from "./basis.js";
 import { Location, Vector3 } from "./Location.js";
 import { YoniDimension } from "./dimension.js";
 

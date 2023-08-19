@@ -1,4 +1,4 @@
-import Minecraft from "../../minecraft.js";
+import { Minecraft } from "../../basis.js";
 import { Equals, UnionToTuple, DumpTupleRecordEntriesToUnion } from "../../lib/types";
 
 export interface EventOptionDefinitions extends MinecraftEventsOptions, InnerEventsOptions {

@@ -1,4 +1,4 @@
-import Minecraft from "./minecraft.js";
+import { Minecraft } from "./basis.js";
 import { Dimension, YoniDimension } from "./dimension.js";
 import { Block, YoniBlock } from "./block.js";
 import { DimensionLikeValue, isDimensionValue } from "./dim.js";

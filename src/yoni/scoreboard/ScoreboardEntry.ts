@@ -1,4 +1,4 @@
-import Minecraft from "../minecraft.js";
+import { Minecraft } from "../basis.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 import { EntityBase } from "../entity/EntityBase.js";
 import { YoniEntity } from "../entity/Entity.js";

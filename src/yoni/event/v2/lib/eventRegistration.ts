@@ -1,4 +1,4 @@
-import Minecraft from "../../../minecraft.js";
+import { Minecraft } from "../../../basis.js";
 import { EventRegistry } from "../EventRegistry.js";
 import { EventSignalListeningAdapter } from "../adapting/EventSignalListeningAdapter.js";
 import IEventSignal from "../interfaces/IEventSignal";
