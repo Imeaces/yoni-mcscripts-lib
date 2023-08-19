@@ -28,4 +28,5 @@ async function scheulderTest(test: Test){
 registerAsync("yonimcscriptslib", "scheulderTest1", scheulderTest)
     .structureName("yonimcscriptslib:single_void_structure")
     .tag("yonimcscriptslib")
+    .required(false)
     .maxTicks(300*20);
