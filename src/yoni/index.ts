@@ -87,3 +87,6 @@ export const EntityClass = {
     SimulatedPlayer
 };
 
+export async function initializeDebugFunc(){
+    await import("./debug_func.js");
+}

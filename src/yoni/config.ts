@@ -2,7 +2,7 @@
 
 //设置为true后，将启用一些debug功能
 //请勿在正式投入使用时启用
-export const debug = true;
+export const debug = false;
 
 const loggingConfig = {
     playerConsoleSpecificTag: "yoni:console",
@@ -14,7 +14,7 @@ const loggingConfig = {
     showTimeStringOnConsoleOutput: true,
     
     //日志输出等级
-    //-1: none, 0: fatal, 1: error, 2: info, 3: warn, 4: debug, 5: trace
+    //-1: none, 0: fatal, 1: error, 2: warn, 3: info, 4: debug, 5: trace
     logLevel: 3,
     
     uniqueFontSize: true,
