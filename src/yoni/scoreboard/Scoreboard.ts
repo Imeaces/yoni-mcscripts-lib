@@ -13,6 +13,8 @@ import { EntryValueType, EntryType } from "./EntryType.js";
 
 import { EntityBase } from "../entity.js";
 
+import { hasParticipant, removeParticipant, clearObjectiveAtDisplaySlot, setObjectiveAtDisplaySlot, getObjectiveAtDisplaySlot, addObjective, isObjectiveValid, removeObjective } from "../legacy_impl.js";
+
 /**
  * 可用的显示位。
  */
@@ -20,15 +22,15 @@ export enum DisplaySlot {
     /**
      * 在暂停菜单中显示。
      */
-    list = Minecraft.DisplaySlotId.List,
+    list = "list",
     /**
      * 在屏幕右侧显示。
      */
-    sidebar = Minecraft.DisplaySlotId.Sidebar,
+    sidebar = "sidebar",
     /**
      * 在玩家名字下方显示。
      */
-    belowname = Minecraft.DisplaySlotId.BelowName,
+    belowname = "belowname",
 }
 
 /**
@@ -105,7 +107,7 @@ export class Scoreboard {
         else if (typeof name !== "string" || name.length === 0)
             throw new TypeError("Objective display name not valid!");
         
-        let vanillaObjective = VanillaScoreboard.addObjective(name, displayName);
+        let vanillaObjective = addObjective(VanillaScoreboard, name, displayName);
         
         let newObjective = new Objective(Scoreboard,
             name, criteria, displayName,
@@ -133,7 +135,7 @@ export class Scoreboard {
                 Scoreboard.#objectives.delete(objectiveId);
             }
             try {
-                return VanillaScoreboard.removeObjective(objectiveId);
+                return removeObjective(VanillaScoreboard, objectiveId);
             } catch {
                 return false;
             }
@@ -150,8 +152,8 @@ export class Scoreboard {
      */
     static tryGetObjective(name: string): Objective | false {
         let objective = Scoreboard.#objectives.get(name);
-        if (objective?.vanillaObjective.isValid()){
-            return objective;
+        if (isObjectiveValid(objective?.vanillaObjective)){
+            return objective as Objective;
         } else if (Scoreboard.#objectives.has(name)){
             Scoreboard.#objectives.delete(name);
         }
@@ -188,7 +190,7 @@ export class Scoreboard {
         
         if (objectiveId instanceof Minecraft.ScoreboardObjective){
             let vanillaObjective = objectiveId;
-            if (vanillaObjective.isValid()){
+            if (isObjectiveValid(vanillaObjective)){
                 name = vanillaObjective.id;
             } else if (autoCreateDummy){
                 try {
@@ -207,7 +209,7 @@ export class Scoreboard {
             objective = Scoreboard.tryGetObjective(name) || null;
 
             if (!objective && autoCreateDummy){
-                VanillaScoreboard.addObjective(name, name);
+                addObjective(VanillaScoreboard, name, name);
                 objective = Scoreboard.tryGetObjective(name) as Objective;
             }
         }
@@ -236,7 +238,7 @@ export class Scoreboard {
      * @returns {DisplayOptions} - 显示位上显示的内容。
      */
     static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions {
-        const vanillaResult = VanillaScoreboard.getObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
+        const vanillaResult = getObjectiveAtDisplaySlot(VanillaScoreboard, slot as Minecraft.DisplaySlotId);
         const objective = Scoreboard.tryGetObjective(vanillaResult.objective?.id) || null;
         const result: DisplayOptions = { objective };
         if (vanillaResult.sortOrder != null){
@@ -270,13 +272,16 @@ export class Scoreboard {
         if (settings.sortOrder != null){
             if (settings.sortOrder === ObjectiveSortOrder.ascending){
                 settingArg.sortOrder = Minecraft.ObjectiveSortOrder.Ascending;
+                settingArg.sortOrder = 0;
             } else if (settings.sortOrder === ObjectiveSortOrder.descending){
                 settingArg.sortOrder =  Minecraft.ObjectiveSortOrder.Descending;
+                settingArg.sortOrder = 1;
             } else {
                 throw new Error("unknown ObjectiveSortOrder");
             }
         }
-        let lastDisplayingObjective = VanillaScoreboard.setObjectiveAtDisplaySlot(
+        let lastDisplayingObjective = setObjectiveAtDisplaySlot(
+            VanillaScoreboard,
             slot as Minecraft.DisplaySlotId,
             settingArg
         );
@@ -287,11 +292,11 @@ export class Scoreboard {
     
     /**
      * 清空显示位上正显示的记分项。
-     * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
+     * @param {DisplaySlot|Minecraft.DisplaySlot} slot - 显示位。
      * @returns {Objective} 显示位先前显示的记分项，若无，返回 `null` 。
      */
     static clearDisplaySlot(slot: DisplaySlot|Minecraft.DisplaySlotId): Objective | null{
-        let rt = VanillaScoreboard.clearObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
+        let rt = clearObjectiveAtDisplaySlot(VanillaScoreboard, slot as Minecraft.DisplaySlotId);
         if (rt?.id != null){
             return Scoreboard.getObjective(rt.id);
         } else {
@@ -327,7 +332,7 @@ export class Scoreboard {
     static resetAllScores(){
         for (const objective of VanillaScoreboard.getObjectives()){
             for (const scbid of objective.getParticipants()){
-                objective.removeParticipant(scbid);
+                removeParticipant(objective, scbid);
             }
         }
     }
@@ -342,8 +347,8 @@ export class Scoreboard {
         let identify = ScoreboardEntry.getIdentity(one);
         
         for (const objective of VanillaScoreboard.getObjectives()){
-            if (objective.hasParticipant(identify)){
-                objective.removeParticipant(identify);
+            if (hasParticipant(objective, identify)){
+                removeParticipant(objective, identify);
             }
         }
     }

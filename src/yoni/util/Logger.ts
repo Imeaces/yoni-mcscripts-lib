@@ -1,4 +1,4 @@
-import { VanillaWorld } from "../basis.js";
+import { VanillaWorld, Minecraft } from "../basis.js";
 import { Command, AsyncCommandSender } from "../command.js";
 
 import { visualizeValue } from "../lib/console.js";
@@ -140,7 +140,7 @@ function sendLogText(level: string, msg: string, rps: any[], time: Date, ignoreL
     const shouldSendToConsole = ignoreLevel || config.getBoolean("logging.outputToConsole");
     
     const players = Array.from( //我们对旧版有良好的兼容性！（翻译：就是想用，你打我啊）
-      VanillaWorld.getPlayers({ tags: [ config.getString("logging.playerConsoleSpecificTag", "yoni:console") ] })
+      VanillaWorld.getPlayers(Object.assign(new Minecraft.EntityQueryOptions(), { tags: [ config.getString("logging.playerConsoleSpecificTag", "yoni:console") ] }))
     );
     
     if (players.length === 0 && !shouldSendToConsole){

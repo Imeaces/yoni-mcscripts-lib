@@ -5,7 +5,7 @@ export { Gametest } from "./modules/Gametest.js";
 
 export const VanillaWorld: Minecraft.World = Minecraft.world;
 export const VanillaScoreboard: Minecraft.Scoreboard = VanillaWorld.scoreboard;
-export const MinecraftSystem: Minecraft.System = Minecraft.system;
+export const MinecraftSystem: Minecraft.System = {};
 
 /**
  * 在游戏刻的固定时机运行函数。
@@ -29,11 +29,6 @@ export const overworld = VanillaWorld.getDimension(Minecraft.MinecraftDimensionT
  * 返回当前是否为只读模式上下文（通常在before事件的回调执行时出现）。
  */
 export function isReadonlyMode(): boolean {
-    try {
-        overworld.runCommand("help");
-    } catch {
-        return true;
-    }
     return false;
 }
 

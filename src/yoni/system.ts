@@ -1,5 +1,6 @@
-import { Minecraft, MinecraftSystem, runTask, overworld, isReadonlyMode } from "./basis.js";
+import { Minecraft, MinecraftSystem, runTask, overworld, VanillaWorld, isReadonlyMode } from "./basis.js";
 import { YoniScheduler } from "./schedule.js";
+import { getCurrentTick } from "./legacy_impl.js";
 
 /**
  * 对 {@link Minecraft.System} 的模仿，提供系统级事件与函数的支持。
@@ -9,13 +10,13 @@ class System {
         runTask(callback, ...args);
     }
     get beforeEvents(){
-        return MinecraftSystem.beforeEvents;
+        return {};
     }
     get afterEvents(){
-        return MinecraftSystem.afterEvents;
+        return {};
     }
     get currentTick(){
-        return MinecraftSystem.currentTick;
+        return getCurrentTick();
     }
     isReadonlyMode(): boolean {
         return isReadonlyMode();

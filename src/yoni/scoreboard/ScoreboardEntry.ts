@@ -165,8 +165,8 @@ export class ScoreboardEntry {
     }
     get vanillaScoreboardIdentity(): Minecraft.ScoreboardIdentity | undefined {
         if (this.#entity && (this.type === EntryType.ENTITY || this.type === EntryType.PLAYER)
-        && (this.#vanillaScbid ?? undefined) !== (this.#entity?.scoreboardIdentity ?? undefined)){
-            this.#vanillaScbid = this.#entity?.scoreboardIdentity ?? undefined;
+        && (this.#vanillaScbid ?? undefined) !== (this.#entity?.scoreboard ?? undefined)){
+            this.#vanillaScbid = this.#entity?.scoreboard ?? undefined;
             if (this.#vanillaScbid){
                 ScoreboardEntry.#scbidMap.set(this.#vanillaScbid, this);
             }
