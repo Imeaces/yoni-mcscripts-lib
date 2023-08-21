@@ -4,6 +4,6 @@ import { StatusCode } from "../basis.js";
  */
 export interface CommandResult {
     statusCode: StatusCode;
-    successCount?: number;
+    successCount: number;
     statusMessage?: string;
 }

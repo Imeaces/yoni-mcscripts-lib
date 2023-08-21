@@ -325,7 +325,7 @@ class Objective {
                 + "\n  cause by: "
                 + result.statusMessage);
         } else if (name){
-            if (VanillaWorld.getPlayers({name}).length !== 0)
+            if (EntityBase.getWorldVanillaPlayers({name}).length !== 0)
                 throw new NameConflictError(name as string);
                 
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, objective.#id);
