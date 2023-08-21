@@ -209,7 +209,7 @@ function resolveFilter(
     }
     
     if (filterValues.entityTypes != null){
-        return filterValues.entityTypes.includes(entity.typeId);
+        return filterValues.entityTypes.includes(entity.id);
     }
     
     return true;

@@ -82,9 +82,9 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniEntity}
      */
-    * selectEntities(option: Minecraft.EntityQueryOptions): Generator<YoniEntity> {
+    * selectEntities(option: Partial<Minecraft.EntityQueryOptions>): Generator<YoniEntity> {
         for (let d of getAllDims()){
-            for (let entity of d.getEntities(option)){
+            for (let entity of d.getEntities(Object.assign(new Minecraft.EntityQueryOptions, option))){
                 yield EntityBase.from(entity) as unknown as YoniEntity;
             }
         }

@@ -10,6 +10,8 @@ import { DimensionLikeValue } from "../dim.js";
 
 import { YoniPlayer, YoniEntity, YoniSimulatedPlayer } from "../entity.js";
 
+import { getEntity, isEntityValid } from "../legacy_impl.js";
+
 /**
  * Yoni实体的基类，同时也含有一些用于处理实体的静态方法。
  */
@@ -81,10 +83,10 @@ export abstract class EntityBase {
     }
     
     static getAliveVanillaEntity(entity: EntityValue): Minecraft.Entity {
-        if (entity.isValid())
+        if (isEntityValid(entity))
             return EntityBase.getMinecraftEntity(entity);
         
-        const result = VanillaWorld.getEntity(entity.id);
+        const result = getEntity(VanillaWorld, entity.id);
         if (result){
             return result;
         }
@@ -148,7 +150,7 @@ export abstract class EntityBase {
      */
     static getCurrentHealth(entity: EntityValue): number {
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.currentValue;
+        return (component === undefined) ? 0 : component.current;
     }
     
     static getDimensionVanillaEntities(options?: MinecraftEntityQueryOptions) {
@@ -157,9 +159,9 @@ export abstract class EntityBase {
         
         let entitiesArrays: Minecraft.Entity[][];
         if (!options){
-            entitiesArrays = dimensionArrays.map(dim => dim.getEntities());
+            entitiesArrays = dimensionArrays.map(dim => Array.from(dim.getEntities()));
         } else {
-            entitiesArrays = dimensionArrays.map(dim => dim.getEntities(Object.assign(new Minecraft.EntityQueryOptions(), options)));
+            entitiesArrays = dimensionArrays.map(dim => Array.from(dim.getEntities(Object.assign(new Minecraft.EntityQueryOptions(), options))));
         }
         
         return ([] as Minecraft.Entity[]).concat(...entitiesArrays);
@@ -191,7 +193,7 @@ export abstract class EntityBase {
      */
     static getMaxHealth(entity: EntityValue){
         let component = EntityBase.getHealthComponent(entity);
-        return (component === undefined) ? 0 : component.effectiveMax;
+        return (component === undefined) ? 0 : component.value;
     }
     
     /**
@@ -228,10 +230,12 @@ export abstract class EntityBase {
     static hasFamilies(entity: EntityValue, ...families: string[]){
         entity = EntityBase.getMinecraftEntity(entity);
         const dimension = entity.dimension;
-        const tryEntities = dimension.getEntities({
-            type: entity.typeId,
-            families: families
-        });
+        const tryEntities = dimension.getEntities(
+            Object.assign(new Minecraft.EntityQueryOptions, {
+                type: entity.id,
+                families
+            })
+        );
         for (const cEntity of tryEntities){
             if (entity === cEntity){
                 return true;
@@ -252,10 +256,12 @@ export abstract class EntityBase {
         const dimension = entity.dimension;
         
         for (const family of families){
-            const tryEntities = dimension.getEntities({
-                type: entity.typeId,
+            const tryEntities = dimension.getEntities(
+                Object.assign(new Minecraft.EntityQueryOptions, {
+                type: entity.id,
                 families: Array.of(family)
-            });
+                })
+            );
             
             for (const cEntity of tryEntities){
                 if (entity === cEntity){
@@ -283,7 +289,12 @@ export abstract class EntityBase {
      * @returns {boolean}
      */
     static isAliveEntity(entity: EntityValue){
-        return entity.isValid();
+        try {
+            EntityBase.getYoniEntity(entity).vanillaEntity.id;
+        } catch {
+            return false;
+        }
+        return true;
     }
     
     /**
@@ -301,7 +312,7 @@ export abstract class EntityBase {
         if (comp == null)
             return false;
         
-        return comp.currentValue > 0;
+        return comp.current > 0;
     }
     
     /**
@@ -333,9 +344,8 @@ export abstract class EntityBase {
      * 检测两个参数是否为同一实体
      */
     static isSameEntity(entity1: any, entity2: any){
-        return EntityBase.isEntity(entity1)
-        && EntityBase.isEntity(entity2)
-        && entity1.id === entity2.id;
+        entity1 = EntityBase.from(entity1);
+        return entity1 != null && entity1 === EntityBase.from(entity2);
     }
 
     /**
@@ -357,10 +367,10 @@ export abstract class EntityBase {
         if (!component){
             throw new Error("No health component for this entity");
         }
-        component.setCurrentValue(val);
+        component.setCurrent(val);
     }
     
 }
 
-interface MinecraftEntityQueryOptions extends Optional<Minecraft.EntityQueryOptions> {
+interface MinecraftEntityQueryOptions extends Partial<Minecraft.EntityQueryOptions> {
 }

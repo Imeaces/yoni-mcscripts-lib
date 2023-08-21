@@ -1,7 +1,7 @@
-import { MinecraftSystem as system } from "../basis.js";
 import { CommandQueue } from "./CommandQueue.js";
 import { CommandPriority } from "./CommandPriority.js";
 import { CommandList } from "./CommandList.js";
+import { clearRun, runInterval } from "../legacy_impl.js";
 
 export class CommandExecutor {
     static log(...data: any[]){
@@ -16,12 +16,12 @@ export class CommandExecutor {
     start(){
         if (this.#scheduleId !== null)
             throw new Error("executor already started");
-        this.#scheduleId = system.runInterval(this.#run.bind(this));
+        this.#scheduleId = runInterval(this.#run.bind(this));
     }
     #scheduleId: number | null = null;
     stop(){
         if (this.#scheduleId !== null){
-            system.clearRun(this.#scheduleId);
+            clearRun(this.#scheduleId);
             this.#scheduleId = null;
         }
     }

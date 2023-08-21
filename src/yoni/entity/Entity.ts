@@ -8,8 +8,9 @@ import { DimensionLikeValue } from "../dim.js";
 import { Location, Vector2, Vector3 } from "../Location.js";
 import { copyPropertiesWithoutOverride } from "../lib/ObjectUtils.js";
 import { Command } from "../command.js";
+import { teleportEntity } from "../legacy_impl.js";
 
-const { EntityTypes } = Minecraft;
+const { EntityTypes, MinecraftEffectTypes } = Minecraft;
 
 /**
  * 代表一个实体
@@ -18,16 +19,18 @@ class Entity extends EntityBase {
     
     get [Symbol.toStringTag](){
         if (this instanceof Entity)
-            return `Entity: { type: ${this.vanillaEntity.typeId} }`;
+            return `Entity: { type: ${this.typeId} }`;
         return "Object (Entity)";
     }
     
-    get velocity() {
-        return this.vanillaEntity.getVelocity();
+    get typeId(){
+        return this.vanillaEntity.id;
     }
     
     get rotation(){
-        return this.vanillaEntity.getRotation();
+        const { x, y } = this.vanillaEntity.rotation;
+        const result = { x, y };
+        return result;
     }
     
     get entityType() {
@@ -42,7 +45,7 @@ class Entity extends EntityBase {
         const location = Location.zero;
         location.setDimension(this.vanillaEntity.dimension);
         location.setPosition(this.vanillaEntity.location);
-        location.setRotation(this.vanillaEntity.getRotation());
+        location.setRotation(this.vanillaEntity.rotation);
         return location;
     }
     
@@ -156,8 +159,16 @@ class Entity extends EntityBase {
                 showParticles: showParticles as boolean
             }
         }
+        if (typeof effectType === "string"){
+            let effectTypeId = effectType;
+            effectTypeId = effectTypeId.split(":")[1];
+            effectTypeId = effectTypeId.replace(/_[a-z]/g, (u) => u[1].toUpperCase());
+            effectType = MinecraftEffectTypes[effectTypeId as unknown as keyof typeof MinecraftEffectTypes] as Minecraft.EffectType;
+        }
+        amplifier = option.amplifier ?? 0;
+        showParticles = option.showParticles ?? true;
         if (option){
-            this.vanillaEntity.addEffect(effectType, duration, option);
+            this.vanillaEntity.addEffect(effectType, duration, amplifier, showParticles);
         } else {
             this.vanillaEntity.addEffect(effectType, duration);
         }
@@ -186,7 +197,12 @@ class Entity extends EntityBase {
         | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
         | [ Vector3, DimensionLikeValue, number, number ]
         | [ Vector3, DimensionLikeValue, number, number, boolean ]){
-        return this.#executeTeleport(this.vanillaEntity.tryTeleport, params) as boolean;
+        try {
+            this.#executeTeleport(this.vanillaEntity.teleport, params);
+            return true;
+        } catch {
+            return false;
+        }
     }
     
     #executeTeleport(teleportFunc: any, params: [ Location ] | [ Location, boolean ]
@@ -222,7 +238,7 @@ class Entity extends EntityBase {
                 options.keepVelocity = params[4];
         }
         
-        teleportFunc.call(this.vanillaEntity, coords, options);
+        teleportEntity(this.vanillaEntity, coords, options);
     }
 }
 
@@ -232,7 +248,7 @@ EntityClassRegistry.register(Entity, Minecraft.Entity);
 
 
 type RemovedKeys = "getRotation" | "getVelocity"
-type OverridedKeys = "target" | "tryTeleport" | "teleport" | "addEffect" | "dimension"
+type OverridedKeys = "target" | "tryTeleport" | "teleport" | "addEffect" | "dimension" | "location" | "rotation" | "scoreboard"
 type BaseVanillaEntityClass = 
     Omit<
         Minecraft.Entity,

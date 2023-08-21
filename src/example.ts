@@ -44,8 +44,8 @@ YoniScheduler.runDelayTickTask(function doSome(){
 @EventListener({static: true})
 class MainClass{
 
-    @EventHandler({event: Minecraft.EntityHealthChangedAfterEvent, options: {}})
-    static onEvent(event: Minecraft.EntityHealthChangedAfterEvent){
+    @EventHandler({event: Minecraft.EntityHitEvent, options: {}})
+    static onEvent(event: Minecraft.EntityHitEvent){
     }
 }
 

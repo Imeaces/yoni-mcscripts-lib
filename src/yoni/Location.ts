@@ -373,7 +373,8 @@ export class Location {
             .setRy(ry.toFixed(v));
     }
     toVector(){
-        return this.getVanillaVector();
+        const { x, y, z } = this;
+        return { x, y, z };
     }
     getDirection(){
         throw new Error("not implemented yet");
@@ -432,14 +433,14 @@ export class Location {
         x = Math.floor(x);
         y = Math.floor(y);
         z = Math.floor(z);
-        return { x, y, z };
+        return new Minecraft.BlockLocation(x, y, z);
     }
     /**
      * @returns {Minecraft.Location} 根据此位置创建一个原版的Minecraft.Location
      */
     getVanillaLocation(){
         let { x, y, z } = this;
-        return { x, y, z };
+        return new Minecraft.Location(x, y, z);
     }
     getVanillaVector(){
         let { x, y, z } = this;

@@ -11,12 +11,10 @@ export const MinecraftSystem: Minecraft.System = {};
  * 在游戏刻的固定时机运行函数。
  */
 export function runTask<P extends any[]>(callback: (...args: P) => any, ...args: P){
-    if (args.length === 0)
-        MinecraftSystem.run(callback);
-    else
-        MinecraftSystem.run(() => {
-            callback(...args);
-        });
+    const sid = VanillaWorld.events.tick.subscribe(function runTask(event){
+        VanillaWorld.events.tick.unsubscribe(sid);
+        callback(...args);
+    });
 }
 
 /**

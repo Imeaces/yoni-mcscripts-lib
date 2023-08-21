@@ -29,7 +29,7 @@ class Player extends Entity {
     
     get [Symbol.toStringTag](){
         if (this instanceof Player)
-            return `Player: { type: ${this.vanillaPlayer.typeId}, name: ${this.vanillaPlayer.name} }`;
+            return `Player: { type: ${this.typeId}, name: ${this.vanillaPlayer.name} }`;
         return "Object (Player)";
     }
     
@@ -38,7 +38,13 @@ class Player extends Entity {
      * @type {number}
      */
     get experienceLevel(){
-        return this.vanillaPlayer.level;
+        let level = 0;
+        for (let addLevels = 32768; addLevels >= 1; addLevels /= 2){
+            if (EntityBase.getWorldVanillaPlayers({minLevel: level+addLevels}).includes(this.vanillaPlayer)){
+                level += addLevels;
+            }
+        }
+        return level;
     }
     
     getItemInMainHand(): Minecraft.ItemStack | undefined {
@@ -55,8 +61,15 @@ class Player extends Entity {
      */
     setExperienceLevel(level: number){
         level = getNumber(level);
-        if (this.vanillaPlayer.level !== level)
+        if (this.experienceLevel !== level)
             this.addLevels(level - this.experienceLevel);
+    }
+    
+    addLevels(level: number){
+        level = parseInt(String(level));
+        if (isNaN(level))
+            throw new TypeError("not an integer");
+        Command.execute(this, `xp ${level}l`);
     }
     
     /**
@@ -82,10 +95,17 @@ class Player extends Entity {
         Command.addExecute(Command.PRIORITY_HIGH, this.vanillaPlayer, `tellraw @s ${rawtext}`);
     }
     
+    /**
+     * 向玩家发送消息。
+     */
+    sendMessage(message: string){
+        this.sendChatMessage(message);
+    }
+    
     get gamemode(): Minecraft.GameMode {
         // @ts-ignore
         for (let gm of Object.getOwnPropertyNames(Minecraft.GameMode).map(k=>Minecraft.GameMode[k])){
-            for (let splayer of VanillaWorld.getPlayers({gameMode: gm})){
+            for (let splayer of EntityBase.getWorldVanillaPlayers({gameMode: gm})){
                 if (EntityBase.isSameEntity(splayer, this)){
                     return gm;
                 }
@@ -98,6 +118,16 @@ class Player extends Entity {
         Command.addExecute(Command.PRIORITY_HIGHEST, this, command);
     }
     
+    totalXpNeededForNextLevel = 0;
+    xpEarnedAtCurrentLevel = 0;
+    addExperience(xp: number): boolean {
+        xp = parseInt(String(xp));
+        if (isNaN(xp))
+            throw new TypeError("not an integer");
+        Command.execute(this, `xp ${xp}`);
+        return true;
+    }
+    
     removeXp(xpCount: number){
         if (this.xpEarnedAtCurrentLevel >= xpCount){
             this.addExperience(-xpCount);
@@ -108,7 +138,7 @@ class Player extends Entity {
         xpCount -= v0;
         this.addExperience(-v0);
   
-        while (xpCount > 0 && this.vanillaPlayer.level > 0){
+        while (xpCount > 0 && this.experienceLevel > 0){
             this.addLevels(-1);
             xpCount -= this.totalXpNeededForNextLevel;
         }

@@ -1,6 +1,44 @@
 import { VanillaWorld, Minecraft, overworld, StatusCode, VanillaScoreboard } from "./basis.js";
 import { EntityBase } from "./entity/EntityBase.js";
 import { Command } from "./command.js";
+import { Location } from "./Location.js";
+
+export function teleportEntity(entity: Minecraft.Entity, location: Vector3, teleportOptions?: Minecraft.TeleportOptions){
+    const { rotation, keepVelocity, facingLocation, dimension, checkForBlocks } = teleportOptions ?? {};
+    
+    if (checkForBlocks)
+        throw new Error("not support checkForBlocks");
+    
+    let { velocity } = entity;
+    let rx = rotation?.x ?? 0;
+    let ry = rotation?.y ?? 0;
+    
+    entity.teleport(new Location(location).getVanillaLocation(), dimension ?? entity.dimension, rx, ry);
+    
+    let command = "tp @s ~ ~ ~";
+    
+    if (rotation){
+    } else if (facingLocation){
+        const { x, y, z } = facingLocation;
+        command = Command.getCommand(command, "facing", x as any, y as any, z as any);
+    }
+    
+    if (checkForBlocks)
+        command = Command.getCommand(command, "true");
+    
+    Command.execute(entity, command);
+    
+    if (keepVelocity)
+        entity.setVelocity(velocity);
+}
+
+export function isEntityValid(entity: any){
+    return EntityBase.isAliveEntity(entity);
+}
+
+export function getEntity(world: Minecraft.World, id: string): Minecraft.Entity | undefined {
+    throw new ReferenceError("not implemented");
+}
 
 let currentTick = -1;
 VanillaWorld.events.tick.subscribe((event) => {
@@ -180,5 +218,62 @@ declare module "mojang-minecraft" {
     }
     interface SystemAfterEvents {
     }
+    interface Vector3 {
+        x: number;
+        y: number;
+        z: number;
+    }
+    interface Vector2 {
+        x: number;
+        y: number;
+    }
+    interface TeleportOptions {
+        /**
+         * @remarks
+         * Whether to check whether blocks will block the entity after
+         * teleport.
+         *
+         */
+        checkForBlocks?: boolean;
+        /**
+         * @remarks
+         * Dimension to potentially move the entity to.  If not
+         * specified, the entity is teleported within the dimension
+         * that they reside.
+         *
+         */
+        dimension?: Minecraft.Dimension;
+        /**
+         * @remarks
+         * Location that the entity should be facing after teleport.
+         *
+         */
+        facingLocation?: Vector3;
+        /**
+         * @remarks
+         * Whether to retain the entities velocity after teleport.
+         *
+         */
+        keepVelocity?: boolean;
+        /**
+         * @remarks
+         * Rotation of the entity after teleport.
+         *
+         */
+        rotation?: Vector2;
+    }
+    interface EntityEffectOptions {
+        amplifier?: number
+        showParticles?: boolean
+    }
 }
 
+    interface Vector3 {
+        x: number;
+        y: number;
+        z: number;
+    }
+    interface Vector2 {
+        x: number;
+        y: number;
+    }

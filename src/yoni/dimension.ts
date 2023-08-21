@@ -105,30 +105,30 @@ class Dimension {
     }
     /**
      */
-    getBlockFromRay(location: Vector3, direction: Vector3, options?: Minecraft.BlockRaycastOptions): Minecraft.BlockRaycastHit | undefined {
-        return this.vanillaDimension.getBlockFromRay(location, direction, options);
+    getBlockFromRay(location: Vector3, direction: Vector3, options?: Minecraft.BlockRaycastOptions) {
+        return Block.from(this.vanillaDimension.getBlockFromRay(new Location(location).getVanillaLocation(), new Location(direction).getVanillaVector(), options));
     }
     /**
      */
-    getEntities(options?: Minecraft.EntityQueryOptions): YoniEntity[] {
-        return this.vanillaDimension.getEntities(options).map(EntityBase.from) as unknown as YoniEntity[];
+    getEntities(options?: Partial<Minecraft.EntityQueryOptions>): YoniEntity[] {
+        return Array.from(this.vanillaDimension.getEntities(Object.assign(new Minecraft.EntityQueryOptions, options))).map(EntityBase.from) as unknown as YoniEntity[];
     }
     /**
      */
     getEntitiesAtBlockLocation(location: Vector3): YoniEntity[] {
-        return this.vanillaDimension.getEntitiesAtBlockLocation(location)
+        return this.vanillaDimension.getEntitiesAtBlockLocation(new Location(location).getVanillaBlockLocation())
             .map(EntityBase.from) as unknown as YoniEntity[];
     }
     /**
      */
     getEntitiesFromRay(location: Vector3, direction: Vector3, options?: Minecraft.EntityRaycastOptions): YoniEntity[] {
-        return this.vanillaDimension.getEntitiesFromRay(location, direction, options)
+        return this.vanillaDimension.getEntitiesFromRay(new Location(location).getVanillaLocation(), new Location(direction).getVanillaVector(), options)
             .map(EntityBase.from) as unknown as YoniEntity[];
     }
     /**
      */
-    getPlayers(option?: Minecraft.EntityQueryOptions): YoniPlayer[] {
-        return this.vanillaDimension.getPlayers(option).map(EntityBase.from) as unknown as YoniPlayer[];
+    getPlayers(option?: Partial<Minecraft.EntityQueryOptions>): YoniPlayer[] {
+        return Array.from(this.vanillaDimension.getPlayers(Object.assign(new Minecraft.EntityQueryOptions, option))).map(EntityBase.from) as unknown as YoniPlayer[];
     }
     fetchCommand(commandString: string){
         return Command.fetchExecute(this.vanillaDimension, commandString);
@@ -136,12 +136,12 @@ class Dimension {
     /**
      */
     spawnEntity(identifier: string, location: Vector3): YoniEntity {
-        return EntityBase.from(this.vanillaDimension.spawnEntity(identifier, location)) as YoniEntity;
+        return EntityBase.from(this.vanillaDimension.spawnEntity(identifier, new Location(location).getVanillaLocation())) as YoniEntity;
     }
     /**
      */
     spawnItem(item: Minecraft.ItemStack, location: Vector3): YoniEntity {
-        return EntityBase.from(this.vanillaDimension.spawnItem(item, location)) as YoniEntity;
+        return EntityBase.from(this.vanillaDimension.spawnItem(item, new Location(location).getVanillaLocation())) as YoniEntity;
     }
 }
 

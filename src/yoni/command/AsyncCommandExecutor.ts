@@ -1,8 +1,7 @@
-import { MinecraftSystem as system } from "../basis.js";
 import { AsyncCommandQueue } from "./AsyncCommandQueue.js";
 import { CommandPriority } from "./CommandPriority.js";
 import { CommandList } from "./CommandList.js";
-
+import { clearRun, runInterval } from "../legacy_impl.js";
 
 export class AsyncCommandExecutor {
     static log(...data: any[]){
@@ -12,7 +11,7 @@ export class AsyncCommandExecutor {
     start(){
         if (this.#scheduleId !== null)
             throw new Error("executor already started");
-        this.#scheduleId = system.runInterval(this.#run.bind(this));
+        this.#scheduleId = runInterval(this.#run.bind(this));
     }
     constructor(autoStart?: boolean){
         if (arguments.length > 0)
@@ -22,7 +21,7 @@ export class AsyncCommandExecutor {
     #scheduleId: number | null = null;
     stop(){
         if (this.#scheduleId !== null){
-            system.clearRun(this.#scheduleId);
+            clearRun(this.#scheduleId);
             this.#scheduleId = null;
         }
     }

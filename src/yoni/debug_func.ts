@@ -2,7 +2,7 @@ import { ChatCommand } from "./command/ChatCommand.js";
 import { Command } from "./command.js";
 import { EntityBase, YoniPlayer } from "./entity.js";
 import { Logger } from "./util/Logger.js";
-import { LegacyEventListener as EventListener } from "./legacy_event.js";
+import { listenEvent } from "./event.js";
 import { getErrorMsg } from "./lib/console.js";
 import { config } from "./config.js";
 import { runTask, Minecraft } from "./basis.js";
@@ -14,7 +14,7 @@ let doEvalFunctionInitizePromise = initEvalFunction();
 
 ChatCommand.registerPrefixCommand("$", "geval", onRequestChatEventAsEval);
 ChatCommand.registerPrefixCommand("$", "eval", onEvalCommand);
-EventListener.register("minecraft:beforeEvents.chatSend", onChatEventAsEval);
+listenEvent(Minecraft.BeforeChatEvent, onChatEventAsEval);
 
 async function initEvalFunction(){
     let generateFunctionCodeLines = [];
@@ -70,7 +70,7 @@ function onEvalCommand(sender: YoniPlayer, command: string, label: string, args:
     let code = command.slice(command.indexOf(" ")+1);
     executeEval(sender, code);
 }
-function onChatEventAsEval(event: Minecraft.ChatSendBeforeEvent){
+function onChatEventAsEval(event: Minecraft.BeforeChatEvent){
     const player = EntityBase.from(event.sender) as unknown as YoniPlayer;
     if (chatAsEvalPlayers.has(player)){
         event.cancel = true;
@@ -91,7 +91,7 @@ function onRequestChatEventAsEval(sender: YoniPlayer, command: string, label: st
     }
 }
 function hasPermission(player: YoniPlayer | Minecraft.Player): boolean {
-    return player.isOp();
+    return player.hasTag("yoni:debug_func");
 }
 async function executeEval(sender: YoniPlayer, code: string){
     if (!hasPermission(sender)){
