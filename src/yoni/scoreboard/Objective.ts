@@ -325,6 +325,9 @@ class Objective {
                 + "\n  cause by: "
                 + result.statusMessage);
         } else if (name){
+            if (VanillaWorld.getPlayers({name}).length !== 0)
+                throw new NameConflictError(name as string);
+                
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, objective.#id);
             let result = Command.run(Command.getCommand(cmd, ...args));
             if (result.statusCode === StatusCode.success
@@ -332,9 +335,6 @@ class Objective {
                 return true;
             }
             objective.checkUnregistered();
-            if (VanillaWorld.getPlayers({name}).length !== 0)
-                throw new NameConflictError(name as string);
-                
             //我觉得这里应该不会被执行到了，如果被执行到，请告诉我
             throw new Error(`Could not ${option} score, `
                 + "maybe entity or player disappeared?"
