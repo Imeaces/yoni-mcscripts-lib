@@ -59,7 +59,7 @@ function onDead(event: PlayerDeadEvent){
     let location = player.location;
     DeadPlayers.add(player);
     DeadPlayerLocationRecords.set(player, location);
-    if (!schedule.isQueue()){
+    if (!schedule.isQueued()){
         YoniScheduler.addSchedule(schedule);
     }
 }

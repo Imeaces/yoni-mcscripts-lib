@@ -124,4 +124,5 @@ export class EventManager {
     }
 }
 
-export const manager = new EventManager();
+export const eventManager = new EventManager();
+export { eventManager as manager };
