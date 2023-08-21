@@ -51,8 +51,6 @@ import { EventRegistry } from "../../EventRegistry.js";
 
 export function registerMinecraftEventOptionResolvers(){
 (function (){
-
-(function (){
 let registry = EventRegistry.getRegistry(Minecraft.EffectAddAfterEvent);
 
 registry.extraOption = true;

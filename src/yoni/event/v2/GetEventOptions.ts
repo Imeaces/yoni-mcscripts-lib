@@ -14,6 +14,7 @@ interface MinecraftEventsOptions {
     "Minecraft.EffectAddAfterEvent": [Minecraft.EffectAddAfterEvent, Minecraft.EntityEventOptions]
     "Minecraft.DataDrivenEntityTriggerAfterEvent": [Minecraft.DataDrivenEntityTriggerAfterEvent, Minecraft.EntityDataDrivenTriggerEventOptions]
     "Minecraft.DataDrivenEntityTriggerBeforeEvent": [Minecraft.DataDrivenEntityTriggerBeforeEvent, Minecraft.EntityDataDrivenTriggerEventOptions]
+    "Minecraft.ScriptEventCommandMessageAfterEvent": [Minecraft.ScriptEventCommandMessageAfterEvent, Minecraft.ScriptEventMessageFilterOptions]
 }
 
 interface InnerEventsOptions {
