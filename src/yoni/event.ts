@@ -2,7 +2,7 @@ export { Event } from "./event/v2/base/Event.js";
 export { VanillaEvent } from "./event/v2/base/VanillaEvent.js";
 export { EventPriority } from "./event/v2/EventPriority.js";
 export { EventRegistry } from "./event/v2/EventRegistry.js";
-export { manager as eventManager } from "./event/v2/EventManager.js";
+export { eventManager } from "./event/v2/EventManager.js";
 export { default as IEventListener } from "./event/v2/interfaces/EventListener";
 export { default as IEventHandler } from "./event/v2/interfaces/EventHandler";
 export { default as IEventSignal } from "./event/v2/interfaces/IEventSignal";
@@ -19,3 +19,5 @@ registerMinecraftNativeEvents();
 
 import { registerMinecraftEventOptionResolvers } from "./event/v2/adapting/eventOptions/MinecraftEventOptionResolvers.js";
 registerMinecraftEventOptionResolvers();
+
+export { PlayerJoinedEvent } from "./event/v2/player/PlayerJoinedEvent.js";

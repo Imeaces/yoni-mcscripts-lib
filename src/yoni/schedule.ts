@@ -105,7 +105,7 @@ export class Schedule {
     /**
      * 任务是否已经添加到执行队列。
      */
-    isQueue(): boolean {
+    isQueued(): boolean {
         return scheduleQueue.has(this);
     }
     get startInQueueTime(): number {
