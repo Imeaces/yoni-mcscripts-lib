@@ -51,28 +51,6 @@ import { EventRegistry } from "../../EventRegistry.js";
 
 export function registerMinecraftEventOptionResolvers(){
 (function (){
-let registry = EventRegistry.getRegistry(Minecraft.DataDrivenEntityTriggerBeforeEvent);
-
-registry.extraOption = true;
-registry.extraOptionResolver = (event, options) => {
-    const entities: any[] = [];
-    entities.push(event.entity);
-    return conditionEntityDataDrivenTriggerEventOptions(event.id, entities, options);
-}
-
-})();
-
-(function (){
-let registry = EventRegistry.getRegistry(Minecraft.DataDrivenEntityTriggerAfterEvent);
-
-registry.extraOption = true;
-registry.extraOptionResolver = (event, options) => {
-    const entities: any[] = [];
-    entities.push(event.entity);
-    return conditionEntityDataDrivenTriggerEventOptions(event.id, entities, options);
-}
-
-})();
 
 (function (){
 let registry = EventRegistry.getRegistry(Minecraft.EffectAddAfterEvent);
