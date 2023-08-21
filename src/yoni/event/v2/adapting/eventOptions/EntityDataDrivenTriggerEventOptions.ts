@@ -16,7 +16,7 @@ import { EventRegistry } from "../../EventRegistry.js";
 
 export function registerMinecraftEventOptionResolvers(){
 (function (){
-let registry = EventRegistry.getRegistry(Minecraft.DataDrivenEntityTriggerBeforeEvent);
+let registry = EventRegistry.getRegistry(Minecraft.BeforeDataDrivenEntityTriggerEvent);
 
 registry.extraOption = true;
 registry.extraOptionResolver = (event, options) => {
@@ -28,7 +28,7 @@ registry.extraOptionResolver = (event, options) => {
 })();
 
 (function (){
-let registry = EventRegistry.getRegistry(Minecraft.DataDrivenEntityTriggerAfterEvent);
+let registry = EventRegistry.getRegistry(Minecraft.DataDrivenEntityTriggerEvent);
 
 registry.extraOption = true;
 registry.extraOptionResolver = (event, options) => {

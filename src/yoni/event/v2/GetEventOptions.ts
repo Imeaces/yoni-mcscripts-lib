@@ -5,16 +5,11 @@ export interface EventOptionDefinitions extends MinecraftEventsOptions, InnerEve
 }
 
 interface MinecraftEventsOptions {
-    "Minecraft.EntityRemovedAfterEvent": [Minecraft.EntityRemovedAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EntityHurtAfterEvent": [Minecraft.EntityHurtAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EntityHitEntityAfterEvent": [Minecraft.EntityHitEntityAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EntityHitBlockAfterEvent": [Minecraft.EntityHitBlockAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EntityHealthChangedAfterEvent": [Minecraft.EntityHealthChangedAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EntityDieAfterEvent": [Minecraft.EntityDieAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.EffectAddAfterEvent": [Minecraft.EffectAddAfterEvent, Minecraft.EntityEventOptions]
-    "Minecraft.DataDrivenEntityTriggerAfterEvent": [Minecraft.DataDrivenEntityTriggerAfterEvent, Minecraft.EntityDataDrivenTriggerEventOptions]
-    "Minecraft.DataDrivenEntityTriggerBeforeEvent": [Minecraft.DataDrivenEntityTriggerBeforeEvent, Minecraft.EntityDataDrivenTriggerEventOptions]
-    "Minecraft.ScriptEventCommandMessageAfterEvent": [Minecraft.ScriptEventCommandMessageAfterEvent, Minecraft.ScriptEventMessageFilterOptions]
+    "Minecraft.EntityHurtAfterEvent": [Minecraft.EntityHurtEvent, Partial<Minecraft.EntityEventOptions>]
+    "Minecraft.EntityHitEvent": [Minecraft.EntityHitEvent, Partial<Minecraft.EntityEventOptions>]
+    "Minecraft.EffectAddAfterEvent": [Minecraft.EffectAddEvent, Partial<Minecraft.EntityEventOptions>]
+    "Minecraft.DataDrivenEntityTriggerAfterEvent": [Minecraft.DataDrivenEntityTriggerEvent, Partial<Minecraft.EntityDataDrivenTriggerEventOptions>]
+    "Minecraft.DataDrivenEntityTriggerBeforeEvent": [Minecraft.BeforeDataDrivenEntityTriggerEvent, Partial<Minecraft.EntityDataDrivenTriggerEventOptions>]
 }
 
 interface InnerEventsOptions {

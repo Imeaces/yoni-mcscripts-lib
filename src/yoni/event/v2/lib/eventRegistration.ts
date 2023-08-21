@@ -4,11 +4,11 @@ import { EventSignalListeningAdapter } from "../adapting/EventSignalListeningAda
 import IEventSignal from "../interfaces/IEventSignal";
 import { logger } from "./../logger.js";
 
-const { world, system } = Minecraft;
-const VanillaBeforeEvents = world.beforeEvents;
-const VanillaAfterEvents = world.afterEvents;
-const SystemBeforeEvents = system.beforeEvents;
-const SystemAfterEvents = system.afterEvents;
+const { world } = Minecraft;
+const VanillaBeforeEvents = world.events;
+const VanillaAfterEvents = world.events;
+const SystemBeforeEvents: Minecraft.SystemBeforeEvents = {};
+const SystemAfterEvents: Minecraft.SystemAfterEvents = {};
 
 export function registerMinecraftNativeEvents(){
 const eventSignals = {
@@ -37,9 +37,8 @@ const NotAEventClassNames = [
     "MessageReceiveAfterEvent"
 ];
 const DefinedEventClassMappings = new Map<Function, Function>([
-    [Minecraft.ItemDefinitionTriggeredAfterEvent, Minecraft.ItemDefinitionAfterEventSignal],
-    [Minecraft.ItemDefinitionTriggeredBeforeEvent, Minecraft.ItemDefinitionBeforeEventSignal],
-    [Minecraft.MessageReceiveAfterEvent, Minecraft.IServerMessageAfterEventSignal]
+    [Minecraft.BeforeItemDefinitionTriggeredEvent, Minecraft.BeforeItemDefinitionEventSignal],
+    [Minecraft.ItemDefinitionTriggeredEvent, Minecraft.ItemDefinitionEventSignal],
 ]);
    
 const EventClasses: [string, Function, Function][] = [];

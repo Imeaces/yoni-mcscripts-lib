@@ -29,7 +29,21 @@ export function run(cb: () => void): number {
     return taskId;
 }
 
-export function runInterval(cb: () => void, interval?: number): number {
+export function runTimeout(cb: () => void, timeout: number = 0): number {
+    const taskId = globalTaskId++;
+    let nextRunAt = getCurrentTick() + timeout;
+    let sid = VanillaWorld.events.tick.subscribe(function runInterval(event) {
+        if (event.currentTick < nextRunAt){
+           return;
+        }
+        clearRun(taskId);
+        cb();
+    });
+    runningSchedules.set(taskId, sid);
+    return taskId;
+}
+
+export function runInterval(cb: () => void, interval: number = 1): number {
     const taskId = globalTaskId++;
     let nextRunAt = getCurrentTick() + interval;
     let sid = VanillaWorld.events.tick.subscribe(function runInterval(event) {
@@ -162,4 +176,9 @@ declare module "mojang-minecraft" {
          */
         sortOrder?: ObjectiveSortOrder;
     }
+    interface SystemBeforeEvents {
+    }
+    interface SystemAfterEvents {
+    }
 }
+

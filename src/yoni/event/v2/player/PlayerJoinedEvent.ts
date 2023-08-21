@@ -17,7 +17,7 @@ export class PlayerJoinedEvent extends PlayerEvent {
 
 const eventRegistry = EventRegistry.register(PlayerJoinedEvent);
 
-const joiningPlayers = new Set<string>();
+const joiningPlayers = new Set<Minecraft.Player>();
 
 const schedule = new Schedule({
     type: Schedule.cycleTickSchedule,
@@ -32,8 +32,8 @@ const schedule = new Schedule({
     
     let joinedPlayers = [];
     for (const onlinePlayer of VanillaWorld.getPlayers()){
-        if (joiningPlayers.has(onlinePlayer.name)){
-            joiningPlayers.delete(onlinePlayer.name);
+        if (joiningPlayers.has(onlinePlayer)){
+            joiningPlayers.delete(onlinePlayer);
             joinedPlayers.push(onlinePlayer);
         }
     }
@@ -44,9 +44,9 @@ const schedule = new Schedule({
     }
 });
 
-listenEvent(Minecraft.PlayerJoinAfterEvent, 
+listenEvent(Minecraft.PlayerJoinEvent, 
 function onJoin(event){
-    joiningPlayers.add(event.playerName);
+    joiningPlayers.add(event.player);
     startDetect();
 });
 
