@@ -11,6 +11,45 @@ export function getCurrentTick(){
     return currentTick;
 }
 
+export function clearRun(taskId: number): void {
+    const sid = runningSchedules.get(taskId);
+    if (!sid) return;
+    runningSchedules.delete(taskId);
+    //@ts-ignore
+    VanillaWorld.events.tick.unsubscribe(sid);
+}
+
+export function run(cb: () => void): number {
+    const taskId = globalTaskId++;
+    let sid = VanillaWorld.events.tick.subscribe(function run(event) {
+        clearRun(taskId);
+        cb();
+    });
+    runningSchedules.set(taskId, sid);
+    return taskId;
+}
+
+export function runInterval(cb: () => void, interval?: number): number {
+    const taskId = globalTaskId++;
+    let nextRunAt = getCurrentTick() + interval;
+    let sid = VanillaWorld.events.tick.subscribe(function runInterval(event) {
+        if (event.currentTick < nextRunAt){
+           return;
+        }
+        nextRunAt = event.currentTick + (interval ?? 1);
+        cb();
+    });
+    runningSchedules.set(taskId, sid);
+    return taskId;
+}
+
+let globalTaskId = 0;
+const runningSchedules = new Map<number, Function>();
+
+export function setScore(objective: Minecraft.ScoreboardObjective, identity: Minecraft.Entity | string | Minecraft.ScoreboardIdentity, score: number){
+    Objective.playerCommand(Scoreboard.getObjective(objective), "set", identity, score);
+}
+
 export function isObjectiveValid(objective: Minecraft.ScoreboardObjective | null | undefined): boolean {
     try {
         //@ts-ignore
@@ -32,6 +71,7 @@ export function removeObjective(scoreboard: Minecraft.Scoreboard, objective: str
 
 import { Objective } from "./scoreboard/Objective.js";
 import { Scoreboard, DisplaySlot } from "./scoreboard/Scoreboard.js";
+import { EntryType } from "./scoreboard/EntryType.js";
 export function removeParticipant(objective: Minecraft.ScoreboardObjective, identity: Minecraft.Entity | string | Minecraft.ScoreboardIdentity){
     return Objective.playerCommand(Scoreboard.getObjective(objective), "reset", identity);
 }
@@ -39,9 +79,10 @@ export function removeParticipant(objective: Minecraft.ScoreboardObjective, iden
 export function hasParticipant(objective: Minecraft.ScoreboardObjective, identity: Minecraft.Entity | string | Minecraft.ScoreboardIdentity): boolean {
     let condition: (scbid: Minecraft.ScoreboardIdentity) => boolean;
     if (typeof identity === "string"){
-        condition = (scbid) => scbid.type === EntryType.FAKE_PLAYER && scbid.displayName === identity;
+        condition = (scbid) => ((scbid.type as any) === EntryType.FAKE_PLAYER && scbid.displayName === identity);
     } else {
         if (EntityBase.isMinecraftEntity(identity)){
+            let entity = identity;
             if (entity.scoreboard == undefined)
                 return false;
             else
@@ -63,13 +104,13 @@ export function getObjectiveAtDisplaySlot(scoreboard: Minecraft.Scoreboard, slot
 
 export function clearObjectiveAtDisplaySlot(scoreboard: Minecraft.Scoreboard, slot: Minecraft.DisplaySlotId): Minecraft.ScoreboardObjective {
     let { objective: last } = getObjectiveAtDisplaySlot(scoreboard, slot);
-    Command.run(Command.getCommandMoreStrict("scoreboard objectives setdisplay", slot));
+    Command.run(Command.getCommandMoreStrict("scoreboard objectives setdisplay", slot as unknown as string));
     return last;
 }
 
 export function setObjectiveAtDisplaySlot(scoreboard: Minecraft.Scoreboard, slot: Minecraft.DisplaySlotId, options: Minecraft.ScoreboardObjectiveDisplayOptions): Minecraft.ScoreboardObjective {
     let { objective: last } = getObjectiveAtDisplaySlot(scoreboard, slot);
-    let command = Command.getCommandMoreStrict("scoreboard objectives setdisplay", slot, options.objective.id);
+    let command = Command.getCommandMoreStrict("scoreboard objectives setdisplay", slot as unknown as string, options.objective.id);
     if (options.sortOrder === 0){
         command = Command.getCommandMoreStrict(command, "ascending");
     } else {
@@ -82,7 +123,7 @@ export function setObjectiveAtDisplaySlot(scoreboard: Minecraft.Scoreboard, slot
 declare module "mojang-minecraft" {
     interface System {}
     interface DisplaySlotId {
-        [key: any]: any
+        [key: string | symbol | number]: any
     }
     /**
      * @beta

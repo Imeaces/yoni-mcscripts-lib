@@ -93,10 +93,10 @@ export abstract class EntityBase {
     
     /**
      * 获取所有存活的实体
-     * @param {Minecraft.EntityQueryOptions} option
+     * @param {MinecraftEntityQueryOptions} option
      * @return {YoniEntity[]}
      */
-    static getAliveEntities(option: Minecraft.EntityQueryOptions): YoniEntity[] {
+    static getAliveEntities(option: MinecraftEntityQueryOptions): YoniEntity[] {
         return Array.from(EntityBase.getDimensionVanillaEntities()).map(EntityBase.from) as unknown as YoniEntity[];
     }
     
@@ -151,7 +151,7 @@ export abstract class EntityBase {
         return (component === undefined) ? 0 : component.currentValue;
     }
     
-    static getDimensionVanillaEntities(options?: Minecraft.EntityQueryOptions) {
+    static getDimensionVanillaEntities(options?: MinecraftEntityQueryOptions) {
         const dimensionArrays = Object.getOwnPropertyNames(Minecraft.MinecraftDimensionTypes)
             .map(key => Dimension.toDimension((Minecraft.MinecraftDimensionTypes as any)[key] as DimensionLikeValue).vanillaDimension);
         
@@ -159,15 +159,18 @@ export abstract class EntityBase {
         if (!options){
             entitiesArrays = dimensionArrays.map(dim => dim.getEntities());
         } else {
-            entitiesArrays = dimensionArrays.map(dim => dim.getEntities(options));
+            entitiesArrays = dimensionArrays.map(dim => dim.getEntities(Object.assign(new Minecraft.EntityQueryOptions(), options)));
         }
         
         return ([] as Minecraft.Entity[]).concat(...entitiesArrays);
     
     }
     
-    static getWorldVanillaPlayers(options?: Minecraft.EntityQueryOptions): Array<Minecraft.Player> {
-        return VanillaWorld.getPlayers(options);
+    static getWorldVanillaPlayers(options?: MinecraftEntityQueryOptions): Array<Minecraft.Player> {
+        if (options)
+            return Array.from(VanillaWorld.getPlayers(Object.assign(new Minecraft.EntityQueryOptions(), options)));
+        else
+            return Array.from(VanillaWorld.getPlayers());
     }
     
     /**
@@ -357,4 +360,7 @@ export abstract class EntityBase {
         component.setCurrentValue(val);
     }
     
+}
+
+interface MinecraftEntityQueryOptions extends Optional<Minecraft.EntityQueryOptions> {
 }

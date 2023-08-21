@@ -18,6 +18,8 @@ import { EntityValue } from "../entity/EntityTypeDefs.js";
 import { Command } from "../command.js";
 import { Scoreboard } from "./Scoreboard.js";
 
+import { hasParticipant, removeParticipant, clearObjectiveAtDisplaySlot, setObjectiveAtDisplaySlot, getObjectiveAtDisplaySlot, addObjective, isObjectiveValid, removeObjective, setScore } from "../legacy_impl.js";
+
 /**
  * 检查传入的参数是否为整数数字，并且在 [-2^31, 2^31-1] 的区间。
  * @param {...any} scores 要检查的变量。
@@ -127,7 +129,7 @@ class Objective {
     unregister(){
         this.checkUnregistered();
         
-        VanillaScoreboard.removeObjective(this.#id);
+        removeObjective(VanillaScoreboard, this.#id);
     }
     
     constructor(scoreboard: typeof Scoreboard, name: string, criteria: string, displayName: string, options?: {
@@ -147,13 +149,7 @@ class Objective {
      * @returns {number} 此分数持有者在记分项上的分数。若未设定，返回 `undefined`。
      */
     getScore(one: EntryValueType): number | undefined {
-        let identity = ScoreboardEntry.getIdentity(one);
-        
-        if (identity instanceof Gametest.SimulatedPlayer){
-            identity = ScoreboardEntry.guessEntry(one).vanillaScoreboardIdentity as Minecraft.ScoreboardIdentity;
-            if (identity === undefined)
-                return undefined;
-        }
+        let identity = ScoreboardEntry.guessEntry(one).vanillaScoreboardIdentity as Minecraft.ScoreboardIdentity;
         
         try {
             return this.vanillaObjective.getScore(identity);
@@ -226,7 +222,7 @@ class Objective {
             return;
         }
         
-        this.vanillaObjective.setScore(identity, score);
+        setScore(this.vanillaObjective, identity, score);
     }
     
     /**
@@ -286,8 +282,8 @@ class Objective {
             return;
         }
         
-        if (this.vanillaObjective.hasParticipant(identity))
-             this.vanillaObjective.removeParticipant(identity);
+        if (hasParticipant(this.vanillaObjective, identity))
+             removeParticipant(this.vanillaObjective, identity);
     }
     
     /**
@@ -295,7 +291,7 @@ class Objective {
      */
     resetScores(){
         for (const part of this.vanillaObjective.getParticipants()){
-            this.vanillaObjective.removeParticipant(part);
+            removeParticipant(this.vanillaObjective, part);
         }
     }
 
@@ -325,7 +321,7 @@ class Objective {
                 + "\n  cause by: "
                 + result.statusMessage);
         } else if (name){
-            if (VanillaWorld.getPlayers({name}).length !== 0)
+            if (EntityBase.getWorldVanillaPlayers({name}).length !== 0)
                 throw new NameConflictError(name as string);
                 
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, objective.#id);

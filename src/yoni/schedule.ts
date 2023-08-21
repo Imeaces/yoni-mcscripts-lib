@@ -2,6 +2,7 @@ import { MinecraftSystem } from "./basis.js";
 import { Logger } from "./util/Logger.js";
 import { isDebugMode } from "./debug.js";
 import { config } from "./config.js";
+import { getCurrentTick, runInterval } from "./legacy_impl.js";
 
 const logger = new Logger("Schedule");
 const scheduleCallbacks = new WeakMap();
@@ -336,12 +337,12 @@ function addScheduleToQueue(schedule: Schedule): boolean {
         scheduleAddToQueueTime.set(schedule, Date.now());
         scheduleExecuteTimer.set(schedule, schedule.delay);
         scheduleQueue.add(schedule);
-        scheduleAddToQueueGameTick.set(schedule, MinecraftSystem.currentTick);
+        scheduleAddToQueueGameTick.set(schedule, getCurrentTick());
         return true;
     }
 }
 
-MinecraftSystem.runInterval(executeTasks, 1);
+runInterval(executeTasks, 1);
 
 const taskList: Schedule[] = [];
 let legacyTasks: Schedule[] = [];
@@ -376,7 +377,7 @@ function addTickDelayScheduleToTasks(tasks: Schedule[]){
     if (schedules === undefined)
         return;
     
-    const curTick = MinecraftSystem.currentTick;
+    const curTick = getCurrentTick();
 
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
@@ -420,7 +421,7 @@ function addTickCycleScheduleToTasks(tasks: Schedule[]){
     if (schedules === undefined)
         return;
 
-    const curTick = MinecraftSystem.currentTick;
+    const curTick = getCurrentTick();
     
     for (let idx = schedules.length - 1; idx >= 0; idx -= 1){
         const schedule = schedules[idx];
@@ -606,8 +607,9 @@ export class YoniScheduler {
     }
 }
 
+(function (){ //不支持的代码
 //对于异常挂断的特殊处理，但是没见他触发过一次
-MinecraftSystem.beforeEvents.watchdogTerminate.subscribe((event) => {
+(MinecraftSystem as any).beforeEvents.watchdogTerminate.subscribe((event: any) => {
     if (executingSchedule !== null) {
         logger.warn("在执行一个任务的过程中碰到了脚本挂断事件，事件id: {}, 类型: {}, 挂断原因: {}", executingSchedule.id, String(executingSchedule.type), event.terminateReason);
         if (isDebugMode()) {
@@ -616,3 +618,4 @@ MinecraftSystem.beforeEvents.watchdogTerminate.subscribe((event) => {
         }
     }
 });
+})
