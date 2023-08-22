@@ -13,12 +13,12 @@ import {
 import {
     config,
 } from "../config.js";
-import { EntityBase } from "../entity.js";
+import { EntityBase } from "../entity/EntityBase.js";
 import { EntityValue } from "../entity/EntityTypeDefs.js";
 import { Command } from "../command.js";
 import { Scoreboard } from "./Scoreboard.js";
 
-import { hasParticipant, removeParticipant, clearObjectiveAtDisplaySlot, setObjectiveAtDisplaySlot, getObjectiveAtDisplaySlot, addObjective, isObjectiveValid, removeObjective, setScore } from "../legacy_impl.js";
+import { hasParticipant, removeParticipant, clearObjectiveAtDisplaySlot, setObjectiveAtDisplaySlot, getObjectiveAtDisplaySlot, addObjective, isObjectiveValid, removeObjective } from "../legacy_impl.js";
 
 /**
  * 检查传入的参数是否为整数数字，并且在 [-2^31, 2^31-1] 的区间。
@@ -149,14 +149,26 @@ class Objective {
      * @returns {number} 此分数持有者在记分项上的分数。若未设定，返回 `undefined`。
      */
     getScore(one: EntryValueType): number | undefined {
-        let identity = ScoreboardEntry.guessEntry(one).vanillaScoreboardIdentity as Minecraft.ScoreboardIdentity;
+        let entry = ScoreboardEntry.guessEntry(one);
         
-        try {
-            return this.vanillaObjective.getScore(identity);
-        } catch {
-            this.checkUnregistered();
+        let identity = entry.vanillaScoreboardIdentity;
+        
+        if (identity)
+            try {
+                return this.vanillaObjective.getScore(identity);
+            } catch {
+            }
+        else
             return undefined;
-        }
+            
+        this.checkUnregistered();
+        ScoreboardEntry.updateEntry(entry);
+        identity = entry.vanillaScoreboardIdentity;
+        
+        if (identity)
+            return this.vanillaObjective.getScore(identity);
+        
+        return undefined;
     }
     
     /**
@@ -216,13 +228,7 @@ class Objective {
         
         let identity = ScoreboardEntry.getIdentity(one);
         
-        //目前Gametest.SimulatedPlayer无法传入，故使用兼容代码
-        if (identity instanceof Gametest.SimulatedPlayer){
-            Objective.playerCommand(this, "set", identity, score);
-            return;
-        }
-        
-        setScore(this.vanillaObjective, identity, score);
+        Objective.playerCommand(this, "set", identity, score);
     }
     
     /**
@@ -275,12 +281,6 @@ class Objective {
      */
     resetScore(one: EntryValueType){
         let identity = ScoreboardEntry.getIdentity(one);
-        
-        //目前Gametest.SimulatedPlayer无法传入，故使用兼容代码
-        if (identity instanceof Gametest.SimulatedPlayer){
-            Objective.playerCommand(this, "reset", identity);
-            return;
-        }
         
         if (hasParticipant(this.vanillaObjective, identity))
              removeParticipant(this.vanillaObjective, identity);

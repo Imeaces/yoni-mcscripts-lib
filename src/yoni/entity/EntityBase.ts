@@ -10,7 +10,14 @@ import { DimensionLikeValue } from "../dim.js";
 
 import { YoniPlayer, YoniEntity, YoniSimulatedPlayer } from "../entity.js";
 
-import { getEntity, isEntityValid } from "../legacy_impl.js";
+export function isEntityValid(entity: any){
+    return EntityBase.isAliveEntity(entity);
+}
+
+export function getEntity(world: Minecraft.World, id: string): Minecraft.Entity | undefined {
+    throw new ReferenceError("not implemented");
+}
+
 
 /**
  * Yoni实体的基类，同时也含有一些用于处理实体的静态方法。

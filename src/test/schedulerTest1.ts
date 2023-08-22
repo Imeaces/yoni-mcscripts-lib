@@ -1,20 +1,19 @@
 import { registerAsync, Test } from "./gametest.js";
-import { system } from "./minecraft.js";
 import { getErrorMsg } from "./lib/getErrorMsg.js";
 
 //此测试暂时没有很好的办法通过
 
 async function scheulderTest(test: Test){
-    const { YoniScheduler } = await import("yoni-mcscripts-lib");
+    const { YoniScheduler, LegacyMinecraft } = await import("yoni-mcscripts-lib");
     let taskCallTime: number = -1;
     
-    system.runTimeout(() =>
+    LegacyMinecraft.runTimeout(() =>
     YoniScheduler.runDelayTickTask(() => {
-        taskCallTime = system.currentTick;
+        taskCallTime = LegacyMinecraft.getCurrentTick();
     }, 56)
     , 1);
     
-    let taskAddTime = system.currentTick;
+    let taskAddTime = LegacyMinecraft.getCurrentTick();
     
     await test.idle(80);
     

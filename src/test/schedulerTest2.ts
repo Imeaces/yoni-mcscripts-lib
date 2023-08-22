@@ -1,5 +1,4 @@
 import { registerAsync, Test } from "./gametest.js";
-import { system } from "./minecraft.js";
 import { getErrorMsg } from "./lib/getErrorMsg.js";
 
 async function scheulderTest(test: Test){

@@ -9,9 +9,9 @@ registerAsync("yonimcscriptslib", "scoreboard_test", scoreboard_test)
     .maxTicks(300*20);
 
 async function scoreboard_test(test: Test){
-    const { VanillaWorld, Scoreboard, ScoreboardEntry, DisplaySlot, world } = await import("yoni-mcscripts-lib");
+    const { VanillaWorld, Location, Scoreboard, ScoreboardEntry, DisplaySlot, world, YoniUtils } = await import("yoni-mcscripts-lib");
     //测试过程中发现模拟玩家不能传 //更新：已兼容
-    let onePlayer = test.spawnSimulatedPlayer({x:0,y:0,z:0},randomName(), GameMode.creative);
+    let onePlayer = test.spawnSimulatedPlayer(Location.zero.getVanillaBlockLocation(),randomName(), GameMode.creative);
     
     //let onePlayer = world.getAllPlayers()[0];
     //test.assert(onePlayer != null, "记分板测试需要有一个在线的玩家");
@@ -74,7 +74,7 @@ async function scoreboard_test(test: Test){
     test.assert(obj.getScore("866test") === 688, "虚拟玩家 866test 设置分数出现未知错误");
 
     Scoreboard.setDisplayAtSlot(DisplaySlot.sidebar, {objective: obj});
-    world.sendMessage("现在侧边栏应该有名为 "+ obj.displayName + " 的记分项正在显示");
+    YoniUtils.say("现在侧边栏应该有名为 "+ obj.displayName + " 的记分项正在显示");
     
     await test.idle(200);
     

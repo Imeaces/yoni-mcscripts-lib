@@ -5,6 +5,7 @@ export { Entity, YoniEntity } from "./entity/Entity.js";
 export * from "./entity/EntityTypeDefs.js";
 
 // to load entity class sync
+import "./entity/EntityBase.js";
 import "./entity/Entity.js";
 import "./entity/Player.js";
 import "./entity/SimulatedPlayer.js";

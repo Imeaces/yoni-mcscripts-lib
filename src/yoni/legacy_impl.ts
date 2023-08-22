@@ -98,10 +98,6 @@ export function runInterval(cb: () => void, interval: number = 1): number {
 let globalTaskId = 0;
 const runningSchedules = new Map<number, Function>();
 
-export function setScore(objective: Minecraft.ScoreboardObjective, identity: Minecraft.Entity | string | Minecraft.ScoreboardIdentity, score: number){
-    Objective.playerCommand(Scoreboard.getObjective(objective), "set", identity, score);
-}
-
 export function isObjectiveValid(objective: Minecraft.ScoreboardObjective | null | undefined): boolean {
     try {
         //@ts-ignore
@@ -112,7 +108,17 @@ export function isObjectiveValid(objective: Minecraft.ScoreboardObjective | null
     return true;
 }
 
+import { encodeUtf8 } from "./lib/utf8.js";
+
 export function addObjective(scoreboard: Minecraft.Scoreboard, objectiveId: string, displayName: string): Minecraft.ScoreboardObjective {
+    let length = encodeUtf8(objectiveId).length;
+    if (length > 16)
+        throw new Error("记分项名称的长度不能大于 16");
+    
+    length = encodeUtf8(displayName).length;
+    if (length > 32)
+        throw new Error("记分项显示名称的长度不能大于 32");
+    
     Command.run(Command.getCommandMoreStrict("scoreboard objectives add", objectiveId, "dummy", displayName));
     return scoreboard.getObjective(objectiveId);
 }

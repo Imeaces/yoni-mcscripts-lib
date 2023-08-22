@@ -14,10 +14,6 @@ export { EventListener } from "./event/v2/decorators/EventListener.js";
 export { EventSignalListeningAdapter } from "./event/v2/adapting/EventSignalListeningAdapter.js";
 export { EventOptionType, EventOptionDefinitions } from "./event/v2/GetEventOptions"
 
-import { registerMinecraftNativeEvents } from "./event/v2/lib/eventRegistration.js";
-registerMinecraftNativeEvents();
-
-import { registerMinecraftEventOptionResolvers } from "./event/v2/adapting/eventOptions/MinecraftEventOptionResolvers.js";
-registerMinecraftEventOptionResolvers();
+import "./event/v2/index.js";
 
 export { PlayerJoinedEvent } from "./event/v2/player/PlayerJoinedEvent.js";

@@ -1,9 +1,8 @@
 import { registerAsync, Test } from "./gametest.js";
-import { system } from "./minecraft.js";
 import { getErrorMsg } from "./lib/getErrorMsg.js";
 
 async function scheulderTest(test: Test){
-    const { YoniScheduler, Schedule } = await import("yoni-mcscripts-lib");
+    const { YoniScheduler, Schedule, LegacyMinecraft } = await import("yoni-mcscripts-lib");
     
     YoniScheduler.runDelayTimerTask(() => {
         lastCallRealTime = Date.now();

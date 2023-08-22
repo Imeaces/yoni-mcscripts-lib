@@ -1,4 +1,4 @@
-import { Minecraft } from "../basis.js";
+import { Minecraft, VanillaScoreboard } from "../basis.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
 import { EntityBase } from "../entity/EntityBase.js";
 import { YoniEntity } from "../entity/Entity.js";
@@ -170,7 +170,66 @@ export class ScoreboardEntry {
             if (this.#vanillaScbid){
                 ScoreboardEntry.#scbidMap.set(this.#vanillaScbid, this);
             }
+        } else if (this.#vanillaScbid == null
+        && this.type === EntryType.FAKE_PLAYER
+        && this.#name != null){
+            this.#vanillaScbid = ScoreboardEntry.getVanillaScoreboardIdentityOfFakePlayer(this.#name);
         }
         return this.#vanillaScbid;
-    } 
+    }
+    static isVanillaScoreboardIdentityValid(scbid: Minecraft.ScoreboardIdentity): boolean {
+        return true;
+    }
+    static updateEntry(entry: ScoreboardEntry): ScoreboardEntry {
+        entry.#vanillaScbid = undefined;
+        ScoreboardEntry.nameRecord.delete(entry.displayName);
+        return entry;
+    }
+    static nameRecord = new Map<string, Minecraft.ScoreboardIdentity>();
+    static getVanillaScoreboardIdentityOfFakePlayer(name: string, array?: Minecraft.ScoreboardIdentity[]): Minecraft.ScoreboardIdentity | undefined {
+
+        let result: Minecraft.ScoreboardIdentity | undefined = undefined;
+        
+        if (ScoreboardEntry.nameRecord.has(name)){
+            result = ScoreboardEntry.nameRecord.get(name) as Minecraft.ScoreboardIdentity;
+            if (ScoreboardEntry.isVanillaScoreboardIdentityValid(result))
+                return result;
+            else
+                ScoreboardEntry.nameRecord.delete(name);
+        }
+        
+        if (!array)
+            array = VanillaScoreboard.getParticipants();
+        
+        array = Array.from(array);
+        
+        while (array.length > 0){
+            const scbid = array.pop() as Minecraft.ScoreboardIdentity;
+            if ((scbid.type as any) === EntryType.FAKE_PLAYER){
+                ScoreboardEntry.nameRecord.set(name, scbid);
+                if (scbid.displayName === name){
+                    startAsyncHelper();
+                    result = scbid;
+                    return result;
+                }
+            }
+        }
+        
+        async function startAsyncHelper(){
+            if (!array) return;
+            
+            await 1;
+            
+            let times = 0;
+            for (const scbid of array){
+                if ((scbid.type as any) === EntryType.FAKE_PLAYER){
+                    ScoreboardEntry.nameRecord.set(name, scbid);
+                }
+                if (times++ > 300){
+                    times = 0;
+                    await 1;
+                }
+            }
+        }
+    }
 }

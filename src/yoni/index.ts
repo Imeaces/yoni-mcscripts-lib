@@ -37,6 +37,7 @@ export { ObjectUtils } from "./lib/ObjectUtils.js";
 export { Dimension } from "./dimension.js";
 export { Block } from "./block.js";
 export { Yoni } from "./Yoni.js";
+export * as LegacyMinecraft from "./legacy_impl.js";
 
 // lib exports
 export * as TimeoutLib from "./lib/Timeout.js";

@@ -2,7 +2,7 @@ import { VanillaWorld, Minecraft } from "./basis.js";
 
 import { Location } from "./Location.js";
 
-import { YoniEntity, YoniPlayer } from "./entity.js";
+import type { YoniEntity, YoniPlayer } from "./entity.js";
 
 import { LocationParamsOneArg, Vector3 } from "./Location.js";
 import { DimensionLikeValue } from "./dim.js";

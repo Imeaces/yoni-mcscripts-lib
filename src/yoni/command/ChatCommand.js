@@ -1,5 +1,5 @@
 import { VanillaWorld }  from "../basis.js";
-import { EntityBase } from "../entity.js";
+import { EntityBase } from "../entity/EntityBase.js";
 import { Logger } from "../util/Logger.js";
 
 const logger = new Logger("ChatCommand");
@@ -274,7 +274,7 @@ export class ChatCommand {
     }
 }
 
-VanillaWorld.beforeEvents.chatSend.subscribe(function (event){
+VanillaWorld.events.beforeChat.subscribe(function (event){
     if (event.cancel)
         return;
     ChatCommand.receiveBeforeChatEvent(event);

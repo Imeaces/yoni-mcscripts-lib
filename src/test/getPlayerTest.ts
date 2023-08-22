@@ -5,12 +5,12 @@ import { GameMode } from "./minecraft.js";
 
 
 async function getPlayerTest(test: Test){
-    const { world, Minecraft } = await import("yoni-mcscripts-lib");
+    const { world, Minecraft, Location } = await import("yoni-mcscripts-lib");
     const { GameMode } = Minecraft;
     
     let name = randomName();
     
-    let p = test.spawnSimulatedPlayer({ x: 0, y: 0, z: 0}, name, GameMode.creative);
+    let p = test.spawnSimulatedPlayer(Location.zero.getVanillaBlockLocation(), name, GameMode.creative);
     
     await test.idle(100);
     

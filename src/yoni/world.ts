@@ -1,7 +1,7 @@
 import { VanillaWorld, Minecraft } from "./basis.js";
 import { getAllDims } from "./dim.js";
-import { EntityBase } from "./entity.js";
-import { Scoreboard } from "./scoreboard.js";
+import { EntityBase } from "./entity/EntityBase.js";
+import { Scoreboard } from "./scoreboard/Scoreboard.js";
 import { Dimension } from "./dimension.js";
 import { copyPropertiesWithoutOverride } from "./lib/ObjectUtils.js";
 
@@ -47,7 +47,7 @@ class World {
      * @param {Minecraft.EntityQueryOptions} [option]
      * @yields {YoniPlayer}
      */
-    getPlayers(option?: Minecraft.EntityQueryOptions): Array<YoniPlayer> {
+    getPlayers(option?: Partial<Minecraft.EntityQueryOptions>): Array<YoniPlayer> {
         return EntityBase.getWorldVanillaPlayers(option).map(EntityBase.from) as Array<YoniPlayer>;
     }
     

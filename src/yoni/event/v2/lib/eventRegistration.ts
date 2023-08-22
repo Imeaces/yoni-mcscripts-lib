@@ -34,7 +34,7 @@ for (const propKey in VanillaBeforeEvents){
 
 const NotAEventClassNames = [
     "BlockEvent",
-    "MessageReceiveAfterEvent"
+    "MessageReceiveEvent"
 ];
 const DefinedEventClassMappings = new Map<Function, Function>([
     [Minecraft.BeforeItemDefinitionTriggeredEvent, Minecraft.BeforeItemDefinitionEventSignal],
