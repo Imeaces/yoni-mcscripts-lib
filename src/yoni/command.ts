@@ -291,7 +291,7 @@ export class Command {
         // 反正最后返回的是 CommandResult
         
         let statusCode = isSuccess ? StatusCode.success: StatusCode.fail;
-        let successCount = 0;
+        let successCount = isSuccess ? 1 : 0;
         let statusMessage = "command error";
         
         if (typeof value === "string"){
