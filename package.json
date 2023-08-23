@@ -4,6 +4,9 @@
     "@minecraft/server-gametest": "1.0.0-beta.1.20.10-stable"
   },
   "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.4.1",
+    "@typescript-eslint/parser": "^6.4.1",
+    "eslint": "^8.47.0",
     "typescript": "^4.9.3"
   },
   "name": "yoni-mcscripts-lib",
