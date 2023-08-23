@@ -730,7 +730,9 @@ function requireEntityObject(argc: 1, args: any[]){
     if (!rotation && "function" === typeof entity.getRotation){
         try {
             rotation = entity.getRotation();
-        } catch {}
+        } catch {
+            //no thing to do
+        }
     }
     
     return location && rotation && dimension
