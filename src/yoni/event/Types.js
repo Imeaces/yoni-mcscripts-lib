@@ -245,4 +245,3 @@ export const events = new Proxy({}, {
 export { Types };
 export { Types as EventTypes };
 export { EventRegisterListener };
-import("./_loadEvents");

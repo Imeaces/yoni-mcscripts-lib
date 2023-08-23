@@ -38,6 +38,10 @@ const scheduler = {
     maxLegacyTaskCount: 30,
 };
 
+const events = {
+    enableLegacyCustomEvents: false
+};
+
 //如果为true，启用一些可能可以加快运行速度的代码
 //（可能不够稳定）
 export const useOptionalFasterCode = true;
@@ -70,6 +74,7 @@ export const config = Config.createFromObject({
     debug,
     scheduler,
     command,
+    events,
     "yoni-mcscripts-lib": { injectGlobal: false },
     enableScoreboardIdentityByNumberIdQuery,
     logging: loggingConfig

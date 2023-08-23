@@ -16,4 +16,6 @@ export {
     events as legacyEvents,
 };
 
+import { config } from "./config.js";
+if (config.getBoolean("events.enableLegacyCustomEvents", false))
 import("./event/_loadEvents.js");
