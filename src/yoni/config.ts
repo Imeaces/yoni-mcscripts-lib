@@ -27,7 +27,11 @@ const command = {
     //在Command中使用runCommand()代替runCommandAsync()
     //这可以大幅提升命令执行速度，但是可能会出现一些其他问题
     useSyncExecutorOnAsyncExecute: true,
+    
+    executor: { "re-execute-throws": false },
+    asyncExecutor: { "re-execute-when-no-promise": true },
 };
+
 
 const scheduler = {
     //允许的遗留任务数量，当遗留任务的数量超出此设置值时，会放弃执行
