@@ -441,6 +441,13 @@ export class Location {
         let { x, y, z } = this;
         return { x, y, z };
     }
+    /**
+     * @returns {Minecraft.DimensionLocation} 根据此位置创建一个原版的 Minecraft.DimensionLocation
+     */
+    getVanillaDimensionLocation(): Minecraft.DimensionLocation {
+        const { x, y, z, dimension } = this;
+        return { x, y, z, dimension: dimension.vanillaDimension };
+    }
     getVanillaVector(){
         let { x, y, z } = this;
         return new Minecraft.Vector(x, y, z);
