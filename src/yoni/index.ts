@@ -30,7 +30,7 @@ export * as YoniUtils from "./utils.js";
 export { Command } from "./command.js";
 export { Scoreboard } from "./scoreboard.js";
 export { ChatCommand } from "./command/ChatCommand.js";
-export { EntityUtils } from "./EntityUtils.js";
+export { EntityUtils, EntityUtils as EntityBase } from "./EntityUtils.js";
 export { YoniScheduler } from "./schedule.js";
 export { TPSCounter } from "./util/TPSCounter.js";
 export { ObjectUtils } from "./lib/ObjectUtils.js";
