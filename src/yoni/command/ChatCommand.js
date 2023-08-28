@@ -1,5 +1,5 @@
 import { VanillaWorld }  from "../basis.js";
-import { EntityBase } from "../entity.js";
+import { EntityUtils } from "../EntityUtils.js";
 import { Logger } from "../util/Logger.js";
 
 const logger = new Logger("ChatCommand");
@@ -86,7 +86,7 @@ export class ChatCommand {
                 });
             } else {
                 logger.debug("无法找到命令 {}", label);
-                EntityBase.from(sender).sendMessage("[ChatCommand]: 无法找到命令" + label);
+                EntityUtils.from(sender).sendMessage("[ChatCommand]: 无法找到命令" + label);
             }
         }
     }
@@ -94,7 +94,7 @@ export class ChatCommand {
     /**
      * @param {string} prefix 
      * @param {string} command 
-     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     * @param {(sender: import("../types").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
      */
     static registerPrefixCommand(prefix, command, executor){
         this.registerCustomPrefixCommand.apply(this, arguments);
@@ -103,7 +103,7 @@ export class ChatCommand {
     /**
      * 
      * @param {string} command 
-     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     * @param {(sender: import("../types").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
      */
     static registerCommand(command, executor){
         if (typeof command !== "string" || command.length === 0)
@@ -125,7 +125,7 @@ export class ChatCommand {
     
     /**
      * @param {string} command 
-     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     * @param {(sender: import("../types").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
      */
     static registerNonPrefixCommand(command, executor){
         if (typeof command !== "string" || command.length === 0)
@@ -147,7 +147,7 @@ export class ChatCommand {
     /**
      * @param {string} prefix 
      * @param {string} command 
-     * @param {(sender: import("../entity.js").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
+     * @param {(sender: import("../types").YoniPlayer, rawCommand:string, label:string, args:string[])=>void} executor 
      */
     static registerCustomPrefixCommand(prefix, command, executor){
         if (typeof prefix !== "string" || prefix.length === 0)
@@ -178,7 +178,7 @@ export class ChatCommand {
     
     static #invokeCommand(options){
         let { sender, rawCommand, label, args, executor } = options;
-        sender = EntityBase.from(sender);
+        sender = EntityUtils.from(sender);
         try {
             logger.debug("正在执行命令{}", label);
             if (typeof executor.onCommand === "function"){

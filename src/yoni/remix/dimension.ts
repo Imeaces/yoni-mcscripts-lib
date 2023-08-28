@@ -89,6 +89,22 @@ class Dimension {
             }
         });
     }
+    /**
+     * 获取指定位置上的方块对象。
+     */
+    getBlock(location: LocationParamsOneArg): Minecraft.Block {
+        let loc: Location;
+        if (location instanceof Location){
+            loc = location;
+        } else {
+            loc = new Location(location);
+        }
+        let vanillaBlock = this.vanillaDimension.getBlock(loc.getVanillaBlockLocation());
+        if (vanillaBlock)
+            return vanillaBlock;
+        else
+            throw new Error("This location has not been loaded\n"+loc.toString());
+    }
     getEntities(options?: Minecraft.EntityQueryOptions): YoniEntity[] {
         return this.vanillaDimension.getEntities(options).map(EntityUtils.from) as unknown as YoniEntity[];
     }
@@ -115,7 +131,7 @@ class Dimension {
 }
 
 type RemovedKeys = never
-type OverridedKeys = "id" | "getEntities" | "getEntitiesAtBlockLocation" | "getEntitiesFromRay" | "getPlayers" | "spawnEntity" | "spawnItem"
+type OverridedKeys = "id" | "getBlock" | "getEntities" | "getEntitiesAtBlockLocation" | "getEntitiesFromRay" | "getPlayers" | "spawnEntity" | "spawnItem"
 type BaseVanillaDimensionClass = 
     Omit<
         Minecraft.Dimension,

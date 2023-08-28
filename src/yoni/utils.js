@@ -1,6 +1,6 @@
 import { VanillaWorld, overworld } from "./basis.js";
 import { Command } from "./command.js";
-import { dealWithCmd } from "./lib/commandutils.js";
+import { dealWithCmd } from "./commandutils.js";
 
 export { log } from "./util/Logger.js";
 

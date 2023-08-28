@@ -384,7 +384,7 @@ export class Location {
     /**
      * @returns 此位置上的方块。
      */
-    getBlock(){
+    getBlock(): Minecraft.Block {
         return this.dimension.getBlock(this);
     }
     getBlockX(){
