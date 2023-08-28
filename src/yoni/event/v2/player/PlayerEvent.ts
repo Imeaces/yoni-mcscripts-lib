@@ -1,4 +1,4 @@
-import { Event } from "../base/Event.js";
+import { Event } from "../index.js";
 import { Minecraft } from "../../../basis.js";
 import { EntityBase, Player } from "../../../entity.js";
 

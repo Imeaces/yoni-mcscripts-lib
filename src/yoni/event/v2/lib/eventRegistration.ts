@@ -11,6 +11,10 @@ const SystemBeforeEvents = system.beforeEvents;
 const SystemAfterEvents = system.afterEvents;
 
 export function registerMinecraftNativeEvents(){
+if (registerMinecraftNativeEvents.hasRegistered)
+    return;
+registerMinecraftNativeEvents.hasRegistered = true;
+
 const eventSignals = {
     "VanillaEvents": new Set<IEventSignal>(),
     "SystemEvents": new Set<IEventSignal>(),
@@ -106,3 +110,5 @@ for (const info of mappedEventInfos){
 logger.trace("{} 个Minecraft事件已注册", mappedEventInfos.length);
 
 }
+
+registerMinecraftNativeEvents.hasRegistered = false;

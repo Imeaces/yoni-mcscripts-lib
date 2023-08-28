@@ -1,6 +1,7 @@
-import { EventRegistry } from "../EventRegistry.js";
-import { eventManager } from "../EventManager.js";
-import { listenEvent } from "../lib/listenEvent.js";
+import {
+  EventRegistry,
+  eventManager,
+  listenEvent } from "../index.js";
 import { VanillaWorld, Minecraft } from "../../../basis.js";
 import { YoniScheduler, Schedule } from "../../../schedule.js";
 import { Player } from "../../../entity.js";
