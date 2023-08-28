@@ -65,6 +65,16 @@ YoniScheduler.runDelayTickTask(function doSome(){
 
 ```
 
+## npm 的版本标签
+
+`latest`指向最新的可用版本
+`stable`指向稳定版本
+`unstable`指向正在测试的不稳定版本
+`mcstable`指向适用于稳定版游戏的最新版本
+`mcpreview`指向适用于beta版游戏的最新版本
+
+就目前来说，推荐使用`unstable`版本
+
 ## 引用
 
 目前尚无除了 @minecraft 之外的引用。
