@@ -8,7 +8,7 @@ export {
 } from "./basis.js";
 
 // variable exports
-export { world } from "./world.js";
+export { world } from "./remix/world.js";
 export { system } from "./system.js";
 export {
   runTask,
@@ -30,12 +30,11 @@ export * as YoniUtils from "./utils.js";
 export { Command } from "./command.js";
 export { Scoreboard } from "./scoreboard.js";
 export { ChatCommand } from "./command/ChatCommand.js";
-export { EntityBase } from "./entity/EntityBase.js";
+export { EntityUtils } from "./EntityUtils.js";
 export { YoniScheduler } from "./schedule.js";
 export { TPSCounter } from "./util/TPSCounter.js";
 export { ObjectUtils } from "./lib/ObjectUtils.js";
-export { Dimension } from "./dimension.js";
-export { Block } from "./block.js";
+export { Dimension } from "./remix/dimension.js";
 export { Yoni } from "./Yoni.js";
 
 // lib exports
@@ -44,27 +43,26 @@ export * as TimeoutLib from "./lib/Timeout.js";
 // class exports
 export { Schedule } from "./schedule.js";
 export { Logger } from "./util/Logger.js";
-export { Config } from "./util/Config.js";
-export { Location } from "./Location.js";
-export { UUID } from "./util/UUID.js";
+export { Config } from "./lib/Config.js";
+export { Location } from "./remix/Location.js";
+export { UUID } from "./lib/UUID.js";
 
 // type exports
 export {
     YoniEntity,
     YoniPlayer,
     YoniSimulatedPlayer,
-} from "./entity.js";
+} from "./remix/entity/index.js";
 export {
   Vector3
-} from "./Location.js";
-export { DimensionLikeValue } from "./dim.js";
+} from "./remix/Location.js";
+export { DimensionLikeValue } from "./dimensionutils.js";
 export {
   ScoreboardEntry,
   Objective,
 } from "./scoreboard.js";
-export { YoniWorld } from "./world.js";
-export { YoniDimension } from "./dimension.js";
-export { YoniBlock } from "./block.js";
+export { YoniWorld } from "./remix/world.js";
+export { YoniDimension } from "./remix/dimension.js";
 
 // enum
 export { EntryType, DisplaySlot, ObjectiveSortOrder } from "./scoreboard.js";
@@ -80,7 +78,7 @@ import {
     Entity,
     Player,
     SimulatedPlayer,
-} from "./entity.js";
+} from "./remix/entity/index.js";
 export const EntityClass = {
     Entity, 
     Player,

@@ -11,8 +11,6 @@ import { Objective } from "./Objective.js";
 import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { EntryValueType, EntryType } from "./EntryType.js";
 
-import { EntityBase } from "../entity.js";
-
 /**
  * 可用的显示位。
  */

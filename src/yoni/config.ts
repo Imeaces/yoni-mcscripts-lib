@@ -57,7 +57,7 @@ export const enableScoreboardIdentityByNumberIdQuery = false;
 
 
 /* 以下为非配置区 */
-import { Config } from "./util/Config.js";
+import { Config } from "./lib/Config.js";
 
 export function isDebug(){
     return config.getBoolean("debug");

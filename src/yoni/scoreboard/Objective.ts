@@ -9,14 +9,12 @@ import {
     ObjectiveUnregisteredError,
     UnknownEntryError
 } from "./ScoreboardError.js"
-
-import {
-    config,
-} from "../config.js";
-import { EntityBase } from "../entity.js";
-import { EntityValue } from "../entity/EntityTypeDefs.js";
+import { config } from "../config.js";
+import { EntityUtils } from "../EntityUtils.js";
 import { Command } from "../command.js";
-import { Scoreboard } from "./Scoreboard.js";
+
+import type { Scoreboard } from "./Scoreboard.js";
+import type { EntityValue } from "../types";
 
 /**
  * 检查传入的参数是否为整数数字，并且在 [-2^31, 2^31-1] 的区间。
@@ -325,7 +323,7 @@ class Objective {
                 + "\n  cause by: "
                 + result.statusMessage);
         } else if (name){
-            if (EntityBase.getWorldVanillaPlayers({name}).length !== 0)
+            if (EntityUtils.getWorldVanillaPlayers({name}).length !== 0)
                 throw new NameConflictError(name as string);
                 
             let cmd = Command.getCommandMoreStrict("scoreboard", "players", option, name, objective.#id);
@@ -375,8 +373,8 @@ class Objective {
                 name = one.displayName;
                 type = EntryType.FAKE_PLAYER;
             }
-        } else if (EntityBase.isEntity(one)){
-            if (EntityBase.entityIsPlayer(one))
+        } else if (EntityUtils.isEntity(one)){
+            if (EntityUtils.entityIsPlayer(one))
                 type = EntryType.PLAYER;
             else
                 type = EntryType.ENTITY;
