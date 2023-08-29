@@ -12,37 +12,32 @@ export interface ListenEventOptions<TEvent extends Function> {
     ignoreCancelled?: boolean
 }
 
-//@ts-ignore
 function listenEvent<TEvent extends Function>(
     listenOptions: ListenEventOptions<TEvent>,
     callback: EventCallback<TEvent>
 ): SingleHandlerEventListener<TEvent>
-//@ts-ignore
 function listenEvent<TEvent extends Function>(
     event: TEvent,
     callback: EventCallback<TEvent>
 ): SingleHandlerEventListener<TEvent>
-//@ts-ignore
-function listenEvent<TEvent extends Function>(...args: [ListenEventOptions<TEvent> | TEvent, EventCallback<TEvent>]): SingleHandlerEventListener<TEvent> {
+function listenEvent<TEvent extends Function>(listenOptions: ListenEventOptions<TEvent> | TEvent, callback: EventCallback<TEvent>): SingleHandlerEventListener<TEvent> {
     let tevent: TEvent;
-    let callback = args[1];
     let priority = EventPriority.NORMAL;
     let ignoreCancelled: boolean = false;
     let eventOptions: EventOptionType<TEvent["prototype"]> | undefined = undefined;
     
-    if (args[0] instanceof Function){
-        tevent = args[0];
+    if (listenOptions instanceof Function){
+        tevent = listenOptions as TEvent;
     } else {
-        const options = args[0];
-        tevent = options.event;
-        if (options.priority)
-            priority = options.priority;
+        tevent = listenOptions.event;
+        if (listenOptions.priority)
+            priority = listenOptions.priority;
         
-        if (options.eventOptions != null)
-            eventOptions = options.eventOptions;
+        if (listenOptions.eventOptions != null)
+            eventOptions = listenOptions.eventOptions;
         
-        if (options.ignoreCancelled != null)
-            ignoreCancelled = options.ignoreCancelled;
+        if (listenOptions.ignoreCancelled != null)
+            ignoreCancelled = listenOptions.ignoreCancelled;
         
     }
     
