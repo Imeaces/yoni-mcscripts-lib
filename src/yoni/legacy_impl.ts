@@ -1,7 +1,8 @@
 import { VanillaWorld, Minecraft, overworld, StatusCode, VanillaScoreboard } from "./basis.js";
-import { EntityBase } from "./entity/EntityBase.js";
+import { EntityUtils } from "./EntityUtils.js";
 import { Command } from "./command.js";
-import { Location } from "./Location.js";
+import { Location } from "./remix/Location.js";
+import type { EntityValue } from "./types";
 
 export function teleportEntity(entity: Minecraft.Entity, location: Vector3, teleportOptions?: Minecraft.TeleportOptions){
     const { rotation, keepVelocity, facingLocation, dimension, checkForBlocks } = teleportOptions ?? {};
@@ -33,7 +34,7 @@ export function teleportEntity(entity: Minecraft.Entity, location: Vector3, tele
 }
 
 export function isEntityValid(entity: any){
-    return EntityBase.isAliveEntity(entity);
+    return EntityUtils.isAliveEntity(entity);
 }
 
 export function getEntity(world: Minecraft.World, id: string): Minecraft.Entity | undefined {
@@ -139,7 +140,7 @@ export function hasParticipant(objective: Minecraft.ScoreboardObjective, identit
     if (typeof identity === "string"){
         condition = (scbid) => ((scbid.type as any) === EntryType.FAKE_PLAYER && scbid.displayName === identity);
     } else {
-        if (EntityBase.isMinecraftEntity(identity)){
+        if (EntityUtils.isMinecraftEntity(identity)){
             let entity = identity;
             if (entity.scoreboard == undefined)
                 return false;
@@ -176,6 +177,11 @@ export function setObjectiveAtDisplaySlot(scoreboard: Minecraft.Scoreboard, slot
     }
     Command.run(command);
     return last;
+}
+
+
+export function clearItem(entity: EntityValue, slot: number): void {
+    Command.execute(entity, Command.getCommand("replaceitem entity @s slot.inventory", String(slot), "air"));
 }
 
 declare module "mojang-minecraft" {
@@ -271,6 +277,9 @@ declare module "mojang-minecraft" {
     interface EntityEffectOptions {
         amplifier?: number
         showParticles?: boolean
+    }
+    interface DimensionLocation extends Vector3 {
+        dimension: Minecraft.Dimension
     }
 }
 

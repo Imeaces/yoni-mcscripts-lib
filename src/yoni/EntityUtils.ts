@@ -8,19 +8,28 @@ import { getAllVanillaDimensions } from "./dimensionutils.js";
 
 import type { DimensionLikeValue, EntityValue, PlayerEntityValue } from "./types";
 import type {
-    YoniPlayer,
     YoniEntity,
     YoniSimulatedPlayer
 } from "./remix/entity/index.js";
 
+import { Command } from "./command.js";
+
+import {
+    YoniPlayer
+} from "./remix/entity/index.js";
+
 export function isEntityValid(entity: any){
-    return EntityBase.isAliveEntity(entity);
+    return EntityUtils.isAliveEntity(entity);
 }
 
 export function getEntity(world: Minecraft.World, id: string): Minecraft.Entity | undefined {
     throw new ReferenceError("not implemented");
 }
 
+
+export function clearItem(entity: EntityValue, slot: number): void {
+    Command.execute(entity, Command.getCommand("replaceitem entity @s slot.inventory", String(slot), "air"));
+}
 
 /**
  * 一系列处理实体的方法。
@@ -148,7 +157,10 @@ export class EntityUtils {
      * 设置玩家主手上的物品。
      */
     static setItemInMainHand(entity: PlayerEntityValue, item?: Minecraft.ItemStack): void {
-        EntityUtils.getInventory(entity).setItem(entity.selectedSlot, item);
+        if (item)
+            EntityUtils.getInventory(entity).setItem(entity.selectedSlot, item);
+        else
+            clearItem(entity, entity.selectedSlot);
     }
     
     /**
@@ -164,7 +176,7 @@ export class EntityUtils {
     /**
      * 遍历所有维度以获取所有存活着的实体。
      */
-    static getDimensionVanillaEntities(options?: Minecraft.EntityQueryOptions) {
+    static getDimensionVanillaEntities(options?: MinecraftEntityQueryOptions) {
         const dimensionArrays = getAllVanillaDimensions();
         
         let entitiesArrays: Minecraft.Entity[][];
@@ -304,7 +316,7 @@ export class EntityUtils {
      */
     static isAliveEntity(entity: EntityValue){
         try {
-            EntityBase.getYoniEntity(entity).vanillaEntity.id;
+            EntityUtils.getYoniEntity(entity).vanillaEntity.id;
         } catch {
             return false;
         }
@@ -348,7 +360,7 @@ export class EntityUtils {
      * @returns {boolean}
      */
     static isPlayer(object: any): object is (YoniPlayer | Minecraft.Player) {
-         return EntityUtils.isEntity(object) && object.typeId === "minecraft:player";
+         return object instanceof YoniPlayer || object instanceof Minecraft.Player || object instanceof Gametest.SimulatedPlayer;
     }
     
     /**

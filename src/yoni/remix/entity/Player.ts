@@ -40,7 +40,7 @@ class Player extends Entity {
     get experienceLevel(){
         let level = 0;
         for (let addLevels = 32768; addLevels >= 1; addLevels /= 2){
-            if (EntityBase.getWorldVanillaPlayers({minLevel: level+addLevels}).includes(this.vanillaPlayer)){
+            if (EntityUtils.getWorldVanillaPlayers({minLevel: level+addLevels}).includes(this.vanillaPlayer)){
                 level += addLevels;
             }
         }

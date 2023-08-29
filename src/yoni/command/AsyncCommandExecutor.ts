@@ -1,7 +1,7 @@
 import { AsyncCommandQueue } from "./AsyncCommandQueue.js";
 import { CommandPriority } from "./CommandPriority.js";
 import { CommandList } from "./CommandList.js";
-import { clearRun, runInterval } from "../legacy_impl.js";
+import { clearRun, runInterval, run } from "../legacy_impl.js";
 import { config } from "../config.js";
 
 export class AsyncCommandExecutor {
@@ -10,7 +10,7 @@ export class AsyncCommandExecutor {
         if (AsyncCommandExecutor.#logger)
             AsyncCommandExecutor.#logger.trace(...data);
         else
-        system.run(async function initLogger(){
+        run(async function initLogger(){
             const { Logger } = await import("../util/Logger");
             AsyncCommandExecutor.#logger = new Logger("AsyncCommandExecutor");
             AsyncCommandExecutor.log(...data);

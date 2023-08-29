@@ -45,13 +45,8 @@ class World {
      * @param {Minecraft.EntityQueryOptions} [option]
      * @yields {YoniPlayer}
      */
-<<<<<<< HEAD:src/yoni/world.ts
     getPlayers(option?: Partial<Minecraft.EntityQueryOptions>): Array<YoniPlayer> {
-        return EntityBase.getWorldVanillaPlayers(option).map(EntityBase.from) as Array<YoniPlayer>;
-=======
-    getPlayers(option?: Minecraft.EntityQueryOptions): Array<YoniPlayer> {
         return EntityUtils.getWorldVanillaPlayers(option).map(EntityUtils.from) as Array<YoniPlayer>;
->>>>>>> main:src/yoni/remix/world.ts
     }
     
     /**
@@ -85,17 +80,10 @@ class World {
      * @param {Minecraft.EntityQueryOptions} options
      * @yields {YoniEntity}
      */
-<<<<<<< HEAD:src/yoni/world.ts
     * selectEntities(option: Partial<Minecraft.EntityQueryOptions>): Generator<YoniEntity> {
-        for (let d of getAllDims()){
-            for (let entity of d.getEntities(Object.assign(new Minecraft.EntityQueryOptions, option))){
-                yield EntityBase.from(entity) as unknown as YoniEntity;
-=======
-    * selectEntities(option: Minecraft.EntityQueryOptions): Generator<YoniEntity> {
         for (let d of getAllVanillaDimensions()){
-            for (let entity of d.getEntities(option)){
+            for (let entity of d.getEntities(Object.assign(new Minecraft.EntityQueryOptions, option))){
                 yield EntityUtils.from(entity) as unknown as YoniEntity;
->>>>>>> main:src/yoni/remix/world.ts
             }
         }
     }
