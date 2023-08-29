@@ -11,8 +11,6 @@ import { Objective } from "./Objective.js";
 import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { EntryValueType, EntryType } from "./EntryType.js";
 
-import { EntityBase } from "../entity.js";
-
 import { hasParticipant, removeParticipant, clearObjectiveAtDisplaySlot, setObjectiveAtDisplaySlot, getObjectiveAtDisplaySlot, addObjective, isObjectiveValid, removeObjective } from "../legacy_impl.js";
 
 /**

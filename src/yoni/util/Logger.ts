@@ -2,7 +2,7 @@ import { VanillaWorld, Minecraft } from "../basis.js";
 import { Command, AsyncCommandSender } from "../command.js";
 
 import { visualizeValue } from "../lib/console.js";
-import { dealWithCmd as JSONModifier_dealWithCmd } from "../lib/commandutils.js";
+import { dealWithCmd as JSONModifier_dealWithCmd } from "../commandutils.js";
 
 import { config } from "../config.js";
 import { setDebugFunction } from '../debug.js';

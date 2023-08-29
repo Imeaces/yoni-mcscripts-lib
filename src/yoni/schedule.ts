@@ -158,7 +158,7 @@ export class Schedule {
     constructor(props: ScheduleOptions, callback: () => void){
         let { async, period, delay, type } = props;
         
-        this.async = (!!async) ? true : false;
+        this.async = (!!async);
         
         if (isCycleScheduleType(type)
         && !isFinite(period as number))
@@ -261,6 +261,9 @@ function executeSchedule(schedule: Schedule){
         executingSchedule = null;
     }
     if (schedule.async) {
+        runningAsyncSchedule.add(schedule);
+        schedule.runAsync().then(onSuccess, onFail);
+        
         function onSuccess(result: any){
             lastSuccess(schedule, Date.now());
             runningAsyncSchedule.delete(schedule);
@@ -270,8 +273,6 @@ function executeSchedule(schedule: Schedule){
             runningAsyncSchedule.delete(schedule);
             logger.error("async schedule {} 运行时出现错误 {}", schedule.id, error);
         }
-        runningAsyncSchedule.add(schedule);
-        schedule.runAsync().then(onSuccess, onFail);
     } else {
         executingSchedule = schedule;
         

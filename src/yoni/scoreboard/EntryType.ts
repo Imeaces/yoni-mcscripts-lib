@@ -1,6 +1,6 @@
-import { ScoreboardEntry } from "./ScoreboardEntry.js";
 import { Minecraft } from "../basis.js";
-import { EntityValue } from "../entity/EntityTypeDefs";
+import type { ScoreboardEntry } from "./ScoreboardEntry.js";
+import type { EntityValue } from "../types";
 
 /**
  * 可以被作为分数持有者的类型。

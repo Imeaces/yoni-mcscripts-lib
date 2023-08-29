@@ -1,9 +1,9 @@
-import { Event } from "./event/Event.js";
-import { EventTypes, events, EventRegisterListener } from "./event/Types.js";
-import { EventSignal } from "./event/Signal.js";
-import { EventListener } from "./event/Listener.js";
-import { EventTrigger } from "./event/Trigger.js";
-import { EventTriggerBuilder } from "./event/TriggerBuilder.js";
+import { Event } from "./legacy_event/Event.js";
+import { EventTypes, events, EventRegisterListener } from "./legacy_event/Types.js";
+import { EventSignal } from "./legacy_event/Signal.js";
+import { EventListener } from "./legacy_event/Listener.js";
+import { EventTrigger } from "./legacy_event/Trigger.js";
+import { EventTriggerBuilder } from "./legacy_event/TriggerBuilder.js";
 
 export {
     Event as LegacyEvent,
@@ -16,4 +16,6 @@ export {
     events as legacyEvents,
 };
 
-import("./event/_loadEvents.js");
+import { config } from "./config.js";
+if (config.getBoolean("events.enableLegacyCustomEvents", false))
+import("./legacy_event/_loadEvents.js");

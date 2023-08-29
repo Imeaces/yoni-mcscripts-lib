@@ -1,11 +1,12 @@
 import { ChatCommand } from "./command/ChatCommand.js";
 import { Command } from "./command.js";
-import { EntityBase, YoniPlayer } from "./entity.js";
+import { EntityUtils } from "./EntityUtils.js";
 import { Logger } from "./util/Logger.js";
-import { listenEvent } from "./event.js";
+import { listenEvent, EventPriority } from "./event.js";
 import { getErrorMsg } from "./lib/console.js";
 import { config } from "./config.js";
 import { runTask, Minecraft } from "./basis.js";
+import { YoniPlayer } from "./types";
 
 let logger = new Logger("debug_func");
 
@@ -14,7 +15,11 @@ let doEvalFunctionInitizePromise = initEvalFunction();
 
 ChatCommand.registerPrefixCommand("$", "geval", onRequestChatEventAsEval);
 ChatCommand.registerPrefixCommand("$", "eval", onEvalCommand);
-listenEvent(Minecraft.BeforeChatEvent, onChatEventAsEval);
+listenEvent({
+    event: Minecraft.BeforeChatEvent,
+    priority: EventPriority.HIGHEST,
+    ignoreCancelled: true
+}, onChatEventAsEval);
 
 async function initEvalFunction(){
     let generateFunctionCodeLines = [];
@@ -71,7 +76,7 @@ function onEvalCommand(sender: YoniPlayer, command: string, label: string, args:
     executeEval(sender, code);
 }
 function onChatEventAsEval(event: Minecraft.BeforeChatEvent){
-    const player = EntityBase.from(event.sender) as unknown as YoniPlayer;
+    const player = EntityUtils.from(event.sender) as unknown as YoniPlayer;
     if (chatAsEvalPlayers.has(player)){
         event.cancel = true;
         executeEval(player, event.message);

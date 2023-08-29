@@ -1,9 +1,8 @@
 import { Minecraft, VanillaScoreboard } from "../basis.js";
 import { EntryType, EntryValueType } from "./EntryType.js";
-import { EntityBase } from "../entity/EntityBase.js";
-import { YoniEntity } from "../entity/Entity.js";
-import { EntityValue } from "../entity/EntityTypeDefs.js";
+import { EntityUtils } from "../EntityUtils.js";
 import { UnknownEntryError } from "./ScoreboardError.js";
+import type { YoniEntity, EntityValue } from "../types";
 
 /**
  * 代表一个可以在记分板上持有分数的分数持有者。
@@ -28,11 +27,11 @@ export class ScoreboardEntry {
             return one;
         else if (one instanceof Minecraft.ScoreboardIdentity)
             return ScoreboardEntry.getEntry(one.type as unknown as EntryType, one);
-        else if (EntityBase.isEntity(one))
-            if (EntityBase.entityIsPlayer(one))
-                return ScoreboardEntry.getEntry(EntryType.PLAYER, EntityBase.getMinecraftEntity(one));
+        else if (EntityUtils.isEntity(one))
+            if (EntityUtils.entityIsPlayer(one))
+                return ScoreboardEntry.getEntry(EntryType.PLAYER, EntityUtils.getMinecraftEntity(one));
             else
-                return ScoreboardEntry.getEntry(EntryType.ENTITY, EntityBase.getMinecraftEntity(one));
+                return ScoreboardEntry.getEntry(EntryType.ENTITY, EntityUtils.getMinecraftEntity(one));
         else if (typeof one === "string")
             return ScoreboardEntry.getEntry(EntryType.FAKE_PLAYER, one);
         throw new UnknownEntryError();
@@ -48,8 +47,8 @@ export class ScoreboardEntry {
             return one;
         else if (one instanceof ScoreboardEntry)
             return one.getIdentity();
-        else if (EntityBase.isEntity(one))
-            return EntityBase.getMinecraftEntity(one);
+        else if (EntityUtils.isEntity(one))
+            return EntityUtils.getMinecraftEntity(one);
         throw new UnknownEntryError();
     }
     static getEntry(type: EntryType, identify: Minecraft.ScoreboardIdentity | string | Minecraft.Entity){
@@ -101,11 +100,11 @@ export class ScoreboardEntry {
             this.#name = identify;
             Object.defineProperty(this, "type", { configurable: false, writable: false, value: type });
         } else if (type === EntryType.ENTITY){
-            this.#entity = EntityBase.getMinecraftEntity(identify as EntityValue);
+            this.#entity = EntityUtils.getMinecraftEntity(identify as EntityValue);
             Object.defineProperty(this, "type", { configurable: false, writable: false, value: type });
         } else if (type === EntryType.PLAYER){
-            this.#entity = EntityBase.getMinecraftEntity(identify as EntityValue);
-            if (!EntityBase.entityIsPlayer(this.#entity)){
+            this.#entity = EntityUtils.getMinecraftEntity(identify as EntityValue);
+            if (!EntityUtils.isPlayer(this.#entity)){
                 throw new TypeError("not a player");
             }
             Object.defineProperty(this, "type", { configurable: false, writable: false, value: type });
@@ -135,21 +134,21 @@ export class ScoreboardEntry {
     }
     getEntity(): YoniEntity {
         if (this.type !== EntryType.FAKE_PLAYER){
-            if (this.#vanillaScbid && (!this.#entity || !EntityBase.isAliveEntity(this.#entity))){
+            if (this.#vanillaScbid && (!this.#entity || !EntityUtils.isAliveEntity(this.#entity))){
                 this.#entity = this.#vanillaScbid.getEntity();
             }
             if (this.#entity)
-                return EntityBase.getAliveEntity(this.#entity);
+                return EntityUtils.getAliveEntity(this.#entity);
         }
         throw new ReferenceError("this ScoreboardIdentity didn't relate to an alive entity");
     }
     getVanillaEntity(): Minecraft.Entity {
         if (this.type !== EntryType.FAKE_PLAYER){
-            if (this.#vanillaScbid && (!this.#entity || !EntityBase.isAliveEntity(this.#entity))){
+            if (this.#vanillaScbid && (!this.#entity || !EntityUtils.isAliveEntity(this.#entity))){
                 this.#entity = this.#vanillaScbid.getEntity();
             }
             if (this.#entity)
-                return EntityBase.getAliveVanillaEntity(this.#entity);
+                return EntityUtils.getAliveVanillaEntity(this.#entity);
         }
         throw new ReferenceError("this ScoreboardIdentity didn't relate to an alive entity");
     }

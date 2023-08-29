@@ -1,18 +1,16 @@
-import { LegacyEvent as Event } from "../../legacy_event.js";
+import { Event } from "../index.js";
 import { Minecraft } from "../../basis.js";
-import { EntityBase, Player } from "../../entity.js";
+import { EntityUtils } from "../../EntityUtils.js";
+import type { YoniPlayer } from "../../types";
 
 const EntityTypes = Minecraft.EntityTypes;
 
-export class PlayerEvent extends Event {
-    constructor(player: Player, ...args: any[]){
-        super(...args);
-        this.#player = EntityBase.from(player) as unknown as Player;
+export abstract class PlayerEvent extends Event {
+    constructor(player: YoniPlayer | Minecraft.Player){
+        super();
+        this.#player = EntityUtils.from(player) as unknown as YoniPlayer;
     }
-    /**
-     * @type {Player}
-     */
-    #player: Player;
+    #player: YoniPlayer;
     get player(){
         return this.#player;
     }

@@ -2,9 +2,19 @@ import { AsyncCommandQueue } from "./AsyncCommandQueue.js";
 import { CommandPriority } from "./CommandPriority.js";
 import { CommandList } from "./CommandList.js";
 import { clearRun, runInterval } from "../legacy_impl.js";
+import { config } from "../config.js";
 
 export class AsyncCommandExecutor {
+    static #logger: import("../util/Logger").Logger;
     static log(...data: any[]){
+        if (AsyncCommandExecutor.#logger)
+            AsyncCommandExecutor.#logger.trace(...data);
+        else
+        system.run(async function initLogger(){
+            const { Logger } = await import("../util/Logger");
+            AsyncCommandExecutor.#logger = new Logger("AsyncCommandExecutor");
+            AsyncCommandExecutor.log(...data);
+        });
     }
     executingCommand: AsyncCommandQueue | null = null;
     commandList = new CommandList<AsyncCommandQueue>();
@@ -29,6 +39,9 @@ export class AsyncCommandExecutor {
         this.commandList.add(priv, command);
     }
     #run(){
+        if (!config.getBoolean("command.asyncExecutor.re-execute-when-no-promise", false))
+            this.executingCommand = null;
+        
         let executeQueueCount = 0;
         while (this.commandList.hasNext()
         || this.executingCommand !== null){
