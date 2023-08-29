@@ -35,6 +35,46 @@ export class ItemUpdater {
         this.itemStack.nameTag = undefined;
         return this;
     }
+    setCanPlaceOn(blockIdentifiers?: string[]): this {
+        this.itemStack.setCanPlaceOn(blockIdentifiers);
+        return this;
+    }
+    addCanPlaceOn(blockIdentifier: string): this {
+        const old = this.itemStack.getCanPlaceOn();
+        old.push(blockIdentifier);
+        this.itemStack.setCanPlaceOn(old);
+        return this;
+    }
+    removeCanPlaceOn(blockIdentifier?: string): this {
+        if (blockIdentifier){
+            const old = this.itemStack.getCanPlaceOn();
+            deleteFirst(old, blockIdentifier);
+            this.itemStack.setCanPlaceOn(old);
+        } else {
+            this.itemStack.setCanPlaceOn();
+        }
+        return this;
+    }
+    setCanDestroy(blockIdentifiers?: string[]): this {
+        this.itemStack.setCanDestroy(blockIdentifiers);
+        return this;
+    }
+    addCanDestroy(blockIdentifier: string): this {
+        const old = this.itemStack.getCanDestroy();
+        old.push(blockIdentifier);
+        this.itemStack.setCanDestroy(old);
+        return this;
+    }
+    removeCanDestroy(blockIdentifier?: string): this {
+        if (blockIdentifier){
+            const old = this.itemStack.getCanDestroy();
+            deleteFirst(old, blockIdentifier);
+            this.itemStack.setCanDestroy(old);
+        } else {
+            this.itemStack.setCanDestroy();
+        }
+        return this;
+    }
     /**
      * 为物品增添新的附魔。
      * @param newEnchantment 新添加的附魔。
