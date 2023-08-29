@@ -40,7 +40,7 @@ const NotAEventClassNames = [
 const DefinedEventClassMappings = new Map<Function, Function>([
     [Minecraft.ItemDefinitionTriggeredAfterEvent, Minecraft.ItemDefinitionAfterEventSignal],
     [Minecraft.ItemDefinitionTriggeredBeforeEvent, Minecraft.ItemDefinitionBeforeEventSignal],
-    [Minecraft.MessageReceiveAfterEvent, Minecraft.IServerMessageAfterEventSignal]
+    [Minecraft.MessageReceiveAfterEvent, Minecraft.ServerMessageAfterEventSignal]
 ]);
    
 const EventClasses: [string, Function, Function][] = [];

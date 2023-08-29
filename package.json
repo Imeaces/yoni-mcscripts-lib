@@ -1,14 +1,14 @@
 {
   "dependencies": {
-    "@minecraft/server": "1.4.0-beta.1.20.10-stable",
-    "@minecraft/server-gametest": "1.0.0-beta.1.20.10-stable"
+    "@minecraft/server": "^1.6.0-beta.1.20.30-preview.24",
+    "@minecraft/server-gametest": "^1.0.0-beta.1.20.30-preview.24"
   },
   "devDependencies": {
     "typescript": "^4.9.3"
   },
   "name": "yoni-mcscripts-lib",
   "description": "为 Minecraft Script API 中的部分接口创建了 wrapper，并提供简单的事件管理器和任务管理器，另附有一些便于代码编写的一些小工具。",
-  "version": "1.2.0+mcstable.1.20.10",
+  "version": "1.2.1+mcbeta.1.20.30.24",
   "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
   "main": "yoni-mcscripts-lib.js",
   "scripts": {

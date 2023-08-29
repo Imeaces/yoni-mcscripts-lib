@@ -15,8 +15,6 @@ import { Entity } from "./Entity.js";
 import { EntityUtils } from "../../EntityUtils.js";
 import { EntityWraps } from "./EntityWraps.js";
 
-const { MinecraftEntityTypes } = Minecraft;
-
 class Player extends Entity {
     
     get vanillaPlayer(): Minecraft.Player {
@@ -24,7 +22,7 @@ class Player extends Entity {
     }
     
     get entityType(){
-        return MinecraftEntityTypes.player;
+        return Minecraft.EntityTypes.get("player");
     }
     
     get [Symbol.toStringTag](){

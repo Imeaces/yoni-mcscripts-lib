@@ -5,7 +5,7 @@ export interface EventOptionDefinitions extends MinecraftEventsOptions, InnerEve
 }
 
 interface MinecraftEventsOptions {
-    "Minecraft.EntityRemovedAfterEvent": [Minecraft.EntityRemovedAfterEvent, Minecraft.EntityEventOptions]
+    "Minecraft.EntityRemoveAfterEvent": [Minecraft.EntityRemoveAfterEvent, Minecraft.EntityEventOptions]
     "Minecraft.EntityHurtAfterEvent": [Minecraft.EntityHurtAfterEvent, Minecraft.EntityEventOptions]
     "Minecraft.EntityHitEntityAfterEvent": [Minecraft.EntityHitEntityAfterEvent, Minecraft.EntityEventOptions]
     "Minecraft.EntityHitBlockAfterEvent": [Minecraft.EntityHitBlockAfterEvent, Minecraft.EntityEventOptions]
