@@ -175,7 +175,7 @@ function sendLogText(level: string, msg: string, rps: any[], time: Date, ignoreL
     }
 }
     
-export class Logger {
+class Logger {
     static setConsolePrinter(level: string, printer: (msg: string) => void): void {
         Logger.#consoleLevelPrinters.set(String(level), printer);
     }
@@ -241,109 +241,16 @@ export class Logger {
         return this[level];
     }
     
-    //@ts-ignore
-    "0": (...data: any[]) => void
-    //@ts-ignore
-    fatal: (...data: any[]) => void
-    //@ts-ignore
-    f: (...data: any[]) => void
-    //@ts-ignore
-    "1": (...data: any[]) => void
-    //@ts-ignore
-    error: (...data: any[]) => void
-    //@ts-ignore
-    e: (...data: any[]) => void
-    //@ts-ignore
-    err: (...data: any[]) => void
-    //@ts-ignore
-    fail: (...data: any[]) => void
-    //@ts-ignore
-    ex: (...data: any[]) => void
-    //@ts-ignore
-    severe: (...data: any[]) => void
-    //@ts-ignore
-    "2": (...data: any[]) => void
-    //@ts-ignore
-    warn: (...data: any[]) => void
-    //@ts-ignore
-    w: (...data: any[]) => void
-    //@ts-ignore
-    warning: (...data: any[]) => void
-    //@ts-ignore
-    notice: (...data: any[]) => void
-    //@ts-ignore
-    "3": (...data: any[]) => void
-    //@ts-ignore
-    info: (...data: any[]) => void
-    //@ts-ignore
-    i: (...data: any[]) => void
-    //@ts-ignore
-    log: (...data: any[]) => void
-    //@ts-ignore
-    "4": (...data: any[]) => void
-    //@ts-ignore
-    debug: (...data: any[]) => void
-    //@ts-ignore
-    d: (...data: any[]) => void
-    //@ts-ignore
-    "5": (...data: any[]) => void
-    //@ts-ignore
-    trace: (...data: any[]) => void
-    //@ts-ignore
-    t: (...data: any[]) => void
-    //@ts-ignore
-    "6": (...data: any[]) => void
-    //@ts-ignore
-    verbose: (...data: any[]) => void
 }
-/*
-class LoggerProxy {
-    constructor(){
-        this.get = this.get.bind(this);
-    }
-    #funcCaches = new WeakMap<Object>();
-    #otherLoggingFunc = new WeakSet<Object>();
-    get(src: Logger, k: string | symbol | number){
-        //@ts-ignore
-        const val = src[k];
-        
-        if (typeof k !== "string"){
-            return typeof val === "function" 
-                ? this.getProxyFunction(val, src)
-                : val;
-        }
-        
-        if (Object.keys(LoggingNameMappings).includes(k)
-        || this.#otherLoggingFunc.has(val))
-            return val;
-        
-        if (!(k in src)){
-            const val = src.addLevelLogFunc(k, LoggingLevel.INFO);
-            this.#otherLoggingFunc.add(val);
-            return val;
-        }
-        
-        return typeof val === "function" 
-            ? this.getProxyFunction(val, src)
-            : val;
-    }
-    getProxyFunction(fn: Function, src: Logger){
-         if (this.#funcCaches.has(fn))
-             return this.#funcCaches.get(fn);
-                
-         const callfunc = function (this: any, ...args: any[]){
-             if (this === src)
-                 return fn.apply(src, args);
-             else
-                 return fn.apply(this, args);
-         }
-         
-         this.#funcCaches.set(fn, callfunc);
-         
-         return callfunc; 
-    }
+
+type LoggerNames = {
+    [levelName in keyof typeof LoggingNameMappings]: (...args: any[]) => void
+};
+
+interface Logger extends LoggerNames {
 }
-*/
+
+export { Logger };
 
 export const console = new Logger("LOG");
 export const log = console.log;

@@ -595,10 +595,9 @@ export class Location {
      * 创建一个只读的Location对象。
      * @returns {Readonly<Location>}
      */
-    static createReadonly(...values: LocationParams){
-        let location = new Location(
-            // @ts-ignore 我不知道该怎么解决这个问题，所以只好忽略了
-            ...values);
+    static createReadonly(...values: any[]){
+        //@ts-ignore
+        const location = new Location(...values);
         location.#readOnly = true;
         return location as unknown as Readonly<Location>;
     }

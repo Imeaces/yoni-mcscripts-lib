@@ -184,37 +184,21 @@ class Entity {
         }
     }
     
-    //@ts-ignore 我也不知道是怎么回事
     teleport(location: Vector3, options?: Minecraft.TeleportOptions): void;
-    //@ts-ignore 反正已经实现了
     teleport(coords: Vector3, dimension: DimensionLikeValue, rotationX: number, rotationY: number, keepVelocity?: boolean): void;
-    //@ts-ignore
     teleport(location: Location, keepVelocity?: boolean): void;
-    teleport(...params: [ Location ] | [ Location, boolean ]
-        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
-        | [ Vector3, DimensionLikeValue, number, number ]
-        | [ Vector3, DimensionLikeValue, number, number, boolean ]){
+    teleport(...params: any[]){
         this.#executeTeleport(this.vanillaEntity.teleport, params);
     }
     
-    //@ts-ignore 我也不知道是怎么回事
     tryTeleport(location: Vector3, options?: Minecraft.TeleportOptions): boolean;
-    //@ts-ignore 反正已经实现了
     tryTeleport(coords: Vector3, dimension: DimensionLikeValue, rotationX: number, rotationY: number, keepVelocity?: boolean): boolean;
-    //@ts-ignore
     tryTeleport(location: Location, keepVelocity?: boolean): boolean;
-    tryTeleport(...params: [ Location ] | [ Location, boolean ]
-        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
-        | [ Vector3, DimensionLikeValue, number, number ]
-        | [ Vector3, DimensionLikeValue, number, number, boolean ]){
+    tryTeleport(...params: any[]){
         return this.#executeTeleport(this.vanillaEntity.tryTeleport, params) as boolean;
     }
     
-    #executeTeleport(teleportFunc: any, params: [ Location ] | [ Location, boolean ]
-        | [ Vector3 ] | [ Vector3, Minecraft.TeleportOptions ]
-        | [ Vector3, DimensionLikeValue, number, number ]
-        | [ Vector3, DimensionLikeValue, number, number, boolean ]): any {
-        
+    #executeTeleport(teleportFunc: (...args: any[]) => any, params: any[]): any {
         let coords: Vector3;
         //@ts-ignore
         let options: Minecraft.TeleportOptions = {};
@@ -243,7 +227,7 @@ class Entity {
                 options.keepVelocity = params[4];
         }
         
-        teleportFunc.call(this.vanillaEntity, coords, options);
+        return teleportFunc.call(this.vanillaEntity, coords, options);
     }
 }
 

@@ -117,10 +117,8 @@ export class EventManager {
         event: TEvent,
         callback: EventCallback<TEvent>
     ): SingleHandlerEventListener<TEvent>;
-    //@ts-ignore
-    listenEvent<TEvent extends Function>(...args: [ListenEventOptions<TEvent> | TEvent, EventCallback<TEvent>]){
-        //@ts-ignore
-        return listenEvent(...args);
+    listenEvent<TEvent extends Function>(listenOptions: ListenEventOptions<TEvent> | TEvent, callback: EventCallback<TEvent>){
+        return listenEvent(listenOptions as any, callback);
     }
 }
 
