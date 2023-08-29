@@ -91,3 +91,5 @@ export const EntityClass = {
 export async function initializeDebugFunc(){
     await import("./debug_func.js");
 }
+
+export { ItemUpdater } from "./item/ItemUpdater.js";
