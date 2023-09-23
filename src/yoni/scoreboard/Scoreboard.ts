@@ -48,9 +48,9 @@ export enum ObjectiveSortOrder {
  */
 export interface DisplayOptions {
     /**
-     * 显示的记分项。可能不存在。
+     * 显示的记分项。
      */
-    objective: Objective | null;
+    objective: Objective;
     /**
      * 记分项的项目显示在此位置上时，项目排序的方式。
      */
@@ -153,7 +153,7 @@ export class Scoreboard {
         } else if (Scoreboard.#objectives.has(name)){
             Scoreboard.#objectives.delete(name);
         }
-        let vanillaObjective: Minecraft.ScoreboardObjective | null = null;
+        let vanillaObjective: Minecraft.ScoreboardObjective | undefined | null = null;
         try {
             vanillaObjective = VanillaScoreboard.getObjective(name);
         } catch {
@@ -233,11 +233,14 @@ export class Scoreboard {
      * @param {DisplaySlot|Minecraft.DisplaySlotId} slot - 显示位。
      * @returns {DisplayOptions} - 显示位上显示的内容。
      */
-    static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions {
+    static getDisplayAtSlot(slot: DisplaySlot | Minecraft.DisplaySlotId): DisplayOptions | undefined {
         const vanillaResult = VanillaScoreboard.getObjectiveAtDisplaySlot(slot as Minecraft.DisplaySlotId);
-        const objective = Scoreboard.tryGetObjective(vanillaResult.objective?.id) || null;
+        if (!vanillaResult)
+            return undefined;
+        
+        const objective = Scoreboard.getObjective(vanillaResult.objective.id);
         const result: DisplayOptions = { objective };
-        if (vanillaResult.sortOrder != null){
+        if (vanillaResult?.sortOrder != null){
             result.sortOrder = vanillaResult.sortOrder as unknown as ObjectiveSortOrder;
         }
         return result;

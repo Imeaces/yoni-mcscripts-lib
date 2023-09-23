@@ -126,17 +126,24 @@ registry.extraOptionResolver = (event, options) => {
 })();
 
 (function (){
-let registry = EventRegistry.getRegistry(Minecraft.EntityRemovedAfterEvent);
+let registry = EventRegistry.getRegistry(Minecraft.EntityRemoveAfterEvent);
 
 registry.extraOption = true;
 registry.extraOptionResolver = (event, options) => {
-    if (!options.entities) return true;
+    if (!options || !(options.entityTypes || options.entities))
+        return true;
     
-    let id = event.removedEntity;
-
+    let id = event.removedEntityId;
+    let typeId = event.typeId;
+    
+    if (options.entities)
     for (const entity of options.entities){
         if (entity.id === id)  return true;
     }
+    
+    if (options.entityTypes)
+        if (options.entityTypes.includes(typeId))
+            return true;
     
     return false;
 }
