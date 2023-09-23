@@ -17,7 +17,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Silvigarabis/yoni-mcscripts-lib.git"
+    "url": "git+https://github.com/Imeaces/yoni-mcscripts-lib.git"
   },
   "keywords": [
     "minecraft-addon",
@@ -29,9 +29,9 @@
   "author": "Silvigarabis",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Silvigarabis/yoni-mcscripts-lib/issues"
+    "url": "https://github.com/Imeaces/yoni-mcscripts-lib/issues"
   },
-  "homepage": "https://github.com/Silvigarabis/yoni-mcscripts-lib#readme",
+  "homepage": "https://github.com/Imeaces/yoni-mcscripts-lib#readme",
   "files": [
     "@types/",
     "yoni-mcscripts-lib.js",
