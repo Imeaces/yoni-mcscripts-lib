@@ -90,6 +90,8 @@ export class ItemCreator {
             newItemCreator.setLore(lore);
         }, ignoreError);
         
+        this.itemStack = newItemCreator.itemStack;
+        
         return this;
     }
     /**
