@@ -6,3 +6,4 @@ import "./test/schedulerTest3.js";
 import "./test/scoreboard_test.js";
 import "./test/module_load.js";
 import "./test/vanillaEventTest.js";
+import "./test/itemCreate0.js";

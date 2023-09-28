@@ -67,7 +67,7 @@ export class ItemCreator {
             newItemCreator.setDurability(oldDamage);
         }
         
-        if (oldItem.nameTag)
+        if (oldItem.nameTag != null)
         tryExecute(() => {
             newItemCreator.setNameTag(oldItem.nameTag);
         }, ignoreError);
@@ -128,9 +128,16 @@ export class ItemCreator {
      * @param {string[]} loreList lore 文本列表。
      * @returns {this} 返回 this
      */
-    setLore(loreList: string[]): this {
+    setLore(loreList: string[]): this;
+    /**
+     * 修改物品的 lore 文本。
+     * @param {string} loreList lore 文本。
+     * @returns {this} 返回 this
+     */
+    setLore(loreList: string): this;
+    setLore(loreList: string[] | string): this {
         if (typeof loreList === "string")
-            loreList = [loreList];
+            loreList = loreList.split("\x00");
         this.itemStack.setLore(loreList);
         return this;
     }
@@ -221,10 +228,10 @@ export class ItemCreator {
      * @param {boolean} [override] 如果为真，则替换现有附魔（如果附魔存在）；否则，为现有附魔条目提升附魔等级。默认为替换附魔。
      * @returns {this} 返回 this
      */
-    addEnchant(newEnchantment: unknown, level: unknown, override: unknown = true): this {
+    addEnchant(newEnchantment: Enchantment | string | Minecraft.EnchantmentType, level?: number | boolean, override: unknown = true): this {
         let ench: Enchantment;
         if (level === true || level === false || level === undefined){
-            override = (level as boolean) ?? true;
+            override = level ?? true;
             ench = newEnchantment as Enchantment;
         } else {
             ench = {
@@ -433,6 +440,9 @@ export class ItemCreator {
     }
 }
 
+/**
+ " 代表附魔。
+ */
 interface Enchantment {
     type: Minecraft.EnchantmentType | string
     level: number
