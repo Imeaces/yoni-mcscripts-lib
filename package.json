@@ -1,7 +1,7 @@
 {
   "dependencies": {
-    "@minecraft/server": "1.6.0-beta.1.20.30-stable",
-    "@minecraft/server-gametest": "1.0.0-beta.1.20.30-stable"
+    "@minecraft/server": "^1.7.0-beta.1.20.40-preview.22",
+    "@minecraft/server-gametest": "^1.0.0-beta.1.20.40-preview.22"
   },
   "devDependencies": {
     "typescript": "^4.9.3"
