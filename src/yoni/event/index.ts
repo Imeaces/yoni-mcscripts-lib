@@ -20,9 +20,8 @@ export { EventListener } from "./decorators/EventListener.js";
 export { eventManager } from "./EventManager.js";
 export { listenEvent } from "./lib/listenEvent.js";
 
-import { registerMinecraftNativeEvents } from "./lib/eventRegistration.js";
-registerMinecraftNativeEvents();
-
 import { registerMinecraftEventOptionResolvers } from "./adapting/eventOptions/MinecraftEventOptionResolvers.js";
 registerMinecraftEventOptionResolvers();
 
+import { registerMinecraftNativeEvents } from "./lib/eventRegistration.js";
+registerMinecraftNativeEvents();
