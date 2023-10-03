@@ -8,6 +8,9 @@ import { isDebug, config } from "../config.js";
 import { listenEvent, EventCallback, ListenEventOptions, SingleHandlerEventListener } from "./lib/listenEvent.js";
 
 export class EventManager {
+    /**
+     * 处理事件回调要求的额外参数。
+     */
     static checkExtraOption<
         T extends EventRegistry<TEvent>,
         TEvent extends Function = T["eventClass"],
@@ -33,8 +36,18 @@ export class EventManager {
         
         return false;
     }
-    callEvent<T extends EventRegistry<TEvent>, TEvent extends Function = T["eventClass"], E extends {} = TEvent["prototype"]>(eventRegistry: T, event: E, noExtendsAlways: boolean = false){
-        eventRegistry.sortHandlers();
+    /**
+     * 处理一次事件。
+     * @param eventRegistry 事件的注册信息。
+     * @param event 事件对象。
+     * @param noExtendsAlways 指定是否不应该去尝试扩展事件的回调范围。
+     */
+    callEvent<
+        T extends EventRegistry<TEvent>,
+        TEvent extends Function = T["eventClass"],
+        E extends {} = TEvent["prototype"]
+    >(eventRegistry: T, event: E, noExtendsAlways: boolean = false){
+        eventRegistry.throwIfNotRegistered();
         
         if (!noExtendsAlways && !eventRegistry.noExtends){
             let extendsEvents = EventRegistry.getExtends(eventRegistry);
