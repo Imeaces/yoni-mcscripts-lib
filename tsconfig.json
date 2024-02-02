@@ -1,0 +1,47 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+
+        "outDir": "./",
+        "sourceMap": false,
+        "useDefineForClassFields": true,
+        "removeComments": false,
+        "esModuleInterop": true,
+
+        "baseUrl": "src",
+        "rootDir": "src",
+        "module": "es2022",
+        "moduleResolution": "node",
+
+        "declaration": true,
+        "declarationMap": false,
+        "declarationDir": "./@types/yoni-mcscripts-lib",
+
+        "noEmitOnError": false,
+        "forceConsistentCasingInFileNames": true,
+
+        "allowUnusedLabels": true,
+        "allowUnreachableCode": true,
+        "experimentalDecorators": true,
+        
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+
+        "allowJs": true,
+        "checkJs": false,
+
+        "skipLibCheck": true,
+        
+        "incremental": true,
+        "tsBuildInfoFile": "./.tsbuildinfo"
+    },
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.js"
+    ],
+    "exclude": [
+        "src/yoni/storage/**",
+        "node_modules"
+    ]
+}

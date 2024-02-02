@@ -1,0 +1,43 @@
+{
+  "dependencies": {
+    "@minecraft/server": "1.6.0-beta.1.20.30-stable",
+    "@minecraft/server-gametest": "1.0.0-beta.1.20.30-stable"
+  },
+  "devDependencies": {
+    "typescript": "^4.9.3"
+  },
+  "name": "yoni-mcscripts-lib",
+  "description": "为 Minecraft Script API 中的部分接口创建了 wrapper，并提供简单的事件管理器和任务管理器，另附有一些便于代码编写的一些小工具。",
+  "version": "1.3.1-beta-mcstable.1.20.30",
+  "types": "@types/yoni-mcscripts-lib/yoni-mcscripts-lib.d.ts",
+  "main": "yoni-mcscripts-lib.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Imeaces/yoni-mcscripts-lib.git"
+  },
+  "keywords": [
+    "minecraft-addon",
+    "minecraft-bedrock",
+    "minecraft-sapi",
+    "minecraft",
+    "scriptsapi"
+  ],
+  "author": "Silvigarabis",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Imeaces/yoni-mcscripts-lib/issues"
+  },
+  "homepage": "https://github.com/Imeaces/yoni-mcscripts-lib#readme",
+  "files": [
+    "@types/",
+    "yoni-mcscripts-lib.js",
+    "example.js",
+    "src/",
+    "yoni/",
+    "tsconfig.json"
+  ]
+}
