@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "@minecraft/server": "1.6.0-beta.1.20.30-stable",
-    "@minecraft/server-gametest": "1.0.0-beta.1.20.30-stable"
+    "@minecraft/server-gametest": "1.0.0-beta.1.20.30-stable",
+    "@types/mojang-minecraft": "^0.1.11"
   },
   "devDependencies": {
     "typescript": "^4.9.3"
