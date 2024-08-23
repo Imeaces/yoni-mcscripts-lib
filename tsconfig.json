@@ -1,21 +1,21 @@
 {
     "compilerOptions": {
-        "target": "es2022",
+        "target": "ES2023",
+        "module": "ES2022",
+        "moduleResolution": "Node",
 
-        "outDir": "./",
-        "sourceMap": false,
+        "outDir": "./dist",
+        "inlineSourceMap": true,
         "useDefineForClassFields": true,
         "removeComments": false,
-        "esModuleInterop": true,
+        "esModuleInterop": false,
 
         "baseUrl": "src",
         "rootDir": "src",
-        "module": "es2022",
-        "moduleResolution": "node",
 
         "declaration": true,
-        "declarationMap": false,
-        "declarationDir": "./@types/yoni-mcscripts-lib",
+        "declarationMap": true,
+        "declarationDir": "./@types/",
 
         "noEmitOnError": false,
         "forceConsistentCasingInFileNames": true,
@@ -41,7 +41,7 @@
         "src/**/*.js"
     ],
     "exclude": [
-        "src/yoni/storage/**",
+        "src/yoni/storage/",
         "node_modules"
     ]
 }

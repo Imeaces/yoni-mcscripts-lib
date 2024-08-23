@@ -5,6 +5,7 @@
 /test/
 /tests.js
 /package-lock.json
+.vscode/
 
 # Logs
 logs

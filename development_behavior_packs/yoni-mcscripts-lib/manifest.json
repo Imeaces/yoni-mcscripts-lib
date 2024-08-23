@@ -5,7 +5,7 @@
     "description": "Yoni Script Module",
     "uuid": "0b7ef624-e6b8-11ec-b378-df8eb4284b8b",
     "version": [1, 0, 0],
-    "min_engine_version": [1, 20, 10]
+    "min_engine_version": [1, 20, 30]
   },
   "modules": [
     {
@@ -20,20 +20,18 @@
       "language": "javascript",
       "uuid": "0b7efb24-e6b8-11ec-b382-5358dafc5ed1",
       "version": [1, 0, 0],
-      "entry": "scripts/yoni/index.js"
+      "entry": "scripts/yoni-mcscripts-lib.js"
     }
   ],
   "dependencies": [
-    /* Gametest需要的依赖项 begin */
     {
       "module_name": "@minecraft/server",
-      "version": "1.4.0-beta"
+      "version": "1.12.0-beta"
     },
     {
       "module_name": "@minecraft/server-gametest",
       "version": "1.0.0-beta"
     }
-    /* Gametest需要的依赖项 end */
   ],
   "capabilities": [
       "script_eval"
@@ -43,6 +41,6 @@
       "Silvigarabis"
     ],
     "license": "MIT",
-    "url": "https://github.com/Silvigarabis/yoni-mcscripts-lib"
+    "url": "https://github.com/Imeaces/yoni-mcscripts-lib"
   }
 }

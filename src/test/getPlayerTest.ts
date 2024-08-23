@@ -16,6 +16,7 @@ async function getPlayerTest(test: Test){
     
     let qp = world.getPlayers({name});
     
+    // @ts-ignore
     if (qp[0]?.vanillaPlayer === p)
         test.succeed();
     else
